@@ -23,7 +23,7 @@ class AgendaItemAssigneeTest extends TestCase
         $meeting = Meeting::factory()->for($organization, 'organization')->create();
         $agendaItem = AgendaItem::create(['meeting_id' => $meeting->id, 'order' => 1, 'title' => '議題', 'member_id' => $member->id]);
 
-        $this->assertSame('理事長 山田太郎', $agendaItem->assigneeLabel());
+        $this->assertSame('理事長　　山田太郎', $agendaItem->assigneeLabel());
     }
 
     public function test_assignee_label_shows_member_name_alone_when_no_position(): void

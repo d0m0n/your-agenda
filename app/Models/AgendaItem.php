@@ -63,7 +63,7 @@ class AgendaItem extends Model
     public function assigneeLabel(): ?string
     {
         if ($this->member) {
-            return trim(($this->member->position?->name.' ').$this->member->name);
+            return $this->member->nameWithPosition();
         }
 
         return $this->assignee_name;

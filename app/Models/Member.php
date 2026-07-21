@@ -36,4 +36,12 @@ class Member extends Model
     {
         return $this->photo_path ? asset('storage/'.$this->photo_path) : null;
     }
+
+    /**
+     * "{役職}　　{氏名}" (役職未設定なら氏名のみ)。全角スペース2文字で区切る。
+     */
+    public function nameWithPosition(): string
+    {
+        return $this->position ? $this->position->name.'　　'.$this->name : $this->name;
+    }
 }
