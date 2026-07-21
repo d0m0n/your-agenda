@@ -81,12 +81,17 @@
                             <div x-show="!editing" class="flex items-center justify-between gap-4">
                                 <div>
                                     <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $index + 1 }}. {{ $item->title }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                                        {{ __('担当者') }}: {{ $item->member?->name ?? __('未定') }}
-                                        @if ($item->site)
-                                            ・<a href="{{ $item->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('議案') }}: {{ $item->site->title }}</a>
-                                        @endif
-                                    </p>
+                                    @if ($item->member || $item->site)
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            @if ($item->member)
+                                                {{ __('担当者') }}: {{ $item->member->name }}
+                                            @endif
+                                            @if ($item->site)
+                                                @if ($item->member)・@endif
+                                                <a href="{{ $item->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('議案') }}: {{ $item->site->title }}</a>
+                                            @endif
+                                        </p>
+                                    @endif
                                 </div>
                                 <div class="flex items-center gap-2 shrink-0">
                                     <form method="POST" action="{{ route('agenda-items.move-up', [$meeting, $item]) }}">

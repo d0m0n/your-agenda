@@ -45,7 +45,9 @@
                                     {{ $item->title }}
                                 @endif
                             </p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 text-right shrink-0">{{ $item->member?->name ?? __('未定') }}</p>
+                            @if ($item->member)
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-right shrink-0">{{ $item->member->name }}</p>
+                            @endif
                         </li>
                     @empty
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('次第はまだ登録されていません。') }}</p>

@@ -22,7 +22,7 @@
                         <input id="zip_file" name="zip_file" type="file" accept=".zip" required
                             class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md cursor-pointer focus:outline-none" />
                         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('gian.htm はZip直下、もしくは1階層下のフォルダに配置してください。展開後の合計サイズは100MBまで、ファイル数は1000件までです。') }}
+                            {{ __('gian.htm はZip直下、もしくは1階層下のフォルダに配置してください。展開後の合計サイズは200MBまで、ファイル数は1000件までです。') }}
                         </p>
                         <x-input-error :messages="$errors->get('zip_file')" class="mt-2" />
                     </div>

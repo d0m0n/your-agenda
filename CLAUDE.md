@@ -41,10 +41,20 @@
 - PHPはコントロールパネルでバージョン選択(8.3を使用)
 - root権限なし。サーバー全体の設定変更は不可
 - ドキュメントルートは ~/www 配下。Laravel本体は www の外に置き、
-  public の内容を公開ディレクトリに配置(index.php のパス書き換え)
+  public の内容を公開ディレクトリに配置する。index.php のパス書き換えでも
+  良いが、`ln -s ~/your-agenda/public ~/www/your-agenda` のように
+  シンボリックリンクで公開ディレクトリに見せる方法でも動作確認済み
+  (index.phpの相対パスがそのまま使えるため書き換え不要)
 - SSH接続可、composer は SSH 経由で実行
 - 本番でSailは使わない(Dockerは開発専用)。デプロイは git pull +
   composer install --no-dev + migrate を想定
+- フロントエンド資材(public/build/)は.gitignore対象のためgit pullでは
+  配置されず、サーバーにNode.jsも無い想定。デプロイ前にローカルで
+  npm run build を実行し、生成された public/build/ を rsync/scp/FTP
+  (FTPSかSFTP推奨)でサーバーへ手動アップロードする(この手順を忘れると
+  Vite manifest not foundで500エラーになる)。再デプロイ時はファイル名に
+  ハッシュが付くため古いassetsが残っても動作に支障はないが、容量整理の
+  ため定期的に public/build/ ごと差し替えるとよい
 - cron はコントロールパネルから設定(Laravelスケジューラ用に
   php artisan schedule:run を毎分または最小間隔で登録)
 
@@ -136,7 +146,7 @@
 
 ## セキュリティ要件(必ず守ること)
 - Zip Slip対策: エントリ名に「..」や先頭「/」を含む場合は拒否
-- Zip爆弾対策: 展開後合計100MB以下、ファイル数1000以下
+- Zip爆弾対策: 展開後合計200MB以下、ファイル数1000以下
 - 拡張子ホワイトリスト: html, htm, css, js, png, jpg, jpeg, gif, svg,
   webp, ico, woff, woff2, ttf, json, txt, pdf, mp4 のみ展開
 - .php等は絶対に展開しない

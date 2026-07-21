@@ -26,7 +26,10 @@
     <ol>
         @forelse ($meeting->agendaItems as $item)
             <li>
-                {{ $item->title }}(担当: {{ $item->member?->name ?? '未定' }})
+                {{ $item->title }}
+                @if ($item->member)
+                    (担当: {{ $item->member->name }})
+                @endif
                 @if ($item->site)
                     <br><a href="sites/{{ $item->site->uuid }}/{{ $item->site->index_path }}">議案を見る</a>
                 @endif

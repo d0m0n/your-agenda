@@ -14,7 +14,7 @@ class SiteZipInstaller
         'webp', 'ico', 'woff', 'woff2', 'ttf', 'json', 'txt', 'pdf', 'mp4',
     ];
 
-    private const MAX_TOTAL_BYTES = 100 * 1024 * 1024;
+    private const MAX_TOTAL_BYTES = 200 * 1024 * 1024;
 
     private const MAX_FILE_COUNT = 1000;
 
@@ -140,7 +140,7 @@ class SiteZipInstaller
                 if ($totalBytes > self::MAX_TOTAL_BYTES) {
                     fclose($stream);
                     fclose($out);
-                    throw new InvalidSiteZipException('展開後のサイズが大きすぎます(上限100MB)。');
+                    throw new InvalidSiteZipException('展開後のサイズが大きすぎます(上限200MB)。');
                 }
 
                 fwrite($out, $chunk);
