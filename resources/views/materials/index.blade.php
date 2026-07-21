@@ -1,0 +1,84 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('資料置き場') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            @if (session('status'))
+                <div class="px-4 py-3 rounded-md bg-green-50 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm">
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            @can('manage')
+                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('資料をアップロード') }}</h3>
+                    <form method="POST" action="{{ route('materials.store') }}" enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                        @csrf
+                        <div class="sm:col-span-1">
+                            <x-input-label for="title" :value="__('タイトル')" />
+                            <x-text-input id="title" name="title" type="text" class="mt-1 block w-full" :value="old('title')" required />
+                            <x-input-error :messages="$errors->get('title')" class="mt-2" />
+                        </div>
+                        <div class="sm:col-span-1">
+                            <x-input-label for="file" :value="__('ファイル')" />
+                            <input id="file" name="file" type="file" required
+                                class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md cursor-pointer focus:outline-none" />
+                            <x-input-error :messages="$errors->get('file')" class="mt-2" />
+                        </div>
+                        <div>
+                            <x-primary-button>{{ __('アップロード') }}</x-primary-button>
+                        </div>
+                    </form>
+                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('pdf, doc(x), xls(x), ppt(x), zip, jpg, png, gif, webp, txt, csv。最大20MB。') }}</p>
+                </div>
+            @endcan
+
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-900">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('タイトル') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('アップロード者') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('日時') }}</th>
+                                <th class="px-6 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            @forelse ($materials as $material)
+                                <tr>
+                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $material->title }}</td>
+                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $material->user?->name }}</td>
+                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $material->created_at->format('Y-m-d H:i') }}</td>
+                                    <td class="px-6 py-3 whitespace-nowrap text-right text-sm space-x-3">
+                                        <a href="{{ route('materials.download', $material) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('ダウンロード') }}</a>
+                                        @can('manage')
+                                            <form method="POST" action="{{ route('materials.destroy', $material) }}" class="inline" onsubmit="return confirm('{{ __('この資料を削除しますか?') }}');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
+                                            </form>
+                                        @endcan
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('資料はまだありません。') }}</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                {{ $materials->links() }}
+            </div>
+        </div>
+    </div>
+</x-app-layout>
