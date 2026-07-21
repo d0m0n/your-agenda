@@ -52,7 +52,7 @@
                             </div>
 
                             @if ($item->children->isNotEmpty())
-                                <ol class="mt-2 ml-6 space-y-2">
+                                <ol class="mt-2 ml-6 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-2">
                                     @foreach ($item->children as $childIndex => $child)
                                         <li class="flex items-center justify-between gap-4">
                                             <p class="text-sm text-gray-700 dark:text-gray-300">

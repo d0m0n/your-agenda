@@ -82,7 +82,8 @@
                             'number' => $loop->iteration, 'isFirst' => $loop->first, 'isLast' => $loop->last,
                         ])
 
-                        <div class="ml-6 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-3">
+                        <div class="ml-6 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-3"
+                            x-data="{ showAddChild: {{ old('parent_id') == $item->id ? 'true' : 'false' }} }">
                             @foreach ($item->children as $child)
                                 @include('meetings._agenda-item-row', [
                                     'meeting' => $meeting, 'item' => $child, 'members' => $members, 'sites' => $sites,
@@ -91,13 +92,18 @@
                                 ])
                             @endforeach
 
-                            <form method="POST" action="{{ route('agenda-items.store', $meeting) }}"
+                            <button type="button" x-show="!showAddChild" @click="showAddChild = true"
+                                class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+                                + {{ __('子項目を追加') }}
+                            </button>
+
+                            <form x-show="showAddChild" method="POST" action="{{ route('agenda-items.store', $meeting) }}"
                                 class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end border border-dashed border-gray-300 dark:border-gray-600 rounded-md p-4">
                                 @csrf
                                 <input type="hidden" name="parent_id" value="{{ $item->id }}">
                                 <div class="sm:col-span-3">
                                     <x-input-label :value="__('子項目を追加')" />
-                                    <x-text-input name="title" type="text" class="mt-1 block w-full" placeholder="{{ __('例: ●●の件') }}" required />
+                                    <x-text-input name="title" type="text" class="mt-1 block w-full" placeholder="{{ __('例: ●●の件') }}" value="{{ old('parent_id') == $item->id ? old('title') : '' }}" required />
                                     <x-input-error :messages="$errors->get('title')" class="mt-2" />
                                 </div>
                                 <div>
@@ -112,8 +118,9 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div>
+                                <div class="flex gap-3">
                                     <x-primary-button>{{ __('子項目を追加') }}</x-primary-button>
+                                    <x-secondary-button type="button" @click="showAddChild = false">{{ __('閉じる') }}</x-secondary-button>
                                 </div>
                             </form>
                         </div>
