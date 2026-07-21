@@ -55,6 +55,12 @@
   Vite manifest not foundで500エラーになる)。再デプロイ時はファイル名に
   ハッシュが付くため古いassetsが残っても動作に支障はないが、容量整理の
   ため定期的に public/build/ ごと差し替えるとよい
+- 初回デプロイ時（サーバー移行時など）は php artisan storage:link を
+  1回実行しておくこと（public/storage → storage/app/public のシンボリック
+  リンク）。忘れると議案Zipのgian.htmリンクや会議/組織のヘッダー画像、
+  メンバー写真などstorage/app/public配下のアップロードファイルが軒並み
+  404になる。git pullでは作られないため、通常のデプロイフローとは別に
+  一度だけ実行が必要
 - cron はコントロールパネルから設定(Laravelスケジューラ用に
   php artisan schedule:run を毎分または最小間隔で登録)
 

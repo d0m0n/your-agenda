@@ -17,12 +17,12 @@
 
     <div>
         <x-input-label for="password" :value="$o ? __('新しいパスワード(変更する場合のみ)') : __('パスワード')" />
-        <x-text-input id="password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" @if(!$o) required @endif />
+        <x-text-input id="password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" :required="! $o" />
         <x-input-error :messages="$errors->get('password')" class="mt-2" />
     </div>
 
     <div>
         <x-input-label for="password_confirmation" :value="__('パスワード(確認)')" />
-        <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" @if(!$o) required @endif />
+        <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" :required="! $o" />
     </div>
 </div>
