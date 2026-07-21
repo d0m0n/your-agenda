@@ -24,11 +24,23 @@ class Meeting extends Model
     }
 
     /**
+     * All agenda items belonging to this meeting, both top-level items and
+     * their children. Prefer topLevelAgendaItems() for display/creation —
+     * this is mainly here for whole-meeting queries (e.g. order bookkeeping).
+     *
      * @return HasMany<AgendaItem, $this>
      */
     public function agendaItems(): HasMany
     {
         return $this->hasMany(AgendaItem::class)->orderBy('order');
+    }
+
+    /**
+     * @return HasMany<AgendaItem, $this>
+     */
+    public function topLevelAgendaItems(): HasMany
+    {
+        return $this->hasMany(AgendaItem::class)->whereNull('parent_id')->orderBy('order');
     }
 
     /**

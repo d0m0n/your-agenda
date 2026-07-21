@@ -24,7 +24,12 @@ class MeetingArchiveExportService
         $zip = new ZipArchive;
         $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
-        $meetings = $organization->meetings()->with(['agendaItems.member.position', 'agendaItems.site'])->get();
+        $meetings = $organization->meetings()->with([
+            'topLevelAgendaItems.member.position',
+            'topLevelAgendaItems.site',
+            'topLevelAgendaItems.children.member.position',
+            'topLevelAgendaItems.children.site',
+        ])->get();
 
         foreach ($meetings as $meeting) {
             $folder = $meeting->id.'_'.Str::slug($meeting->name, '-', 'ja');
@@ -33,9 +38,15 @@ class MeetingArchiveExportService
             $html = View::make('exports.agenda', ['meeting' => $meeting])->render();
             $zip->addFromString($folder.'/agenda.html', $html);
 
-            foreach ($meeting->agendaItems as $item) {
+            foreach ($meeting->topLevelAgendaItems as $item) {
                 if ($item->site) {
                     $this->addSiteDirectory($zip, $item->site->uuid, $folder.'/sites/'.$item->site->uuid);
+                }
+
+                foreach ($item->children as $child) {
+                    if ($child->site) {
+                        $this->addSiteDirectory($zip, $child->site->uuid, $folder.'/sites/'.$child->site->uuid);
+                    }
                 }
             }
         }

@@ -86,6 +86,40 @@ class AgendaItemBoundaryTest extends TestCase
         $this->assertDatabaseMissing('agenda_items', ['meeting_id' => $meetingA->id]);
     }
 
+    public function test_agenda_item_cannot_be_created_as_a_child_of_another_organizations_item(): void
+    {
+        [$orgA, $userA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        $meetingA = Meeting::factory()->for($orgA, 'organization')->create();
+        $meetingB = Meeting::factory()->for($orgB, 'organization')->create();
+        $parentB = AgendaItem::create(['meeting_id' => $meetingB->id, 'order' => 1, 'title' => '他組織の議題']);
+
+        $response = $this->actingAs($userA)->post(route('agenda-items.store', $meetingA), [
+            'title' => '子項目',
+            'parent_id' => $parentB->id,
+        ]);
+
+        $response->assertSessionHasErrors('parent_id');
+        $this->assertDatabaseMissing('agenda_items', ['meeting_id' => $meetingA->id]);
+    }
+
+    public function test_agenda_item_cannot_be_created_as_a_grandchild(): void
+    {
+        [$orgA, $userA] = $this->createTenant();
+
+        $meetingA = Meeting::factory()->for($orgA, 'organization')->create();
+        $parent = AgendaItem::create(['meeting_id' => $meetingA->id, 'order' => 1, 'title' => '親項目']);
+        $child = AgendaItem::create(['meeting_id' => $meetingA->id, 'parent_id' => $parent->id, 'order' => 1, 'title' => '子項目']);
+
+        $response = $this->actingAs($userA)->post(route('agenda-items.store', $meetingA), [
+            'title' => '孫項目',
+            'parent_id' => $child->id,
+        ]);
+
+        $response->assertSessionHasErrors('parent_id');
+    }
+
     public function test_observer_cannot_manage_agenda_items(): void
     {
         [$orgA, , $observerA] = $this->createTenant();

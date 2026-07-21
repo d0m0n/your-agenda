@@ -24,7 +24,7 @@
     </dl>
     <h2>次第</h2>
     <ol>
-        @forelse ($meeting->agendaItems as $item)
+        @forelse ($meeting->topLevelAgendaItems as $item)
             <li>
                 {{ $item->title }}
                 @if ($item->assigneeLabel())
@@ -32,6 +32,22 @@
                 @endif
                 @if ($item->site)
                     <br><a href="sites/{{ $item->site->uuid }}/{{ $item->site->index_path }}">議案を見る</a>
+                @endif
+
+                @if ($item->children->isNotEmpty())
+                    <ol>
+                        @foreach ($item->children as $child)
+                            <li>
+                                {{ $child->title }}
+                                @if ($child->assigneeLabel())
+                                    (担当: {{ $child->assigneeLabel() }})
+                                @endif
+                                @if ($child->site)
+                                    <br><a href="sites/{{ $child->site->uuid }}/{{ $child->site->index_path }}">議案を見る</a>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ol>
                 @endif
             </li>
         @empty

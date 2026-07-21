@@ -36,16 +36,23 @@ class MeetingController extends Controller
         return redirect()->route('meetings.edit', $meeting)->with('status', '会議を登録しました。続けて次第を追加できます。');
     }
 
+    private const AGENDA_ITEM_RELATIONS = [
+        'topLevelAgendaItems.member.position',
+        'topLevelAgendaItems.site',
+        'topLevelAgendaItems.children.member.position',
+        'topLevelAgendaItems.children.site',
+    ];
+
     public function show(Meeting $meeting): View
     {
-        $meeting->load(['agendaItems.member.position', 'agendaItems.site']);
+        $meeting->load(self::AGENDA_ITEM_RELATIONS);
 
         return view('meetings.show', ['meeting' => $meeting]);
     }
 
     public function edit(Meeting $meeting): View
     {
-        $meeting->load(['agendaItems.member.position', 'agendaItems.site']);
+        $meeting->load(self::AGENDA_ITEM_RELATIONS);
         $members = $meeting->organization->members()->with('position')->orderBy('name')->get();
         $sites = $meeting->sites;
 

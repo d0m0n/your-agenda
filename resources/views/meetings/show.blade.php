@@ -35,18 +35,40 @@
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('次第') }}</h3>
                 <ol class="space-y-3">
-                    @forelse ($meeting->agendaItems as $index => $item)
-                        <li class="flex items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-700 pb-3 last:border-b-0 last:pb-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                {{ $index + 1 }}.
-                                @if ($item->site)
-                                    <a href="{{ $item->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $item->title }}</a>
-                                @else
-                                    {{ $item->title }}
+                    @forelse ($meeting->topLevelAgendaItems as $index => $item)
+                        <li class="border-b border-gray-100 dark:border-gray-700 pb-3 last:border-b-0 last:pb-0">
+                            <div class="flex items-center justify-between gap-4">
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {{ $index + 1 }}.
+                                    @if ($item->site)
+                                        <a href="{{ $item->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $item->title }}</a>
+                                    @else
+                                        {{ $item->title }}
+                                    @endif
+                                </p>
+                                @if ($item->assigneeLabel())
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 text-right shrink-0">{{ $item->assigneeLabel() }}</p>
                                 @endif
-                            </p>
-                            @if ($item->assigneeLabel())
-                                <p class="text-xs text-gray-500 dark:text-gray-400 text-right shrink-0">{{ $item->assigneeLabel() }}</p>
+                            </div>
+
+                            @if ($item->children->isNotEmpty())
+                                <ol class="mt-2 ml-6 space-y-2">
+                                    @foreach ($item->children as $childIndex => $child)
+                                        <li class="flex items-center justify-between gap-4">
+                                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                                {{ sprintf('%02d', $childIndex + 1) }}.
+                                                @if ($child->site)
+                                                    <a href="{{ $child->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $child->title }}</a>
+                                                @else
+                                                    {{ $child->title }}
+                                                @endif
+                                            </p>
+                                            @if ($child->assigneeLabel())
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 text-right shrink-0">{{ $child->assigneeLabel() }}</p>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ol>
                             @endif
                         </li>
                     @empty

@@ -19,8 +19,9 @@ class AgendaItemRequest extends FormRequest
     {
         $organizationId = $this->user()->organization_id;
         $meeting = $this->route('meeting');
+        $isCreating = $this->route('agendaItem') === null;
 
-        return [
+        $rules = [
             'title' => ['required', 'string', 'max:255'],
             'member_id' => [
                 'nullable',
@@ -34,5 +35,19 @@ class AgendaItemRequest extends FormRequest
                     ->where('meeting_id', $meeting?->id),
             ],
         ];
+
+        // parent_id is only accepted when creating: re-parenting an existing
+        // item isn't supported, and this keeps update() from ever nulling it
+        // out just because the edit form doesn't submit the field.
+        if ($isCreating) {
+            $rules['parent_id'] = [
+                'nullable',
+                Rule::exists('agenda_items', 'id')
+                    ->where('meeting_id', $meeting?->id)
+                    ->whereNull('parent_id'),
+            ];
+        }
+
+        return $rules;
     }
 }

@@ -76,82 +76,43 @@
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('次第') }}</h3>
 
                 <div class="space-y-3">
-                    @forelse ($meeting->agendaItems as $index => $item)
-                        <div x-data="{ editing: false }" class="border border-gray-200 dark:border-gray-700 rounded-md p-4">
-                            <div x-show="!editing" class="flex items-center justify-between gap-4">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $index + 1 }}. {{ $item->title }}</p>
-                                    @if ($item->assigneeLabel() || $item->site)
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            @if ($item->assigneeLabel())
-                                                {{ __('担当者') }}: {{ $item->assigneeLabel() }}
-                                            @endif
-                                            @if ($item->site)
-                                                @if ($item->assigneeLabel())・@endif
-                                                <a href="{{ $item->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('議案') }}: {{ $item->site->title }}</a>
-                                            @endif
-                                        </p>
-                                    @endif
-                                </div>
-                                <div class="flex items-center gap-2 shrink-0">
-                                    <form method="POST" action="{{ route('agenda-items.move-up', [$meeting, $item]) }}">
-                                        @csrf
-                                        <button type="submit" @if($index === 0) disabled class="opacity-30" @endif class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">&uarr;</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('agenda-items.move-down', [$meeting, $item]) }}">
-                                        @csrf
-                                        <button type="submit" @if($index === $meeting->agendaItems->count() - 1) disabled class="opacity-30" @endif class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">&darr;</button>
-                                    </form>
-                                    <button type="button" @click="editing = true" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('編集') }}</button>
-                                    <form method="POST" action="{{ route('agenda-items.destroy', [$meeting, $item]) }}" onsubmit="return confirm('{{ __('この次第を削除しますか?') }}');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
-                                    </form>
-                                </div>
-                            </div>
+                    @forelse ($meeting->topLevelAgendaItems as $item)
+                        @include('meetings._agenda-item-row', [
+                            'meeting' => $meeting, 'item' => $item, 'members' => $members, 'sites' => $sites,
+                            'number' => $loop->iteration, 'isFirst' => $loop->first, 'isLast' => $loop->last,
+                        ])
 
-                            <form x-show="editing" method="POST" action="{{ route('agenda-items.update', [$meeting, $item]) }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                        <div class="ml-6 space-y-3">
+                            @foreach ($item->children as $child)
+                                @include('meetings._agenda-item-row', [
+                                    'meeting' => $meeting, 'item' => $child, 'members' => $members, 'sites' => $sites,
+                                    'number' => sprintf('%02d', $loop->iteration), 'isFirst' => $loop->first, 'isLast' => $loop->last,
+                                    'nested' => true,
+                                ])
+                            @endforeach
+
+                            <form method="POST" action="{{ route('agenda-items.store', $meeting) }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                                 @csrf
-                                @method('PUT')
+                                <input type="hidden" name="parent_id" value="{{ $item->id }}">
                                 <div class="sm:col-span-3">
-                                    <x-input-label :value="__('議題')" />
-                                    <x-text-input name="title" type="text" class="mt-1 block w-full" value="{{ $item->title }}" required />
+                                    <x-input-label :value="__('子項目を追加')" />
+                                    <x-text-input name="title" type="text" class="mt-1 block w-full" placeholder="{{ __('例: ●●の件') }}" required />
+                                    <x-input-error :messages="$errors->get('title')" class="mt-2" />
                                 </div>
-                                <div x-data="{
-                                    mode: '{{ $item->member_id ? 'member' : ($item->assignee_name ? 'manual' : 'member') }}',
-                                    memberId: '{{ $item->member_id }}',
-                                    assigneeName: @js($item->assignee_name ?? ''),
-                                }">
-                                    <div class="flex items-center justify-between">
-                                        <x-input-label :value="__('担当者')" />
-                                        <button type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
-                                            x-show="mode === 'member'" @click="mode = 'manual'; memberId = ''">{{ __('手入力に切替') }}</button>
-                                        <button type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
-                                            x-show="mode === 'manual'" @click="mode = 'member'; assigneeName = ''">{{ __('名簿から選ぶ') }}</button>
-                                    </div>
-                                    <select name="member_id" x-show="mode === 'member'" x-model="memberId" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
-                                        <option value="">{{ __('未定') }}</option>
-                                        @foreach ($members as $member)
-                                            <option value="{{ $member->id }}">{{ trim(($member->position?->name.' ').$member->name) }}</option>
-                                        @endforeach
-                                    </select>
-                                    <input type="text" name="assignee_name" x-show="mode === 'manual'" x-model="assigneeName"
-                                        placeholder="{{ __('担当者名を入力') }}"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm" />
+                                <div>
+                                    @include('meetings._assignee-field', ['members' => $members])
                                 </div>
                                 <div>
                                     <x-input-label :value="__('Zip議案')" />
                                     <select name="site_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
                                         <option value="">{{ __('なし') }}</option>
                                         @foreach ($sites as $site)
-                                            <option value="{{ $site->id }}" @selected($item->site_id === $site->id)>{{ $site->title }}</option>
+                                            <option value="{{ $site->id }}">{{ $site->title }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="flex gap-3">
-                                    <x-primary-button>{{ __('保存') }}</x-primary-button>
-                                    <x-secondary-button type="button" @click="editing = false">{{ __('キャンセル') }}</x-secondary-button>
+                                <div>
+                                    <x-secondary-button>{{ __('子項目を追加') }}</x-secondary-button>
                                 </div>
                             </form>
                         </div>
@@ -167,23 +128,8 @@
                         <x-text-input id="new_title" name="title" type="text" class="mt-1 block w-full" placeholder="{{ __('議題名') }}" required />
                         <x-input-error :messages="$errors->get('title')" class="mt-2" />
                     </div>
-                    <div x-data="{ mode: 'member', memberId: '', assigneeName: '' }">
-                        <div class="flex items-center justify-between">
-                            <x-input-label :value="__('担当者')" />
-                            <button type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
-                                x-show="mode === 'member'" @click="mode = 'manual'; memberId = ''">{{ __('手入力に切替') }}</button>
-                            <button type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
-                                x-show="mode === 'manual'" @click="mode = 'member'; assigneeName = ''">{{ __('名簿から選ぶ') }}</button>
-                        </div>
-                        <select name="member_id" x-show="mode === 'member'" x-model="memberId" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
-                            <option value="">{{ __('未定') }}</option>
-                            @foreach ($members as $member)
-                                <option value="{{ $member->id }}">{{ trim(($member->position?->name.' ').$member->name) }}</option>
-                            @endforeach
-                        </select>
-                        <input type="text" name="assignee_name" x-show="mode === 'manual'" x-model="assigneeName"
-                            placeholder="{{ __('担当者名を入力') }}"
-                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm" />
+                    <div>
+                        @include('meetings._assignee-field', ['members' => $members])
                     </div>
                     <div>
                         <x-input-label :value="__('Zip議案')" />

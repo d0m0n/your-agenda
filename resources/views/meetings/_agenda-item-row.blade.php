@@ -1,0 +1,63 @@
+@php
+    $nested = $nested ?? false;
+@endphp
+
+<div x-data="{ editing: false }" class="border border-gray-200 dark:border-gray-700 rounded-md p-4 {{ $nested ? 'bg-gray-50 dark:bg-gray-900/40' : '' }}">
+    <div x-show="!editing" class="flex items-center justify-between gap-4">
+        <div>
+            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $number }}. {{ $item->title }}</p>
+            @if ($item->assigneeLabel() || $item->site)
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    @if ($item->assigneeLabel())
+                        {{ __('担当者') }}: {{ $item->assigneeLabel() }}
+                    @endif
+                    @if ($item->site)
+                        @if ($item->assigneeLabel())・@endif
+                        <a href="{{ $item->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('議案') }}: {{ $item->site->title }}</a>
+                    @endif
+                </p>
+            @endif
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <form method="POST" action="{{ route('agenda-items.move-up', [$meeting, $item]) }}">
+                @csrf
+                <button type="submit" @if($isFirst) disabled class="opacity-30" @endif class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">&uarr;</button>
+            </form>
+            <form method="POST" action="{{ route('agenda-items.move-down', [$meeting, $item]) }}">
+                @csrf
+                <button type="submit" @if($isLast) disabled class="opacity-30" @endif class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">&darr;</button>
+            </form>
+            <button type="button" @click="editing = true" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('編集') }}</button>
+            <form method="POST" action="{{ route('agenda-items.destroy', [$meeting, $item]) }}" onsubmit="return confirm('{{ __('この次第を削除しますか?') }}');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
+            </form>
+        </div>
+    </div>
+
+    <form x-show="editing" method="POST" action="{{ route('agenda-items.update', [$meeting, $item]) }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+        @csrf
+        @method('PUT')
+        <div class="sm:col-span-3">
+            <x-input-label :value="__('議題')" />
+            <x-text-input name="title" type="text" class="mt-1 block w-full" value="{{ $item->title }}" required />
+        </div>
+        <div>
+            @include('meetings._assignee-field', ['members' => $members, 'memberId' => $item->member_id, 'assigneeName' => $item->assignee_name])
+        </div>
+        <div>
+            <x-input-label :value="__('Zip議案')" />
+            <select name="site_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+                <option value="">{{ __('なし') }}</option>
+                @foreach ($sites as $site)
+                    <option value="{{ $site->id }}" @selected($item->site_id === $site->id)>{{ $site->title }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="flex gap-3">
+            <x-primary-button>{{ __('保存') }}</x-primary-button>
+            <x-secondary-button type="button" @click="editing = false">{{ __('キャンセル') }}</x-secondary-button>
+        </div>
+    </form>
+</div>

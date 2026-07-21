@@ -12,11 +12,18 @@ class AgendaItemController extends Controller
 {
     public function store(AgendaItemRequest $request, Meeting $meeting): RedirectResponse
     {
-        $nextOrder = ((int) $meeting->agendaItems()->max('order')) + 1;
+        $data = $this->normalizeAssignee($request->validated());
+        $parentId = $data['parent_id'] ?? null;
 
-        $meeting->agendaItems()->create([...$this->normalizeAssignee($request->validated()), 'order' => $nextOrder]);
+        $nextOrder = $parentId
+            ? ((int) AgendaItem::where('parent_id', $parentId)->max('order')) + 1
+            : ((int) $meeting->topLevelAgendaItems()->max('order')) + 1;
 
-        return redirect()->route('meetings.edit', $meeting)->with('status', '次第を追加しました。');
+        $meeting->agendaItems()->create([...$data, 'order' => $nextOrder]);
+
+        $status = $parentId ? '子項目を追加しました。' : '次第を追加しました。';
+
+        return redirect()->route('meetings.edit', $meeting)->with('status', $status);
     }
 
     public function update(AgendaItemRequest $request, Meeting $meeting, AgendaItem $agendaItem): RedirectResponse
@@ -71,7 +78,9 @@ class AgendaItemController extends Controller
     {
         $this->ensureBelongsToMeeting($meeting, $agendaItem);
 
-        $items = $meeting->agendaItems()->orderBy('order')->get();
+        $items = $agendaItem->parent_id
+            ? AgendaItem::where('parent_id', $agendaItem->parent_id)->orderBy('order')->get()
+            : $meeting->topLevelAgendaItems()->get();
         $index = $items->search(fn (AgendaItem $item) => $item->id === $agendaItem->id);
         $swapIndex = $direction === 'up' ? $index - 1 : $index + 1;
 
