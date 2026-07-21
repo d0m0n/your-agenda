@@ -81,13 +81,13 @@
                             <div x-show="!editing" class="flex items-center justify-between gap-4">
                                 <div>
                                     <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $index + 1 }}. {{ $item->title }}</p>
-                                    @if ($item->member || $item->site)
+                                    @if ($item->assigneeLabel() || $item->site)
                                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            @if ($item->member)
-                                                {{ __('担当者') }}: {{ $item->member->name }}
+                                            @if ($item->assigneeLabel())
+                                                {{ __('担当者') }}: {{ $item->assigneeLabel() }}
                                             @endif
                                             @if ($item->site)
-                                                @if ($item->member)・@endif
+                                                @if ($item->assigneeLabel())・@endif
                                                 <a href="{{ $item->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('議案') }}: {{ $item->site->title }}</a>
                                             @endif
                                         </p>
@@ -118,14 +118,27 @@
                                     <x-input-label :value="__('議題')" />
                                     <x-text-input name="title" type="text" class="mt-1 block w-full" value="{{ $item->title }}" required />
                                 </div>
-                                <div>
-                                    <x-input-label :value="__('担当者')" />
-                                    <select name="member_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+                                <div x-data="{
+                                    mode: '{{ $item->member_id ? 'member' : ($item->assignee_name ? 'manual' : 'member') }}',
+                                    memberId: '{{ $item->member_id }}',
+                                    assigneeName: @js($item->assignee_name ?? ''),
+                                }">
+                                    <div class="flex items-center justify-between">
+                                        <x-input-label :value="__('担当者')" />
+                                        <button type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                                            x-show="mode === 'member'" @click="mode = 'manual'; memberId = ''">{{ __('手入力に切替') }}</button>
+                                        <button type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                                            x-show="mode === 'manual'" @click="mode = 'member'; assigneeName = ''">{{ __('名簿から選ぶ') }}</button>
+                                    </div>
+                                    <select name="member_id" x-show="mode === 'member'" x-model="memberId" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
                                         <option value="">{{ __('未定') }}</option>
                                         @foreach ($members as $member)
-                                            <option value="{{ $member->id }}" @selected($item->member_id === $member->id)>{{ $member->name }}</option>
+                                            <option value="{{ $member->id }}">{{ trim(($member->position?->name.' ').$member->name) }}</option>
                                         @endforeach
                                     </select>
+                                    <input type="text" name="assignee_name" x-show="mode === 'manual'" x-model="assigneeName"
+                                        placeholder="{{ __('担当者名を入力') }}"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm" />
                                 </div>
                                 <div>
                                     <x-input-label :value="__('Zip議案')" />
@@ -154,14 +167,23 @@
                         <x-text-input id="new_title" name="title" type="text" class="mt-1 block w-full" placeholder="{{ __('議題名') }}" required />
                         <x-input-error :messages="$errors->get('title')" class="mt-2" />
                     </div>
-                    <div>
-                        <x-input-label :value="__('担当者')" />
-                        <select name="member_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+                    <div x-data="{ mode: 'member', memberId: '', assigneeName: '' }">
+                        <div class="flex items-center justify-between">
+                            <x-input-label :value="__('担当者')" />
+                            <button type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                                x-show="mode === 'member'" @click="mode = 'manual'; memberId = ''">{{ __('手入力に切替') }}</button>
+                            <button type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                                x-show="mode === 'manual'" @click="mode = 'member'; assigneeName = ''">{{ __('名簿から選ぶ') }}</button>
+                        </div>
+                        <select name="member_id" x-show="mode === 'member'" x-model="memberId" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
                             <option value="">{{ __('未定') }}</option>
                             @foreach ($members as $member)
-                                <option value="{{ $member->id }}">{{ $member->name }}</option>
+                                <option value="{{ $member->id }}">{{ trim(($member->position?->name.' ').$member->name) }}</option>
                             @endforeach
                         </select>
+                        <input type="text" name="assignee_name" x-show="mode === 'manual'" x-model="assigneeName"
+                            placeholder="{{ __('担当者名を入力') }}"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm" />
                     </div>
                     <div>
                         <x-input-label :value="__('Zip議案')" />

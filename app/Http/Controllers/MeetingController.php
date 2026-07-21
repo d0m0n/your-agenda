@@ -38,15 +38,15 @@ class MeetingController extends Controller
 
     public function show(Meeting $meeting): View
     {
-        $meeting->load(['agendaItems.member', 'agendaItems.site']);
+        $meeting->load(['agendaItems.member.position', 'agendaItems.site']);
 
         return view('meetings.show', ['meeting' => $meeting]);
     }
 
     public function edit(Meeting $meeting): View
     {
-        $meeting->load(['agendaItems.member', 'agendaItems.site']);
-        $members = $meeting->organization->members()->orderBy('name')->get();
+        $meeting->load(['agendaItems.member.position', 'agendaItems.site']);
+        $members = $meeting->organization->members()->with('position')->orderBy('name')->get();
         $sites = $meeting->sites;
 
         return view('meetings.edit', ['meeting' => $meeting, 'members' => $members, 'sites' => $sites]);

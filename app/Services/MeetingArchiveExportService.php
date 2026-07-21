@@ -24,7 +24,7 @@ class MeetingArchiveExportService
         $zip = new ZipArchive;
         $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
-        $meetings = $organization->meetings()->with(['agendaItems.member', 'agendaItems.site'])->get();
+        $meetings = $organization->meetings()->with(['agendaItems.member.position', 'agendaItems.site'])->get();
 
         foreach ($meetings as $meeting) {
             $folder = $meeting->id.'_'.Str::slug($meeting->name, '-', 'ja');

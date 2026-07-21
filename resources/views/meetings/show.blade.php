@@ -45,8 +45,8 @@
                                     {{ $item->title }}
                                 @endif
                             </p>
-                            @if ($item->member)
-                                <p class="text-xs text-gray-500 dark:text-gray-400 text-right shrink-0">{{ $item->member->name }}</p>
+                            @if ($item->assigneeLabel())
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-right shrink-0">{{ $item->assigneeLabel() }}</p>
                             @endif
                         </li>
                     @empty

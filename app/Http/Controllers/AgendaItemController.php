@@ -14,7 +14,7 @@ class AgendaItemController extends Controller
     {
         $nextOrder = ((int) $meeting->agendaItems()->max('order')) + 1;
 
-        $meeting->agendaItems()->create([...$request->validated(), 'order' => $nextOrder]);
+        $meeting->agendaItems()->create([...$this->normalizeAssignee($request->validated()), 'order' => $nextOrder]);
 
         return redirect()->route('meetings.edit', $meeting)->with('status', '次第を追加しました。');
     }
@@ -23,9 +23,25 @@ class AgendaItemController extends Controller
     {
         $this->ensureBelongsToMeeting($meeting, $agendaItem);
 
-        $agendaItem->update($request->validated());
+        $agendaItem->update($this->normalizeAssignee($request->validated()));
 
         return redirect()->route('meetings.edit', $meeting)->with('status', '次第を更新しました。');
+    }
+
+    /**
+     * A registered member always takes precedence over a free-typed name,
+     * so the two can't end up disagreeing about who's assigned.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function normalizeAssignee(array $data): array
+    {
+        if (! empty($data['member_id'])) {
+            $data['assignee_name'] = null;
+        }
+
+        return $data;
     }
 
     public function destroy(Meeting $meeting, AgendaItem $agendaItem): RedirectResponse

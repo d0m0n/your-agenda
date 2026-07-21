@@ -26,6 +26,7 @@ class AgendaItemRequest extends FormRequest
                 'nullable',
                 Rule::exists('members', 'id')->where('organization_id', $organizationId),
             ],
+            'assignee_name' => ['nullable', 'string', 'max:255'],
             'site_id' => [
                 'nullable',
                 Rule::exists('sites', 'id')
