@@ -112,7 +112,7 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <x-secondary-button>{{ __('子項目を追加') }}</x-secondary-button>
+                                    <x-primary-button>{{ __('子項目を追加') }}</x-primary-button>
                                 </div>
                             </form>
                         </div>
