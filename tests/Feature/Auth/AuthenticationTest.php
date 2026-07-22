@@ -51,4 +51,23 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
         $response->assertRedirect('/');
     }
+
+    /**
+     * Regression test: the "Log Out" link used to be a plain <a href> with
+     * an onclick handler that called form.submit(). If that JS ever fails
+     * to run in production (CSP, ad blocker, script load failure), the
+     * browser falls back to a normal GET navigation to /logout — which only
+     * has a POST route registered, so it 405s. A native <button type="submit">
+     * inside the form submits correctly with no JavaScript involved at all.
+     */
+    public function test_logout_control_is_a_real_submit_button_not_a_js_dependent_link(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('<button type="submit"', false);
+        $response->assertDontSee("this.closest('form').submit()", false);
+    }
 }
