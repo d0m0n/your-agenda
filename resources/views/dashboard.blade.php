@@ -106,8 +106,8 @@
                         <div class="{{ $paneBodyClass }}">
                             @if ($organization->google_calendar_id)
                                 <iframe
-                                    src="https://calendar.google.com/calendar/embed?src={{ urlencode($organization->google_calendar_id) }}&ctz=Asia%2FTokyo"
-                                    class="w-full h-64 border border-paper-200 dark:border-ink-700 rounded-md" loading="lazy"></iframe>
+                                    src="https://calendar.google.com/calendar/embed?src={{ urlencode($organization->google_calendar_id) }}&ctz=Asia%2FTokyo&showTitle=0&showNav=0&showTabs=0&showCalendars=0&showPrint=0&showTz=0"
+                                    class="w-full h-[360px] border border-paper-200 dark:border-ink-700 rounded-md" loading="lazy"></iframe>
                             @else
                                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Googleカレンダーが設定されていません。') }}</p>
                                 @can('manage')
