@@ -131,4 +131,20 @@ class MeetingBoundaryTest extends TestCase
         $response->assertSee('自組織の例会');
         $response->assertDontSee('他組織の例会');
     }
+
+    public function test_meeting_show_and_edit_pages_use_the_organization_and_meeting_name_as_the_browser_tab_title(): void
+    {
+        [$orgA, $userA] = $this->createTenant(); // organization factory default name
+
+        $meeting = Meeting::factory()->for($orgA, 'organization')->create(['name' => '7月定例会']);
+        $expectedTitle = "<title>{$orgA->name}の次第 | 7月定例会</title>";
+
+        $this->actingAs($userA)->get(route('meetings.show', $meeting))
+            ->assertOk()
+            ->assertSee($expectedTitle, false);
+
+        $this->actingAs($userA)->get(route('meetings.edit', $meeting))
+            ->assertOk()
+            ->assertSee($expectedTitle, false);
+    }
 }

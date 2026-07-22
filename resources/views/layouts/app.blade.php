@@ -7,7 +7,7 @@
 
         @include('layouts.theme-init')
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>@isset($title){{ $title }}@else{{ config('app.name', 'Laravel') }}@endisset</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

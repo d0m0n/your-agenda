@@ -55,6 +55,24 @@ class SiteFileUploadTest extends TestCase
         ]);
     }
 
+    public function test_meeting_edit_screen_shows_the_upload_date_for_each_site(): void
+    {
+        [$organization, $user] = $this->createTenant();
+        $meeting = Meeting::factory()->for($organization, 'organization')->create();
+
+        $this->actingAs($user)->post(route('meetings.sites.store', $meeting), [
+            'title' => 'PDF議案',
+            'zip_file' => UploadedFile::fake()->create('resolution.pdf', 10, 'application/pdf'),
+        ]);
+        $site = $meeting->sites()->where('title', 'PDF議案')->firstOrFail();
+
+        $response = $this->actingAs($user)->get(route('meetings.edit', $meeting));
+
+        $response->assertOk();
+        $response->assertSee('アップロード: '.$site->created_at->format('Y-m-d H:i'));
+        $response->assertDontSee('差し替え:', false);
+    }
+
     public function test_unsupported_file_type_is_rejected(): void
     {
         [$organization, $user] = $this->createTenant();

@@ -1,4 +1,6 @@
 <x-app-layout>
+    <x-slot name="title">{{ $meeting->organization->name }}の次第 | {{ $meeting->name }}</x-slot>
+
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
@@ -40,13 +42,50 @@
                 @if ($sites->isNotEmpty())
                     <ul class="space-y-2 mb-4">
                         @foreach ($sites as $site)
-                            <li class="flex items-center justify-between text-sm border-b border-gray-100 dark:border-gray-700 pb-2 last:border-b-0 last:pb-0">
-                                <a href="{{ $site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $site->title }}</a>
-                                <form method="POST" action="{{ route('sites.destroy', $site) }}" onsubmit="return confirm('{{ __('この議案ファイルを削除しますか?') }}');">
+                            <li class="border-b border-gray-100 dark:border-gray-700 pb-2 last:border-b-0 last:pb-0"
+                                x-data="{ replacing: {{ old('site_id') == $site->id ? 'true' : 'false' }} }">
+                                <div class="flex items-center justify-between text-sm">
+                                    <div>
+                                        <a href="{{ $site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $site->title }}</a>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ __('アップロード') }}: {{ $site->created_at->format('Y-m-d H:i') }}
+                                            @unless ($site->updated_at->equalTo($site->created_at))
+                                                ・{{ __('差し替え') }}: {{ $site->updated_at->format('Y-m-d H:i') }}
+                                            @endunless
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <button type="button" @click="replacing = !replacing" class="text-xs text-gray-600 dark:text-gray-400 hover:underline">{{ __('差し替え') }}</button>
+                                        <form method="POST" action="{{ route('sites.destroy', $site) }}" onsubmit="return confirm('{{ __('この議案ファイルを削除しますか?') }}');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <form x-show="replacing" x-cloak method="POST" action="{{ route('meetings.sites.update', [$meeting, $site]) }}"
+                                    enctype="multipart/form-data" class="mt-2 flex flex-wrap items-end gap-2"
+                                    x-data="uploadProgress()" @submit.prevent="submitViaXhr">
                                     @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
+                                    @method('PUT')
+                                    <input type="hidden" name="site_id" value="{{ $site->id }}">
+                                    <div class="flex-1 min-w-[12rem]">
+                                        <input type="file" name="zip_file" accept=".zip,.pdf,.jpg,.jpeg,.png,.gif,.webp" required
+                                            class="block w-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md cursor-pointer focus:outline-none" />
+                                        @if (old('site_id') == $site->id)
+                                            <x-input-error :messages="$errors->get('zip_file')" class="mt-1" />
+                                        @endif
+                                        <x-upload-progress-bar />
+                                    </div>
+                                    <x-secondary-button type="submit" class="disabled:opacity-50 disabled:cursor-not-allowed shrink-0" x-bind:disabled="uploading">
+                                        <span x-show="!uploading">{{ __('差し替える') }}</span>
+                                        <span x-show="uploading" x-cloak>{{ __('アップロード中…') }}</span>
+                                    </x-secondary-button>
                                 </form>
+                                <p x-show="replacing" x-cloak class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ __('タイトルはそのまま、ファイルの中身だけを差し替えます。次第からのリンクは変更されません。') }}
+                                </p>
                             </li>
                         @endforeach
                     </ul>

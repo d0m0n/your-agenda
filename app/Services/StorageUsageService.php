@@ -86,7 +86,17 @@ class StorageUsageService
         return Site::withoutGlobalScope(OrganizationScope::class)
             ->where('organization_id', $organization->id)
             ->get()
-            ->sum(fn (Site $site) => $this->directoryBytes(storage_path("app/public/sites/{$site->uuid}")));
+            ->sum(fn (Site $site) => $this->bytesForSiteUuid($site->uuid));
+    }
+
+    /**
+     * Public so callers replacing a site's file in place (same uuid, new
+     * content) can measure the old and staged-new footprint separately and
+     * work out the net change before it's applied.
+     */
+    public function bytesForSiteUuid(string $uuid): int
+    {
+        return $this->directoryBytes(storage_path("app/public/sites/{$uuid}"));
     }
 
     private function organizationImageBytes(Organization $organization): int

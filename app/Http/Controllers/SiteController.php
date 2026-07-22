@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\InvalidSiteZipException;
 use App\Http\Requests\StoreSiteRequest;
+use App\Http\Requests\UpdateSiteRequest;
 use App\Models\Meeting;
 use App\Models\Site;
 use App\Services\SiteZipInstaller;
+use App\Services\StorageUsageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SiteController extends Controller
 {
@@ -71,6 +74,51 @@ class SiteController extends Controller
         return redirect()->route('meetings.edit', $meeting)->with('status', '議案ファイルをアップロードしました。');
     }
 
+    /**
+     * Replaces an already-uploaded site's file in place: the new file is
+     * validated/extracted into a staging directory first, so a broken
+     * upload (invalid Zip, no gian.htm, over quota) never touches the
+     * existing working file. Only once that succeeds do we swap it in
+     * under the same uuid, keeping the public URL and any agenda_items
+     * links (which reference the site's id, not its uuid) intact.
+     */
+    public function updateForMeeting(UpdateSiteRequest $request, Meeting $meeting, Site $site, SiteZipInstaller $installer, StorageUsageService $storageUsage): RedirectResponse
+    {
+        $this->ensureBelongsToMeeting($meeting, $site);
+
+        $uploadedFile = $request->file('zip_file');
+        $stagingUuid = $site->uuid.'-staging-'.Str::random(8);
+
+        try {
+            $indexPath = $installer->install($uploadedFile, $stagingUuid);
+        } catch (InvalidSiteZipException $e) {
+            return back()->withInput()->withErrors(['zip_file' => $e->getMessage()]);
+        }
+
+        $projectedUsage = $storageUsage->usedBytes($meeting->organization)
+            - $storageUsage->bytesForSiteUuid($site->uuid)
+            + $storageUsage->bytesForSiteUuid($stagingUuid);
+
+        if ($projectedUsage > $storageUsage->quotaBytes($request->user())) {
+            File::deleteDirectory(storage_path("app/public/sites/{$stagingUuid}"));
+
+            return back()->withInput()->withErrors(['zip_file' => 'データ容量の上限に達しているため、置き換えできません。基本設定の使用量をご確認ください。']);
+        }
+
+        File::deleteDirectory(storage_path("app/public/sites/{$site->uuid}"));
+        File::moveDirectory(
+            storage_path("app/public/sites/{$stagingUuid}"),
+            storage_path("app/public/sites/{$site->uuid}")
+        );
+
+        $site->update([
+            'original_filename' => $uploadedFile->getClientOriginalName(),
+            'index_path' => $indexPath,
+        ]);
+
+        return redirect()->route('meetings.edit', $meeting)->with('status', '議案ファイルを差し替えました。');
+    }
+
     public function destroy(Site $site): RedirectResponse
     {
         File::deleteDirectory(storage_path('app/public/sites/'.$site->uuid));
@@ -78,5 +126,12 @@ class SiteController extends Controller
         $site->delete();
 
         return redirect()->route('sites.index')->with('status', 'サイトを削除しました。');
+    }
+
+    private function ensureBelongsToMeeting(Meeting $meeting, Site $site): void
+    {
+        if ($site->meeting_id !== $meeting->id) {
+            throw new NotFoundHttpException;
+        }
     }
 }

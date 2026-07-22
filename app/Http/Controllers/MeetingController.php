@@ -38,6 +38,7 @@ class MeetingController extends Controller
     }
 
     private const AGENDA_ITEM_RELATIONS = [
+        'organization',
         'topLevelAgendaItems.member.position',
         'topLevelAgendaItems.site',
         'topLevelAgendaItems.children.member.position',

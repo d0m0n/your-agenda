@@ -66,6 +66,7 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::delete('/positions/{position}', [PositionController::class, 'destroy'])->name('positions.destroy');
 
     Route::post('/meetings/{meeting}/sites', [SiteController::class, 'storeForMeeting'])->name('meetings.sites.store');
+    Route::put('/meetings/{meeting}/sites/{site}', [SiteController::class, 'updateForMeeting'])->name('meetings.sites.update');
 
     Route::post('/meetings/{meeting}/agenda-items', [AgendaItemController::class, 'store'])->name('agenda-items.store');
     Route::post('/meetings/{meeting}/agenda-items/copy', [AgendaItemController::class, 'copyFromMeeting'])->name('agenda-items.copy');
