@@ -34,7 +34,7 @@
             </div>
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('議案Zipファイル') }}</h3>
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('議案ファイル') }}</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('この会議専用にアップロードされます。他の会議の次第からは選択できません。') }}</p>
 
                 @if ($sites->isNotEmpty())
@@ -42,7 +42,7 @@
                         @foreach ($sites as $site)
                             <li class="flex items-center justify-between text-sm border-b border-gray-100 dark:border-gray-700 pb-2 last:border-b-0 last:pb-0">
                                 <a href="{{ $site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $site->title }}</a>
-                                <form method="POST" action="{{ route('sites.destroy', $site) }}" onsubmit="return confirm('{{ __('この議案Zipを削除しますか?') }}');">
+                                <form method="POST" action="{{ route('sites.destroy', $site) }}" onsubmit="return confirm('{{ __('この議案ファイルを削除しますか?') }}');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
@@ -60,8 +60,8 @@
                         <x-input-error :messages="$errors->get('title')" class="mt-2" />
                     </div>
                     <div>
-                        <x-input-label for="zip_file" :value="__('Zipファイル')" />
-                        <input id="zip_file" name="zip_file" type="file" accept=".zip" required
+                        <x-input-label for="zip_file" :value="__('議案ファイル(Zip / PDF / 画像)')" />
+                        <input id="zip_file" name="zip_file" type="file" accept=".zip,.pdf,.jpg,.jpeg,.png,.gif,.webp" required
                             class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md cursor-pointer focus:outline-none" />
                         <x-input-error :messages="$errors->get('zip_file')" class="mt-2" />
                     </div>
@@ -69,7 +69,7 @@
                         <x-primary-button>{{ __('アップロード') }}</x-primary-button>
                     </div>
                 </form>
-                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('gian.htm はZip直下、もしくは1階層下のフォルダに配置してください。') }}</p>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Zipの場合はgian.htmをZip直下、もしくは1階層下のフォルダに配置してください。PDF・画像はファイル名を問わずそのままアップロードできます。') }}</p>
             </div>
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">

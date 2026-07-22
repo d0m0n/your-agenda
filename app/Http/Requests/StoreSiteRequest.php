@@ -18,7 +18,7 @@ class StoreSiteRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
-            'zip_file' => ['required', 'file', 'mimes:zip', 'max:'.(200 * 1024)],
+            'zip_file' => ['required', 'file', 'mimes:zip,pdf,jpg,jpeg,png,gif,webp', 'max:'.(200 * 1024)],
         ];
     }
 }

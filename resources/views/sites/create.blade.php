@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Zipアップロード') }}
+            {{ __('議案ファイルアップロード') }}
         </h2>
     </x-slot>
 
@@ -18,11 +18,11 @@
                     </div>
 
                     <div>
-                        <x-input-label for="zip_file" :value="__('Zipファイル')" />
-                        <input id="zip_file" name="zip_file" type="file" accept=".zip" required
+                        <x-input-label for="zip_file" :value="__('議案ファイル(Zip / PDF / 画像)')" />
+                        <input id="zip_file" name="zip_file" type="file" accept=".zip,.pdf,.jpg,.jpeg,.png,.gif,.webp" required
                             class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md cursor-pointer focus:outline-none" />
                         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('gian.htm はZip直下、もしくは1階層下のフォルダに配置してください。展開後の合計サイズは200MBまで、ファイル数は1000件までです。') }}
+                            {{ __('Zipの場合はgian.htmをZip直下、もしくは1階層下のフォルダに配置してください。PDF・画像はファイル名を問わずそのまま公開できます。サイズは200MBまでです。') }}
                         </p>
                         <x-input-error :messages="$errors->get('zip_file')" class="mt-2" />
                     </div>

@@ -14,6 +14,10 @@ class SiteZipInstaller
         'webp', 'ico', 'woff', 'woff2', 'ttf', 'json', 'txt', 'pdf', 'mp4',
     ];
 
+    private const ALLOWED_SINGLE_FILE_EXTENSIONS = [
+        'pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp',
+    ];
+
     private const MAX_TOTAL_BYTES = 200 * 1024 * 1024;
 
     private const MAX_FILE_COUNT = 1000;
@@ -23,10 +27,42 @@ class SiteZipInstaller
     private const INDEX_FILENAME = 'gian.htm';
 
     /**
-     * Extract the uploaded zip into storage/app/public/sites/{uuid} and
-     * return the gian.htm path relative to that directory.
+     * Install the uploaded file into storage/app/public/sites/{uuid} and
+     * return the path (relative to that directory) that should be opened.
+     *
+     * Zip archives are extracted and searched for gian.htm; a single PDF
+     * or image file is stored as-is and opened directly, since there is
+     * no archive structure to search within.
      */
-    public function install(UploadedFile $zipFile, string $uuid): string
+    public function install(UploadedFile $file, string $uuid): string
+    {
+        if ($file->extension() === 'zip') {
+            return $this->installZip($file, $uuid);
+        }
+
+        return $this->installSingleFile($file, $uuid);
+    }
+
+    private function installSingleFile(UploadedFile $file, string $uuid): string
+    {
+        $extension = $file->extension();
+
+        if (! in_array($extension, self::ALLOWED_SINGLE_FILE_EXTENSIONS, true)) {
+            throw new InvalidSiteZipException('対応していないファイル形式です。');
+        }
+
+        $destination = storage_path("app/public/sites/{$uuid}");
+        $filename = 'document.'.$extension;
+
+        File::ensureDirectoryExists($destination);
+        $file->move($destination, $filename);
+
+        $this->writeHtaccess(dirname($destination));
+
+        return $filename;
+    }
+
+    private function installZip(UploadedFile $zipFile, string $uuid): string
     {
         $destination = storage_path("app/public/sites/{$uuid}");
 

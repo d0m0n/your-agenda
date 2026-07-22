@@ -68,7 +68,7 @@ class SiteController extends Controller
             'user_id' => $request->user()->id,
         ]);
 
-        return redirect()->route('meetings.edit', $meeting)->with('status', '議案Zipをアップロードしました。');
+        return redirect()->route('meetings.edit', $meeting)->with('status', '議案ファイルをアップロードしました。');
     }
 
     public function destroy(Site $site): RedirectResponse
