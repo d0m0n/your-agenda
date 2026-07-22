@@ -11,10 +11,17 @@
     </div>
 
     <div>
-        <x-input-label for="held_at" :value="__('開催日時')" />
+        <x-input-label for="held_at" :value="__('開始日時')" />
         <x-text-input id="held_at" name="held_at" type="datetime-local" class="mt-1 block w-full"
             :value="$m?->held_at?->format('Y-m-d\TH:i') ?? old('held_at')" />
         <x-input-error :messages="$errors->get('held_at')" class="mt-2" />
+    </div>
+
+    <div>
+        <x-input-label for="ends_at" :value="__('終了日時')" />
+        <x-text-input id="ends_at" name="ends_at" type="datetime-local" class="mt-1 block w-full"
+            :value="$m?->ends_at?->format('Y-m-d\TH:i') ?? old('ends_at')" />
+        <x-input-error :messages="$errors->get('ends_at')" class="mt-2" />
     </div>
 
     <div>

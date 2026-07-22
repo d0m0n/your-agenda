@@ -2,10 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\EnforcesStorageQuota;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MaterialRequest extends FormRequest
 {
+    use EnforcesStorageQuota;
+
     public function authorize(): bool
     {
         return $this->user()?->can('manage') ?? false;
@@ -24,5 +28,10 @@ class MaterialRequest extends FormRequest
                 'max:20480',
             ],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $this->enforceStorageQuota($validator, ['file']);
     }
 }

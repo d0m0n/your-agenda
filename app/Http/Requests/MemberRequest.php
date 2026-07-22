@@ -2,11 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\EnforcesStorageQuota;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class MemberRequest extends FormRequest
 {
+    use EnforcesStorageQuota;
+
     public function authorize(): bool
     {
         return $this->user()?->can('manage') ?? false;
@@ -58,5 +62,10 @@ class MemberRequest extends FormRequest
             'serial_number.unique' => 'この通し番号は既に使用されています。',
             'serial_number.min' => '通し番号は1以上の数字で入力してください。',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $this->enforceStorageQuota($validator, ['photo']);
     }
 }

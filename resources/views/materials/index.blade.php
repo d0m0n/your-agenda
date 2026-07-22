@@ -17,7 +17,8 @@
             @can('manage')
                 <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('資料をアップロード') }}</h3>
-                    <form method="POST" action="{{ route('materials.store') }}" enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <form method="POST" action="{{ route('materials.store') }}" enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end"
+                        x-data="uploadProgress()" @submit.prevent="submitViaXhr">
                         @csrf
                         <div class="sm:col-span-1">
                             <x-input-label for="title" :value="__('タイトル')" />
@@ -29,9 +30,13 @@
                             <input id="file" name="file" type="file" required
                                 class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md cursor-pointer focus:outline-none" />
                             <x-input-error :messages="$errors->get('file')" class="mt-2" />
+                            <x-upload-progress-bar />
                         </div>
                         <div>
-                            <x-primary-button>{{ __('アップロード') }}</x-primary-button>
+                            <x-primary-button class="disabled:opacity-50 disabled:cursor-not-allowed" x-bind:disabled="uploading">
+                                <span x-show="!uploading">{{ __('アップロード') }}</span>
+                                <span x-show="uploading" x-cloak>{{ __('アップロード中…') }}</span>
+                            </x-primary-button>
                         </div>
                     </form>
                     <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('pdf, doc(x), xls(x), ppt(x), zip, jpg, png, gif, webp, txt, csv。最大20MB。') }}</p>

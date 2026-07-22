@@ -8,7 +8,8 @@
     <div class="py-12">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <form method="POST" action="{{ route('sites.store') }}" enctype="multipart/form-data" class="space-y-6">
+                <form method="POST" action="{{ route('sites.store') }}" enctype="multipart/form-data" class="space-y-6"
+                    x-data="uploadProgress()" @submit.prevent="submitViaXhr">
                     @csrf
 
                     <div>
@@ -25,11 +26,15 @@
                             {{ __('Zipの場合はgian.htmをZip直下、もしくは1階層下のフォルダに配置してください。PDF・画像はファイル名を問わずそのまま公開できます。サイズは200MBまでです。') }}
                         </p>
                         <x-input-error :messages="$errors->get('zip_file')" class="mt-2" />
+                        <x-upload-progress-bar />
                     </div>
 
                     <div class="flex items-center justify-end gap-4">
                         <a href="{{ route('sites.index') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">{{ __('キャンセル') }}</a>
-                        <x-primary-button>{{ __('アップロード') }}</x-primary-button>
+                        <x-primary-button class="disabled:opacity-50 disabled:cursor-not-allowed" x-bind:disabled="uploading">
+                            <span x-show="!uploading">{{ __('アップロード') }}</span>
+                            <span x-show="uploading" x-cloak>{{ __('アップロード中…') }}</span>
+                        </x-primary-button>
                     </div>
                 </form>
             </div>

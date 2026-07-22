@@ -2,11 +2,13 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('メンバー管理') }}
+                {{ __('メンバー一覧') }}
             </h2>
-            <a href="{{ route('members.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
-                {{ __('新規登録') }}
-            </a>
+            @can('manage')
+                <a href="{{ route('members.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
+                    {{ __('新規登録') }}
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -45,23 +47,25 @@
                 </div>
             @endif
 
-            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('CSV一括登録') }}</h3>
-                <div class="flex flex-wrap items-center gap-4">
-                    <a href="{{ route('members.csv-template') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                        {{ __('CSVテンプレートをダウンロード') }}
-                    </a>
-                    <a href="{{ route('members.export') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                        {{ __('登録メンバーをCSVでダウンロード') }}
-                    </a>
-                    <form method="POST" action="{{ route('members.import') }}" enctype="multipart/form-data" class="flex items-center gap-2">
-                        @csrf
-                        <input type="file" name="csv_file" accept=".csv,text/csv" required
-                            class="text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md cursor-pointer focus:outline-none" />
-                        <x-secondary-button type="submit">{{ __('CSVから一括登録') }}</x-secondary-button>
-                    </form>
+            @can('manage')
+                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('CSV一括登録') }}</h3>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <a href="{{ route('members.csv-template') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                            {{ __('CSVテンプレートをダウンロード') }}
+                        </a>
+                        <a href="{{ route('members.export') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                            {{ __('登録メンバーをCSVでダウンロード') }}
+                        </a>
+                        <form method="POST" action="{{ route('members.import') }}" enctype="multipart/form-data" class="flex items-center gap-2">
+                            @csrf
+                            <input type="file" name="csv_file" accept=".csv,text/csv" required
+                                class="text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md cursor-pointer focus:outline-none" />
+                            <x-secondary-button type="submit">{{ __('CSVから一括登録') }}</x-secondary-button>
+                        </form>
+                    </div>
                 </div>
-            </div>
+            @endcan
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
@@ -109,12 +113,14 @@
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $member->company }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $member->birth_date?->format('Y-m-d') }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-right text-sm space-x-3">
-                                        <a href="{{ route('members.edit', $member) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('編集') }}</a>
-                                        <form method="POST" action="{{ route('members.destroy', $member) }}" class="inline" onsubmit="return confirm('{{ __('このメンバーを削除しますか?') }}');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
-                                        </form>
+                                        @can('manage')
+                                            <a href="{{ route('members.edit', $member) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('編集') }}</a>
+                                            <form method="POST" action="{{ route('members.destroy', $member) }}" class="inline" onsubmit="return confirm('{{ __('このメンバーを削除しますか?') }}');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
+                                            </form>
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty

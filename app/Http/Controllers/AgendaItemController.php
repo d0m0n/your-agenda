@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AgendaItemRequest;
+use App\Http\Requests\CopyAgendaItemsRequest;
 use App\Models\AgendaItem;
 use App\Models\Meeting;
 use Illuminate\Http\RedirectResponse;
@@ -49,6 +50,47 @@ class AgendaItemController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * Copies selected top-level items (and their children) from another
+     * meeting in the same organization onto the end of this meeting's
+     * agenda. Site links aren't carried over since a Zip/PDF/image upload
+     * belongs to the meeting it was uploaded for, not the item itself.
+     */
+    public function copyFromMeeting(CopyAgendaItemsRequest $request, Meeting $meeting): RedirectResponse
+    {
+        $sourceMeeting = Meeting::findOrFail($request->integer('source_meeting_id'));
+
+        $sourceItems = $sourceMeeting->topLevelAgendaItems()
+            ->with('children')
+            ->whereIn('id', $request->input('item_ids'))
+            ->get();
+
+        $nextOrder = (int) $meeting->topLevelAgendaItems()->max('order');
+
+        foreach ($sourceItems as $sourceItem) {
+            $newParent = $meeting->agendaItems()->create([
+                'title' => $sourceItem->title,
+                'member_id' => $sourceItem->member_id,
+                'assignee_name' => $sourceItem->assignee_name,
+                'order' => ++$nextOrder,
+            ]);
+
+            $childOrder = 0;
+            foreach ($sourceItem->children as $child) {
+                $meeting->agendaItems()->create([
+                    'parent_id' => $newParent->id,
+                    'title' => $child->title,
+                    'member_id' => $child->member_id,
+                    'assignee_name' => $child->assignee_name,
+                    'order' => ++$childOrder,
+                ]);
+            }
+        }
+
+        return redirect()->route('meetings.edit', $meeting)
+            ->with('status', $sourceItems->count().'件の次第をコピーしました。');
     }
 
     public function destroy(Meeting $meeting, AgendaItem $agendaItem): RedirectResponse

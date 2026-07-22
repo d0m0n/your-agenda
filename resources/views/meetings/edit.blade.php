@@ -52,7 +52,8 @@
                     </ul>
                 @endif
 
-                <form method="POST" action="{{ route('meetings.sites.store', $meeting) }}" enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                <form method="POST" action="{{ route('meetings.sites.store', $meeting) }}" enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end"
+                    x-data="uploadProgress()" @submit.prevent="submitViaXhr">
                     @csrf
                     <div>
                         <x-input-label for="site_title" :value="__('タイトル')" />
@@ -64,13 +65,66 @@
                         <input id="zip_file" name="zip_file" type="file" accept=".zip,.pdf,.jpg,.jpeg,.png,.gif,.webp" required
                             class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md cursor-pointer focus:outline-none" />
                         <x-input-error :messages="$errors->get('zip_file')" class="mt-2" />
+                        <x-upload-progress-bar />
                     </div>
                     <div>
-                        <x-primary-button>{{ __('アップロード') }}</x-primary-button>
+                        <x-primary-button class="disabled:opacity-50 disabled:cursor-not-allowed" x-bind:disabled="uploading">
+                            <span x-show="!uploading">{{ __('アップロード') }}</span>
+                            <span x-show="uploading" x-cloak>{{ __('アップロード中…') }}</span>
+                        </x-primary-button>
                     </div>
                 </form>
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Zipの場合はgian.htmをZip直下、もしくは1階層下のフォルダに配置してください。PDF・画像はファイル名を問わずそのままアップロードできます。') }}</p>
             </div>
+
+            @if ($pastMeetings->isNotEmpty())
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('過去の次第からコピー') }}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('選択した項目(子項目も含む)をこの会議の次第の末尾に追加します。議案ファイルのリンクはコピーされません。') }}</p>
+
+                    <form method="GET" action="{{ route('meetings.edit', $meeting) }}" class="flex flex-wrap items-end gap-3 mb-4">
+                        <div class="flex-1 min-w-[12rem]">
+                            <x-input-label for="copy_from" :value="__('コピー元の会議')" />
+                            <select id="copy_from" name="copy_from" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+                                <option value="">{{ __('選択してください') }}</option>
+                                @foreach ($pastMeetings as $pastMeeting)
+                                    <option value="{{ $pastMeeting->id }}" @selected($copySourceMeeting?->id === $pastMeeting->id)>
+                                        {{ $pastMeeting->name }}@if ($pastMeeting->held_at) ({{ $pastMeeting->held_at->format('Y-m-d') }})@endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <x-secondary-button>{{ __('次第を表示') }}</x-secondary-button>
+                    </form>
+
+                    @if ($copySourceMeeting)
+                        @if ($copyCandidates->isEmpty())
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('この会議には次第がありません。') }}</p>
+                        @else
+                            <form method="POST" action="{{ route('agenda-items.copy', $meeting) }}" class="space-y-3">
+                                @csrf
+                                <input type="hidden" name="source_meeting_id" value="{{ $copySourceMeeting->id }}">
+                                <ul class="space-y-2">
+                                    @foreach ($copyCandidates as $item)
+                                        <li class="text-sm">
+                                            <label class="flex items-center gap-2">
+                                                <input type="checkbox" name="item_ids[]" value="{{ $item->id }}"
+                                                    class="rounded border-gray-300 dark:border-gray-700 text-indigo-600 focus:ring-indigo-500">
+                                                <span class="text-gray-900 dark:text-gray-100">{{ $item->title }}</span>
+                                                @if ($item->children->isNotEmpty())
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">({{ __('子項目:') }} {{ $item->children->count() }})</span>
+                                                @endif
+                                            </label>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                                <x-input-error :messages="$errors->get('item_ids')" class="mt-2" />
+                                <x-primary-button>{{ __('選択した項目をコピー') }}</x-primary-button>
+                            </form>
+                        @endif
+                    @endif
+                </div>
+            @endif
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('次第') }}</h3>

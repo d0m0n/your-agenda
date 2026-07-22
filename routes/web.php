@@ -13,7 +13,11 @@ use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return auth()->check() ? redirect()->route('dashboard') : redirect()->route('login');
+    if (! auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    return redirect()->route(auth()->user()->isSuperAdmin() ? 'admin.dashboard' : 'dashboard');
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
@@ -26,6 +30,11 @@ Route::middleware('auth')->group(function () {
     // 資料の閲覧・ダウンロードはobserverも可能なため、管理系(can:manage)グループの外に置く
     Route::get('/materials', [MaterialController::class, 'index'])->name('materials.index');
     Route::get('/materials/{material}/download', [MaterialController::class, 'download'])->name('materials.download');
+
+    // 会議一覧・メンバー一覧の閲覧もobserverに開放する(作成・編集・削除・CSV入出力は
+    // 引き続き can:manage 側のみ。ビュー側で @can('manage') により操作系UIを隠す)
+    Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+    Route::get('/members', [MemberController::class, 'index'])->name('members.index');
 });
 
 Route::middleware(['auth', 'can:manage'])->group(function () {
@@ -34,7 +43,6 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::post('/sites', [SiteController::class, 'store'])->name('sites.store');
     Route::delete('/sites/{site}', [SiteController::class, 'destroy'])->name('sites.destroy');
 
-    Route::get('/members', [MemberController::class, 'index'])->name('members.index');
     Route::get('/members/create', [MemberController::class, 'create'])->name('members.create');
     Route::post('/members', [MemberController::class, 'store'])->name('members.store');
     Route::get('/members/csv-template', [MemberController::class, 'csvTemplate'])->name('members.csv-template');
@@ -44,7 +52,6 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::put('/members/{member}', [MemberController::class, 'update'])->name('members.update');
     Route::delete('/members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
 
-    Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
     Route::get('/meetings/create', [MeetingController::class, 'create'])->name('meetings.create');
     Route::post('/meetings', [MeetingController::class, 'store'])->name('meetings.store');
     Route::get('/meetings/{meeting}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
@@ -61,6 +68,7 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::post('/meetings/{meeting}/sites', [SiteController::class, 'storeForMeeting'])->name('meetings.sites.store');
 
     Route::post('/meetings/{meeting}/agenda-items', [AgendaItemController::class, 'store'])->name('agenda-items.store');
+    Route::post('/meetings/{meeting}/agenda-items/copy', [AgendaItemController::class, 'copyFromMeeting'])->name('agenda-items.copy');
     Route::put('/meetings/{meeting}/agenda-items/{agendaItem}', [AgendaItemController::class, 'update'])->name('agenda-items.update');
     Route::delete('/meetings/{meeting}/agenda-items/{agendaItem}', [AgendaItemController::class, 'destroy'])->name('agenda-items.destroy');
     Route::post('/meetings/{meeting}/agenda-items/{agendaItem}/move-up', [AgendaItemController::class, 'moveUp'])->name('agenda-items.move-up');
@@ -88,3 +96,4 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/admin.php';

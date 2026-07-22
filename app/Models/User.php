@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['organization_id', 'role', 'name', 'email', 'password'])]
+#[Fillable(['organization_id', 'role', 'name', 'email', 'password', 'storage_quota_bytes'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -60,5 +60,15 @@ class User extends Authenticatable
     public function isObserver(): bool
     {
         return $this->role === UserRole::Observer;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === UserRole::SuperAdmin;
+    }
+
+    public function storageQuotaBytes(): int
+    {
+        return $this->storage_quota_bytes ?? config('storage_quota.default_bytes');
     }
 }

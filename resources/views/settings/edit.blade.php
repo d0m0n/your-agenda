@@ -14,6 +14,31 @@
                 </div>
             @endif
 
+            @php
+                $usagePercent = $quotaBytes > 0 ? min(100, (int) round($usedBytes / $quotaBytes * 100)) : 0;
+                $usageColor = match (true) {
+                    $usagePercent >= 100 => 'bg-red-600',
+                    $usagePercent >= 80 => 'bg-amber-500',
+                    default => 'bg-indigo-600',
+                };
+            @endphp
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('データ使用量') }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    {{ __('資料置き場・議案ファイル・各種画像の合計です。') }}
+                </p>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+                    <div class="{{ $usageColor }} h-2.5 rounded-full" style="width: {{ $usagePercent }}%"></div>
+                </div>
+                <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    {{ \App\Services\StorageUsageService::formatBytes($usedBytes) }} / {{ \App\Services\StorageUsageService::formatBytes($quotaBytes) }}
+                    <span class="text-gray-500 dark:text-gray-400">({{ $usagePercent }}%)</span>
+                </p>
+                @if ($usagePercent >= 100)
+                    <p class="mt-2 text-xs text-red-600 dark:text-red-400">{{ __('容量の上限に達しています。新しいファイルはアップロードできません。不要なデータを削除してください。') }}</p>
+                @endif
+            </div>
+
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('組織情報') }}</h3>
                 <form method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data" class="space-y-6">

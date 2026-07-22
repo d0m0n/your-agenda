@@ -38,7 +38,12 @@
                                     <a href="{{ route('meetings.show', $meeting) }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
                                         {{ $meeting->name }}
                                     </a>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $meeting->held_at?->format('Y-m-d H:i') }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $meeting->scheduleLabel() }}
+                                        @if ($meeting->location)
+                                            ・{{ $meeting->location }}
+                                        @endif
+                                    </p>
                                 </li>
                             @empty
                                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('会議はまだ登録されていません。') }}</p>

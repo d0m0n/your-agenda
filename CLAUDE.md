@@ -3,7 +3,8 @@
 ## 概要
 青年会議所(JC)の委員会運営を楽にするWebサービス。
 委員会組織ごとに契約し、会議・次第・メンバー・資料を一元管理できる。
-アップロードしたZipファイル内のHTML議案(gian.htm)をURLひとつで共有できる。
+アップロードしたZipファイル内のHTML議案(gian.htm)や、PDF・画像単体の
+議案ファイルをURLひとつで共有できる。
 サービス名の由来: 「議題(agenda)はあなた次第」
 
 ## ブランディング
@@ -26,7 +27,30 @@
     オブザーブユーザー管理(作成・ログインID/パスワード変更・削除)、
     ダッシュボードのペイン表示オンオフ、UIのダーク/ライトモード
     手動切り替え(tailwind darkMode:'class' + localStorage永続)を実装
-- 次は 7(LP+組織登録フロー)、8(課金)を実装する
+- 上記に加え、進捗ログ未記載のまま以下も実装済み:
+  - 役職管理(positions テーブル・CRUD、メンバーへの紐付け、ナビ「役職管理」)
+  - 次第(agenda_items)の親子構造(1階層のみ、parent_id)と、
+    Member未登録でも担当者名を自由入力できる assignee_name
+  - 議案アップロードはZipだけでなく、PDF・画像(jpg/png/gif/webp)単体の
+    直接アップロードにも対応(ファイル名がgian.htmでなくても開ける)
+  - 会議に終了日時(ends_at)を追加(開始のみだったheld_atに加えて設定可能)
+  - ダッシュボードの会議一覧ペインに開催場所を表示
+  - 議案ファイル(sites)・資料(materials)のアップロードにプログレスバーを表示
+    (XHRで送信し進捗を表示、レスポンスはそのまま画面に差し替えるため
+    サーバー側のリダイレクト/バリデーションエラー表示はそのまま機能する)
+  - 次第作成画面で、他の会議の次第(トップレベル項目+子項目)を選んで
+    コピーする機能(議案ファイルのリンクはコピーしない)
+  - オブザーブユーザーのナビに「会議一覧」「メンバー一覧」を追加
+    (meetings.index / members.index を一般ユーザーと共有し、
+    作成・編集・削除・CSV入出力のUIのみ@can('manage')で隠す)
+  - ストレージ容量制限(下記「ストレージ容量」参照)と、基本設定画面での
+    使用量表示
+  - 管理者アカウント(super_admin)による管理者パネル
+    (下記「管理者パネル」参照)
+- 7(LP+組織登録フロー)・8(課金)は未着手:
+  - resources/views/welcome.blade.php はBreeze標準のまま残っているが、
+    どのルートからも参照されない死んだファイル(LPの実装ではない)
+  - 次は 7、8 の順で実装する
 
 ## 開発環境
 - Docker + Laravel Sail
@@ -64,25 +88,46 @@
 - cron はコントロールパネルから設定(Laravelスケジューラ用に
   php artisan schedule:run を毎分または最小間隔で登録)
 
-## ユーザー権限(2種類)
+## ユーザー権限(3種類)
 1. 一般ユーザー
    - 委員会組織ごとに契約するアカウント
    - 組織情報・メンバー情報・会議・次第・資料の管理(全CRUD)ができる
 2. オブザーブユーザー
    - 一般ユーザー(の組織)に紐付く閲覧専用アカウント
-   - ダッシュボード・会議画面・資料の閲覧のみ可能
-   - ナビゲーションメニュー(管理系)は一切表示しない
+   - ダッシュボード・会議画面・資料・会議一覧・メンバー一覧の閲覧のみ可能
+   - ナビゲーションメニューの管理系項目は一切表示しない
+3. 管理者アカウント(super_admin)
+   - 運営側がプラットフォーム全体を管理するための、組織に属さないアカウント
+   - 詳細は下記「管理者パネル」を参照
 - 認証は Laravel Breeze(Bladeスタック)
-- 認可は role カラム + Policy/Gate で制御(すべての管理操作をガード)
+- 認可は role カラム + Gate で制御(すべての管理操作をガード)。
+  Policyクラスは使わず、AppServiceProvider の
+  Gate::define('manage', fn (User $user) => $user->isGeneral()) と
+  Gate::define('super-admin', fn (User $user) => $user->isSuperAdmin())
+  に一本化し、ルート側は Route::middleware(['auth', 'can:manage']) /
+  Route::middleware(['auth', 'can:super-admin']) でグループ化する
 - マルチテナント: 全データは organization_id でスコープする。
-  他組織のデータには絶対にアクセスできないこと(グローバルスコープ推奨)
+  他組織のデータには絶対にアクセスできないこと
+  (BelongsToOrganization トレイトのグローバルスコープで実装済み)。
+  super_adminは組織に属さない(organization_id が null)ため、
+  管理者パネルのコントローラでは意図的に
+  ->withoutGlobalScope(OrganizationScope::class) を使って組織を横断する
 
-## データ構造(想定)
-- organizations: name, header_image_path, google_calendar_id,
-  contracted_at, plan_status, timestamps
-- users: organization_id, role (general / observer), name, email, password
+## データ構造(実装済み)
+- organizations: name, header_image_path, icon_image_path,
+  google_calendar_id, contracted_at, plan_status,
+  show_meetings_pane, show_calendar_pane, show_birthday_pane,
+  show_materials_pane(ダッシュボード各ペインの表示オンオフ), timestamps
+- users: organization_id(nullable, super_adminのみnull), role
+  (general / observer / super_admin), name, email, password,
+  storage_quota_bytes(nullable, nullならconfig('storage_quota.default_bytes')
+  =2GBを使う。管理者パネルから一般ユーザーごとに上書きできる)
   - オブザーブユーザーは一般ユーザーが招待・作成する
+  - super_adminはUIからの登録経路がなく、
+    php artisan admin:create-super-admin {name} {email} {password}
+    でのみ作成する(一般ユーザーの登録がseeder/tinker限定なのと同じ方針)
 - members: organization_id, name, name_kana, name_romaji, birth_date,
+  gender, position_id(nullable, positionsへのFK), serial_number(組織内一意),
   company, phone, email, line_id, x_account, instagram_account,
   facebook_account, tiktok_account, hobby, motto, photo_path, timestamps
   - ログインユーザーとは別概念。誕生日表示・議題担当者に使う
@@ -90,12 +135,22 @@
   - CSVの一括登録・テンプレートDL・一括エクスポートに対応
     (photo_pathはCSVの対象外。写真はメンバーごとに個別アップロード)
   - 顔写真はjpg/png/webpのみ許可し、リサイズ・再エンコードして保存する
-- meetings: organization_id, name, held_at, location,
-  wifi_ssid, wifi_password, header_image_path, timestamps
-- agenda_items(次第): meeting_id, order, title, member_id(担当者),
-  site_id(nullable, Zip議案へのリンク), timestamps
-- sites(Zip議案): organization_id, uuid, title, original_filename,
-  index_path, user_id, timestamps
+- positions(役職): organization_id, serial_number(組織内一意, 表示順),
+  name, timestamps
+  - メンバー管理から独立した役職マスタ。ナビ「役職管理」から管理する
+- meetings: organization_id, name, held_at, ends_at(nullable, 終了日時),
+  location, wifi_ssid, wifi_password, header_image_path, memo, timestamps
+- agenda_items(次第): meeting_id, parent_id(nullable, 自己参照FKで1階層の
+  子項目に対応), order, title, member_id(担当者, nullable),
+  assignee_name(nullable, member未登録時の自由入力担当者名),
+  site_id(nullable, 議案ファイルへのリンク), timestamps
+- sites(議案ファイル): organization_id, meeting_id(nullable), uuid, title,
+  original_filename, index_path, user_id, timestamps
+  - meeting_id が null の場合は組織共通の公開サイト、値がある場合はその
+    会議専用の議案ファイルとして扱う
+  - Zip(展開してgian.htmを探す)だけでなく、PDF・画像(jpg/jpeg/png/gif/
+    webp)単体の直接アップロードにも対応。単体アップロードの場合は
+    ファイル名を問わずそのまま公開する(gian.htmという名前は不要)
 - materials(資料置き場): organization_id, title, file_path,
   original_filename, user_id, timestamps
 
@@ -103,7 +158,7 @@
 
 ### ダッシュボード(トップページ・4ペイン構造)
 - 上部に組織のヘッダー画像を表示(基本設定でアップロード)
-- ペイン1: 会議一覧(直近の会議、会議画面へのリンク)
+- ペイン1: 会議一覧(直近の会議、開催日時・開催場所、会議画面へのリンク)
 - ペイン2: カレンダー(組織で設定したGoogleカレンダーをiframe埋め込み表示)
 - ペイン3: 今月の誕生日メンバー(membersのbirth_dateから当月分を抽出)
 - ペイン4: その他の資料置き場(materialsの一覧・ダウンロード)
@@ -111,23 +166,34 @@
 
 ### ナビゲーションメニュー(一般ユーザーのみ表示)
 1. 会議管理
-2. カレンダー管理(GoogleカレンダーIDの設定)
+2. 役職管理(positions の CRUD、メンバーへの紐付けに使う役職マスタ)
 3. メンバー管理(members の CRUD、誕生日登録)
 4. 資料管理(資料置き場にアップするデータの管理画面)
 5. 基本設定
    - ダッシュボードの組織ヘッダー画像の設定
    - 組織情報の編集
+   - GoogleカレンダーIDの設定(独立したメニュー項目ではなく基本設定に統合)
    - 次第の一括ダウンロード機能(下記参照)
-- オブザーブユーザーにはこれらのメニューを一切表示しない(Blade側の
-  @can だけでなく、ルート側でも必ずミドルウェア/Policyでガードする)
+   - データ使用量の表示(下記「ストレージ容量」参照)
+- オブザーブユーザーには上記の管理系メニューを一切表示しない(Blade側の
+  @can だけでなく、ルート側でも必ずミドルウェア/Gateでガードする)。
+  ただし「会議一覧」「メンバー一覧」は閲覧専用として例外的に表示する
+  (meetings.index / members.index への遷移のみ。作成・編集・削除・
+  CSV入出力へのリンクはビュー側で @can('manage') により非表示にする)
 
 ### 会議画面
 - 会議ごとのヘッダー画像をトップに表示(設定可能)
 - アジェンダ(次第)を表示。各議題にアップ済みZip議案(gian.htm)をリンクし、
   クリックで議案を確認できる
 - 次第管理メニュー(一般ユーザーのみ):
-  会議名 / 開催日時 / 開催場所 / Wi-Fi情報 / 次第 / 議題の担当者 /
-  会議ヘッダー画像 を追加・入力・編集・削除できる
+  会議名 / 開始・終了日時(ends_at) / 開催場所 / Wi-Fi情報 / 次第 /
+  議題の担当者 / 会議ヘッダー画像 を追加・入力・編集・削除できる
+  - 次第は他の会議からのコピーにも対応(トップレベル項目を選ぶと
+    その子項目もまとめて末尾に追加される。議案ファイルのリンクは
+    会議ごとの紐付けのためコピーされない)
+  - 議案ファイル・資料のアップロードは進捗バー付き
+    (XHR送信+アップロード中%表示、完了後は通常のリダイレクト/
+    バリデーションエラー表示にそのまま切り替わる)
 
 ### ランディングページ(LP・未ログイン公開ページ)
 - ターゲット: JCメンバー(委員長・幹事クラス)
@@ -150,6 +216,39 @@
 - 会議ごとにフォルダ分けし、次第はHTMLまたはPDFで書き出す
 - 解約時のデータ持ち出し手段でもあるため、確実に全件含めること
 
+## ストレージ容量
+- 一般ユーザー1人あたり、デフォルトで最大2GBのデータ容量を割り当てる
+  (config('storage_quota.default_bytes')、users.storage_quota_bytesで
+  ユーザーごとに上書き可能。上書きは管理者パネルからのみ行う)
+- 集計対象(組織単位で合算し、アップロードを行った一般ユーザー自身の
+  割り当て容量と比較する): 資料置き場(materials)、議案ファイル
+  (sites。Zipは展開後の全ファイル、PDF/画像は本体)、組織のヘッダー/
+  アイコン画像、会議のヘッダー画像、メンバーの顔写真
+  - app/Services/StorageUsageService が集計を担当。ファイルサイズは
+    その都度ディスクから実測する(size列をDBに持たせていない)
+- 上限を超える場合は新規アップロードをバリデーションエラーとして拒否する
+  (app/Http/Requests/Concerns/EnforcesStorageQuota トレイトを各
+  FormRequestのwithValidator()から呼び出す)。既存データの保持には
+  影響しない
+- 基本設定画面に現在の使用量/割り当て容量をプログレスバーで表示する
+
+## 管理者パネル(super_admin)
+- 一般ユーザー・オブザーブユーザーとは別のロール。ログイン画面・URLは
+  共通(Breezeのlogin)だが、ログイン後は layouts/admin.blade.php という
+  専用レイアウト(通常ナビとは別、組織アイコン等に依存しない)を使う
+- ルートは routes/admin.php、prefix('admin')・name('admin.')・
+  middleware(['auth', 'can:super-admin']) でグループ化
+- 提供機能:
+  - 組織一覧(契約ステータス・契約日・ユーザー数・データ使用量)
+  - 組織詳細: 契約状況の確認、ユーザー一覧(一般/オブザーブ)、
+    一般ユーザーごとの割り当て容量(GB)の変更、アカウント削除
+  - 「アップロード済みデータを削除」: その組織のmaterials/sites/
+    各種画像を全て削除して使用量をゼロに戻す(app/Services/
+    OrganizationDataPurgeServiceが担当)。会議・メンバー等のレコード
+    自体は削除しない点が組織削除とは異なる
+- 契約ステータス(plan_status)自体の変更・組織削除・課金操作は
+  未実装(Step8の決済手段確定後にあわせて設計する)
+
 ## セキュリティ要件(必ず守ること)
 - Zip Slip対策: エントリ名に「..」や先頭「/」を含む場合は拒否
 - Zip爆弾対策: 展開後合計200MB以下、ファイル数1000以下
@@ -169,6 +268,9 @@
   Offにしてブラウザに各ファイルの宣言を判断させる。
 - gian.htmはルート直下または1階層下フォルダを探索(__MACOSXは除外)
 - 見つからなければ展開ディレクトリを削除してエラー
+- Zipではなく単体ファイル(PDF・jpg・jpeg・png・gif・webp)をアップロード
+  した場合はこの探索は行わず、拡張子ホワイトリストで許可した種類だけを
+  そのまま保存してそのまま開く(ファイル名にgian.htmを要求しない)
 - ヘッダー画像等のアップロードは画像形式(jpg/png/webp)のみ許可し、
   リサイズ・再エンコードして保存する
 - Wi-Fiパスワードは閲覧権限のある組織メンバーだけが見られること

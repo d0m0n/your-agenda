@@ -23,7 +23,7 @@
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                         <dt class="text-gray-500 dark:text-gray-400">{{ __('開催日時') }}</dt>
-                        <dd class="text-gray-900 dark:text-gray-100">{{ $meeting->held_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                        <dd class="text-gray-900 dark:text-gray-100">{{ $meeting->scheduleLabel() ?? '-' }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-500 dark:text-gray-400">{{ __('開催場所') }}</dt>

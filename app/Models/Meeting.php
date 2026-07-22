@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'organization_id', 'name', 'held_at', 'location',
+    'organization_id', 'name', 'held_at', 'ends_at', 'location',
     'wifi_ssid', 'wifi_password', 'memo', 'header_image_path',
 ])]
 class Meeting extends Model
@@ -20,6 +20,7 @@ class Meeting extends Model
     {
         return [
             'held_at' => 'datetime',
+            'ends_at' => 'datetime',
         ];
     }
 
@@ -56,5 +57,20 @@ class Meeting extends Model
     public function headerImageUrl(): ?string
     {
         return $this->header_image_path ? asset('storage/'.$this->header_image_path) : null;
+    }
+
+    public function scheduleLabel(): ?string
+    {
+        if (! $this->held_at) {
+            return null;
+        }
+
+        $sameDay = $this->ends_at && $this->held_at->isSameDay($this->ends_at);
+
+        return match (true) {
+            $this->ends_at && $sameDay => $this->held_at->format('Y-m-d H:i').' 〜 '.$this->ends_at->format('H:i'),
+            (bool) $this->ends_at => $this->held_at->format('Y-m-d H:i').' 〜 '.$this->ends_at->format('Y-m-d H:i'),
+            default => $this->held_at->format('Y-m-d H:i'),
+        };
     }
 }

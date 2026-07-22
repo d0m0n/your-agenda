@@ -5,15 +5,22 @@ namespace App\Http\Controllers;
 use App\Http\Requests\OrganizationSettingsRequest;
 use App\Services\ImageUploadService;
 use App\Services\MeetingArchiveExportService;
+use App\Services\StorageUsageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class OrganizationSettingsController extends Controller
 {
-    public function edit(): View
+    public function edit(StorageUsageService $storageUsage): View
     {
-        return view('settings.edit', ['organization' => auth()->user()->organization]);
+        $user = auth()->user();
+
+        return view('settings.edit', [
+            'organization' => $user->organization,
+            'usedBytes' => $storageUsage->usedBytes($user->organization),
+            'quotaBytes' => $storageUsage->quotaBytes($user),
+        ]);
     }
 
     public function update(OrganizationSettingsRequest $request, ImageUploadService $imageUploader): RedirectResponse

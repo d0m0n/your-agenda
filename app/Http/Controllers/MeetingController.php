@@ -6,6 +6,7 @@ use App\Http\Requests\MeetingRequest;
 use App\Models\Meeting;
 use App\Services\ImageUploadService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MeetingController extends Controller
@@ -50,13 +51,34 @@ class MeetingController extends Controller
         return view('meetings.show', ['meeting' => $meeting]);
     }
 
-    public function edit(Meeting $meeting): View
+    public function edit(Meeting $meeting, Request $request): View
     {
         $meeting->load(self::AGENDA_ITEM_RELATIONS);
         $members = $meeting->organization->members()->with('position')->orderBy('name')->get();
         $sites = $meeting->sites;
 
-        return view('meetings.edit', ['meeting' => $meeting, 'members' => $members, 'sites' => $sites]);
+        $pastMeetings = Meeting::where('id', '!=', $meeting->id)
+            ->whereHas('agendaItems', fn ($query) => $query->whereNull('parent_id'))
+            ->orderByDesc('held_at')
+            ->get(['id', 'name', 'held_at']);
+
+        $copySourceMeeting = null;
+        $copyCandidates = collect();
+
+        if ($request->filled('copy_from')) {
+            $copySourceMeeting = Meeting::with([
+                'topLevelAgendaItems.member.position',
+                'topLevelAgendaItems.children.member.position',
+            ])->find($request->integer('copy_from'));
+            $copyCandidates = $copySourceMeeting?->topLevelAgendaItems ?? collect();
+        }
+
+        return view('meetings.edit', [
+            'meeting' => $meeting, 'members' => $members, 'sites' => $sites,
+            'pastMeetings' => $pastMeetings,
+            'copySourceMeeting' => $copySourceMeeting,
+            'copyCandidates' => $copyCandidates,
+        ]);
     }
 
     public function update(MeetingRequest $request, Meeting $meeting, ImageUploadService $imageUploader): RedirectResponse

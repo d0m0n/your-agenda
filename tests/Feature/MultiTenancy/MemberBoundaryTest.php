@@ -107,12 +107,42 @@ class MemberBoundaryTest extends TestCase
 
         $member = Member::factory()->for($orgA, 'organization')->create();
 
-        $this->actingAs($observerA)->get(route('members.index'))->assertForbidden();
         $this->actingAs($observerA)->get(route('members.create'))->assertForbidden();
         $this->actingAs($observerA)->get(route('members.edit', $member))->assertForbidden();
         $this->actingAs($observerA)->put(route('members.update', $member), ['name' => '不正更新'])->assertForbidden();
         $this->actingAs($observerA)->delete(route('members.destroy', $member))->assertForbidden();
+        $this->actingAs($observerA)->get(route('members.export'))->assertForbidden();
+        $this->actingAs($observerA)->get(route('members.csv-template'))->assertForbidden();
 
         $this->assertModelExists($member);
+    }
+
+    public function test_observer_can_view_member_index_but_not_management_links(): void
+    {
+        [$orgA, , $observerA] = $this->createTenant();
+
+        Member::factory()->for($orgA, 'organization')->create(['name' => '自組織メンバー']);
+
+        $response = $this->actingAs($observerA)->get(route('members.index'));
+
+        $response->assertOk();
+        $response->assertSee('自組織メンバー');
+        $response->assertDontSee(route('members.create'), false);
+        $response->assertDontSee(route('members.export'), false);
+    }
+
+    public function test_member_index_does_not_list_other_organizations_members_for_observer(): void
+    {
+        [$orgA, , $observerA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        Member::factory()->for($orgA, 'organization')->create(['name' => '自組織メンバー']);
+        Member::factory()->for($orgB, 'organization')->create(['name' => '他組織メンバー']);
+
+        $response = $this->actingAs($observerA)->get(route('members.index'));
+
+        $response->assertOk();
+        $response->assertSee('自組織メンバー');
+        $response->assertDontSee('他組織メンバー');
     }
 }

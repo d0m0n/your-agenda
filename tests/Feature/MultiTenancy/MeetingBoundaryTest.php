@@ -96,12 +96,39 @@ class MeetingBoundaryTest extends TestCase
 
         $meeting = Meeting::factory()->for($orgA, 'organization')->create();
 
-        $this->actingAs($observerA)->get(route('meetings.index'))->assertForbidden();
         $this->actingAs($observerA)->get(route('meetings.create'))->assertForbidden();
         $this->actingAs($observerA)->get(route('meetings.edit', $meeting))->assertForbidden();
         $this->actingAs($observerA)->put(route('meetings.update', $meeting), ['name' => '不正更新'])->assertForbidden();
         $this->actingAs($observerA)->delete(route('meetings.destroy', $meeting))->assertForbidden();
 
         $this->assertModelExists($meeting);
+    }
+
+    public function test_observer_can_view_meeting_index_but_not_management_links(): void
+    {
+        [$orgA, , $observerA] = $this->createTenant();
+
+        Meeting::factory()->for($orgA, 'organization')->create(['name' => '自組織の例会']);
+
+        $response = $this->actingAs($observerA)->get(route('meetings.index'));
+
+        $response->assertOk();
+        $response->assertSee('自組織の例会');
+        $response->assertDontSee(route('meetings.create'), false);
+    }
+
+    public function test_meeting_index_does_not_list_other_organizations_meetings_for_observer(): void
+    {
+        [$orgA, , $observerA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        Meeting::factory()->for($orgA, 'organization')->create(['name' => '自組織の例会']);
+        Meeting::factory()->for($orgB, 'organization')->create(['name' => '他組織の例会']);
+
+        $response = $this->actingAs($observerA)->get(route('meetings.index'));
+
+        $response->assertOk();
+        $response->assertSee('自組織の例会');
+        $response->assertDontSee('他組織の例会');
     }
 }

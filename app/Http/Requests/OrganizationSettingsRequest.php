@@ -2,10 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\EnforcesStorageQuota;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 class OrganizationSettingsRequest extends FormRequest
 {
+    use EnforcesStorageQuota;
+
     public function authorize(): bool
     {
         return $this->user()?->can('manage') ?? false;
@@ -26,5 +30,10 @@ class OrganizationSettingsRequest extends FormRequest
             'show_birthday_pane' => ['sometimes', 'boolean'],
             'show_materials_pane' => ['sometimes', 'boolean'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $this->enforceStorageQuota($validator, ['header_image', 'icon_image']);
     }
 }

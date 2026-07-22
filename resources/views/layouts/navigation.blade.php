@@ -32,6 +32,13 @@
                         <x-nav-link :href="route('settings.edit')" :active="request()->routeIs('settings.*')">
                             {{ __('基本設定') }}
                         </x-nav-link>
+                    @else
+                        <x-nav-link :href="route('meetings.index')" :active="request()->routeIs('meetings.*')">
+                            {{ __('会議一覧') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('members.index')" :active="request()->routeIs('members.*')">
+                            {{ __('メンバー一覧') }}
+                        </x-nav-link>
                     @endcan
                 </div>
             </div>
@@ -101,6 +108,13 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('settings.edit')" :active="request()->routeIs('settings.*')">
                     {{ __('基本設定') }}
+                </x-responsive-nav-link>
+            @else
+                <x-responsive-nav-link :href="route('meetings.index')" :active="request()->routeIs('meetings.*')">
+                    {{ __('会議一覧') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('members.index')" :active="request()->routeIs('members.*')">
+                    {{ __('メンバー一覧') }}
                 </x-responsive-nav-link>
             @endcan
         </div>
