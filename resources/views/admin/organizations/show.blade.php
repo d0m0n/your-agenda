@@ -1,10 +1,10 @@
 <x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
                 {{ $organization->name }}
             </h2>
-            <a href="{{ route('admin.dashboard') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+            <a href="{{ route('admin.dashboard') }}" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">
                 {{ __('組織一覧に戻る') }}
             </a>
         </div>
@@ -13,13 +13,7 @@
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            @if (session('status'))
-                <div class="px-4 py-3 rounded-md bg-green-50 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm">
-                    {{ session('status') }}
-                </div>
-            @endif
-
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('契約状況') }}</h3>
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
@@ -33,21 +27,23 @@
                 </dl>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="flex items-center justify-between mb-1">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('データ使用量') }}</h3>
-                    <form method="POST" action="{{ route('admin.organizations.destroy-data', $organization) }}"
-                        onsubmit="return confirm('{{ __('この組織がアップロードした資料・議案ファイル・画像を全て削除します。よろしいですか?(会議・メンバー等の記録は残ります)') }}');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:underline">{{ __('アップロード済みデータを削除') }}</button>
-                    </form>
+                    <x-confirm-delete-button
+                        id="delete-organization-data"
+                        :action="route('admin.organizations.destroy-data', $organization)"
+                        :message="__('この組織がアップロードした資料・議案ファイル・画像を全て削除します。よろしいですか?(会議・メンバー等の記録は残ります)')"
+                        :confirm-label="__('削除する')"
+                        class="text-xs">
+                        {{ __('アップロード済みデータを削除') }}
+                    </x-confirm-delete-button>
                 </div>
                 <p class="text-sm text-gray-900 dark:text-gray-100">{{ \App\Services\StorageUsageService::formatBytes($usedBytes) }}</p>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('資料置き場・議案ファイル・各種画像の合計です。') }}</p>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 pb-0">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('ユーザー') }}</h3>
                 </div>
@@ -62,7 +58,7 @@
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="bg-white dark:bg-ink-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse ($users as $orgUser)
                                 <tr>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $orgUser->name }}</td>
@@ -85,12 +81,13 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-3 whitespace-nowrap text-right text-sm">
-                                        <form method="POST" action="{{ route('admin.organizations.users.destroy', [$organization, $orgUser]) }}"
-                                            onsubmit="return confirm('{{ __('このアカウントを削除しますか?') }}');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">{{ __('アカウント削除') }}</button>
-                                        </form>
+                                        <x-confirm-delete-button
+                                            :id="'delete-user-'.$orgUser->id"
+                                            :action="route('admin.organizations.users.destroy', [$organization, $orgUser])"
+                                            :message="__('このアカウントを削除しますか?')"
+                                            :confirm-label="__('削除する')">
+                                            {{ __('アカウント削除') }}
+                                        </x-confirm-delete-button>
                                     </td>
                                 </tr>
                             @empty

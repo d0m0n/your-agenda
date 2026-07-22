@@ -18,7 +18,7 @@
     <h1>{{ $meeting->name }}</h1>
     <dl>
         <dt>開催日時</dt>
-        <dd>{{ $meeting->held_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+        <dd>{{ $meeting->scheduleLabel() ?? '-' }}</dd>
         <dt>開催場所</dt>
         <dd>{{ $meeting->location ?? '-' }}</dd>
     </dl>

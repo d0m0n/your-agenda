@@ -78,7 +78,9 @@ class StorageUsageService
         return Material::withoutGlobalScope(OrganizationScope::class)
             ->where('organization_id', $organization->id)
             ->get()
-            ->sum(fn (Material $material) => Storage::disk('local')->size($material->file_path) ?: 0);
+            ->sum(fn (Material $material) => Storage::disk('local')->exists($material->file_path)
+                ? (Storage::disk('local')->size($material->file_path) ?: 0)
+                : 0);
     }
 
     private function sitesBytes(Organization $organization): int

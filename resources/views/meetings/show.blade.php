@@ -3,25 +3,27 @@
 
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
                 {{ $meeting->name }}
             </h2>
             @can('manage')
-                <a href="{{ route('meetings.edit', $meeting) }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                <a href="{{ route('meetings.edit', $meeting) }}" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">
                     {{ __('編集') }}
                 </a>
             @endcan
         </div>
     </x-slot>
 
+    @if ($meeting->headerImageUrl())
+        <x-slot name="headerImage">
+            <img src="{{ $meeting->headerImageUrl() }}" alt="" class="w-full max-h-64 object-cover">
+        </x-slot>
+    @endif
+
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            @if ($meeting->headerImageUrl())
-                <img src="{{ $meeting->headerImageUrl() }}" alt="" class="w-full max-h-64 object-cover rounded-lg shadow-sm">
-            @endif
-
-            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 shadow-sm sm:rounded-lg p-6">
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                         <dt class="text-gray-500 dark:text-gray-400">{{ __('開催日時') }}</dt>
@@ -34,7 +36,7 @@
                 </dl>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('次第') }}</h3>
                 <ol class="space-y-3">
                     @forelse ($meeting->topLevelAgendaItems as $index => $item)
@@ -43,7 +45,7 @@
                                 <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
                                     {{ $index + 1 }}.
                                     @if ($item->linkUrl())
-                                        <a href="{{ $item->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $item->title }}</a>
+                                        <a href="{{ $item->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-leather-500 dark:text-leather-300 hover:underline">{{ $item->title }}</a>
                                     @else
                                         {{ $item->title }}
                                     @endif
@@ -60,7 +62,7 @@
                                             <p class="text-sm text-gray-700 dark:text-gray-300">
                                                 {{ sprintf('%02d', $childIndex + 1) }}.
                                                 @if ($child->linkUrl())
-                                                    <a href="{{ $child->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $child->title }}</a>
+                                                    <a href="{{ $child->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-leather-500 dark:text-leather-300 hover:underline">{{ $child->title }}</a>
                                                 @else
                                                     {{ $child->title }}
                                                 @endif
@@ -80,7 +82,7 @@
             </div>
 
             @if ($meeting->wifi_ssid || $meeting->wifi_password || $meeting->memo)
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 space-y-6">
+                <div class="bg-white dark:bg-ink-800 shadow-sm sm:rounded-lg p-6 space-y-6">
                     @if ($meeting->wifi_ssid || $meeting->wifi_password)
                         <div>
                             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('Wi-Fi情報') }}</h3>

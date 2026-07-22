@@ -9,28 +9,32 @@
 
         <title>{{ __('管理者パネル') }} - {{ config('app.name', 'Laravel') }}</title>
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            <nav class="bg-gray-900 dark:bg-black border-b border-gray-800">
+        <x-toast />
+
+        <div class="min-h-screen bg-paper-100 dark:bg-night">
+            <nav class="bg-ink-900 border-b border-ink-700">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex justify-between h-16 items-center">
+                    <div class="flex justify-between h-14 items-center">
                         <div class="flex items-center gap-8">
-                            <a href="{{ route('admin.dashboard') }}" class="font-semibold text-white">
+                            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 font-serif font-semibold text-paper-100">
+                                <x-brand-mark class="h-6 w-6 text-brass-300" />
                                 {{ __('あなた次第 管理者パネル') }}
                             </a>
-                            <a href="{{ route('admin.dashboard') }}" class="text-sm text-gray-300 hover:text-white">{{ __('組織一覧') }}</a>
+                            <a href="{{ route('admin.dashboard') }}" class="text-sm text-paper-100/70 hover:text-paper-100">{{ __('組織一覧') }}</a>
                         </div>
                         <div class="flex items-center gap-4">
                             <x-theme-toggle />
-                            <span class="text-sm text-gray-300">{{ Auth::user()->name }}</span>
+                            <span class="text-sm text-paper-100/70">{{ Auth::user()->name }}</span>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="text-sm text-gray-300 hover:text-white">{{ __('ログアウト') }}</button>
+                                <button type="submit" class="text-sm text-paper-100/70 hover:text-paper-100">{{ __('ログアウト') }}</button>
                             </form>
                         </div>
                     </div>
@@ -38,8 +42,8 @@
             </nav>
 
             @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <header class="bg-white dark:bg-ink-800 shadow">
+                    <div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
                 </header>

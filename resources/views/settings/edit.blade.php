@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
             {{ __('基本設定') }}
         </h2>
     </x-slot>
@@ -8,21 +8,15 @@
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            @if (session('status'))
-                <div class="px-4 py-3 rounded-md bg-green-50 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm">
-                    {{ session('status') }}
-                </div>
-            @endif
-
             @php
                 $usagePercent = $quotaBytes > 0 ? min(100, (int) round($usedBytes / $quotaBytes * 100)) : 0;
                 $usageColor = match (true) {
                     $usagePercent >= 100 => 'bg-red-600',
                     $usagePercent >= 80 => 'bg-amber-500',
-                    default => 'bg-indigo-600',
+                    default => 'bg-leather-500',
                 };
             @endphp
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('データ使用量') }}</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
                     {{ __('資料置き場・議案ファイル・各種画像の合計です。') }}
@@ -39,7 +33,7 @@
                 @endif
             </div>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('組織情報') }}</h3>
                 <form method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
@@ -85,19 +79,19 @@
                         <x-input-label :value="__('ダッシュボードに表示するペイン')" />
                         <div class="mt-2 space-y-2">
                             <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <input type="checkbox" name="show_meetings_pane" value="1" @checked(old('show_meetings_pane', $organization->show_meetings_pane)) class="rounded border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <input type="checkbox" name="show_meetings_pane" value="1" @checked(old('show_meetings_pane', $organization->show_meetings_pane)) class="rounded border-gray-300 dark:border-gray-700 text-leather-500 shadow-sm focus:ring-leather-400">
                                 {{ __('会議一覧') }}
                             </label>
                             <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <input type="checkbox" name="show_calendar_pane" value="1" @checked(old('show_calendar_pane', $organization->show_calendar_pane)) class="rounded border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <input type="checkbox" name="show_calendar_pane" value="1" @checked(old('show_calendar_pane', $organization->show_calendar_pane)) class="rounded border-gray-300 dark:border-gray-700 text-leather-500 shadow-sm focus:ring-leather-400">
                                 {{ __('カレンダー') }}
                             </label>
                             <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <input type="checkbox" name="show_birthday_pane" value="1" @checked(old('show_birthday_pane', $organization->show_birthday_pane)) class="rounded border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <input type="checkbox" name="show_birthday_pane" value="1" @checked(old('show_birthday_pane', $organization->show_birthday_pane)) class="rounded border-gray-300 dark:border-gray-700 text-leather-500 shadow-sm focus:ring-leather-400">
                                 {{ __('今月の誕生日') }}
                             </label>
                             <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <input type="checkbox" name="show_materials_pane" value="1" @checked(old('show_materials_pane', $organization->show_materials_pane)) class="rounded border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <input type="checkbox" name="show_materials_pane" value="1" @checked(old('show_materials_pane', $organization->show_materials_pane)) class="rounded border-gray-300 dark:border-gray-700 text-leather-500 shadow-sm focus:ring-leather-400">
                                 {{ __('資料置き場') }}
                             </label>
                         </div>
@@ -109,21 +103,21 @@
                 </form>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('オブザーブユーザー') }}</h3>
-                    <a href="{{ route('observers.index') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('管理する') }}</a>
+                    <a href="{{ route('observers.index') }}" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">{{ __('管理する') }}</a>
                 </div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('閲覧専用アカウントの作成・パスワード変更・削除ができます。') }}</p>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('次第の一括ダウンロード') }}</h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('全会議の次第とZip議案をまとめてダウンロードします。解約時のデータ持ち出しにも利用できます。') }}</p>
                     </div>
-                    <a href="{{ route('settings.export') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition shrink-0">
+                    <a href="{{ route('settings.export') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-leather-400 focus:ring-offset-2 transition shrink-0">
                         {{ __('ダウンロード') }}
                     </a>
                 </div>

@@ -10,9 +10,9 @@
 }">
     <div class="flex items-center justify-between">
         <x-input-label :value="__('担当者')" />
-        <button type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+        <button type="button" class="text-xs text-leather-500 dark:text-leather-300 hover:underline"
             x-show="mode === 'member'" @click="mode = 'manual'; memberId = ''">{{ __('手入力に切替') }}</button>
-        <button type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+        <button type="button" class="text-xs text-leather-500 dark:text-leather-300 hover:underline"
             x-show="mode === 'manual'" @click="mode = 'member'; assigneeName = ''">{{ __('名簿から選ぶ') }}</button>
     </div>
     <select name="member_id" x-show="mode === 'member'" x-model="memberId" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">

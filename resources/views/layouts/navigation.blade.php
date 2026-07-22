@@ -1,7 +1,7 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="bg-white dark:bg-ink-900 border-b border-gray-100 dark:border-ink-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
+        <div class="flex justify-between h-14">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center gap-2">
@@ -9,8 +9,10 @@
                         @if (Auth::user()->organization->icon_image_path)
                             <img src="{{ asset('storage/'.Auth::user()->organization->icon_image_path) }}" alt=""
                                 class="h-9 w-9 rounded-md object-cover">
+                        @else
+                            <x-brand-mark class="h-7 w-7 text-leather-400 shrink-0" />
                         @endif
-                        <span class="font-semibold text-gray-800 dark:text-gray-200">{{ Auth::user()->organization->name }}</span>
+                        <span class="font-serif font-semibold text-ink-800 dark:text-paper-100">{{ Auth::user()->organization->name }}</span>
                     </a>
                 </div>
 
@@ -45,10 +47,11 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6 gap-2">
+                @include('layouts._storage-usage-badge')
                 <x-theme-toggle />
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-paper-100/70 bg-white dark:bg-ink-900 hover:text-gray-700 dark:hover:text-paper-100 focus:outline-none transition ease-in-out duration-150">
                             <div>{{ Auth::user()->name }}</div>
 
                             <div class="ms-1">
@@ -61,7 +64,7 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('プロフィール') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -69,7 +72,7 @@
                             @csrf
 
                             <button type="submit" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out">
-                                {{ __('Log Out') }}
+                                {{ __('ログアウト') }}
                             </button>
                         </form>
                     </x-slot>
@@ -78,7 +81,7 @@
 
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-paper-100/50 hover:text-gray-500 dark:hover:text-paper-100/80 hover:bg-gray-100 dark:hover:bg-ink-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-ink-800 focus:text-gray-500 dark:focus:text-paper-100/80 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -89,7 +92,7 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-white dark:bg-ink-900">
         <div class="pt-2 pb-3 space-y-1">
             @can('manage')
                 <x-responsive-nav-link :href="route('meetings.index')" :active="request()->routeIs('meetings.*')">
@@ -118,26 +121,32 @@
         </div>
 
         <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
+        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-ink-700">
             <div class="px-4 flex items-center justify-between">
                 <div>
-                    <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                    <div class="font-medium text-base text-gray-800 dark:text-paper-100">{{ Auth::user()->name }}</div>
+                    <div class="font-medium text-sm text-gray-500 dark:text-paper-100/50">{{ Auth::user()->email }}</div>
                 </div>
                 <x-theme-toggle />
             </div>
 
+            @if (($storageUsagePercent ?? 0) >= 80)
+                <div class="px-4 mt-3">
+                    @include('layouts._storage-usage-badge')
+                </div>
+            @endif
+
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('プロフィール') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
-                    <button type="submit" class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:text-gray-800 dark:focus:text-gray-200 focus:bg-gray-50 dark:focus:bg-gray-700 focus:border-gray-300 dark:focus:border-gray-600 transition duration-150 ease-in-out">
-                        {{ __('Log Out') }}
+                    <button type="submit" class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-paper-200 hover:bg-gray-50 dark:hover:bg-ink-700 hover:border-gray-300 dark:hover:border-ink-600 focus:outline-none focus:text-gray-800 dark:focus:text-paper-200 focus:bg-gray-50 dark:focus:bg-ink-700 focus:border-gray-300 dark:focus:border-ink-600 transition duration-150 ease-in-out">
+                        {{ __('ログアウト') }}
                     </button>
                 </form>
             </div>

@@ -5,3 +5,30 @@
 [x-cloak] {
     display: none;
 }
+
+/*
+ * ログイン画面ブランドパネルの「議題が読み上げられ、最後に
+ * 『あなた次第』へ収束する」演出。reduced-motion環境では
+ * 常に最終状態(opacity:1)で表示し、アニメーションを無効化する。
+ */
+@media (prefers-reduced-motion: no-preference) {
+    .agenda-reveal-item {
+        opacity: 0;
+    }
+
+    .agenda-reveal-item[data-reveal-order='1'] { animation: agenda-reveal 0.7s ease-out 0.15s forwards; }
+    .agenda-reveal-item[data-reveal-order='2'] { animation: agenda-reveal 0.7s ease-out 0.55s forwards; }
+    .agenda-reveal-item[data-reveal-order='3'] { animation: agenda-reveal 0.7s ease-out 0.95s forwards; }
+    .agenda-reveal-item[data-reveal-order='4'] { animation: agenda-reveal 0.8s ease-out 1.5s forwards; }
+}
+
+@keyframes agenda-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

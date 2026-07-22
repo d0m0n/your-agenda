@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
             {{ __('資料置き場') }}
         </h2>
     </x-slot>
@@ -8,14 +8,8 @@
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            @if (session('status'))
-                <div class="px-4 py-3 rounded-md bg-green-50 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm">
-                    {{ session('status') }}
-                </div>
-            @endif
-
             @can('manage')
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+                <div class="bg-white dark:bg-ink-800 shadow-sm sm:rounded-lg p-6">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('資料をアップロード') }}</h3>
                     <form method="POST" action="{{ route('materials.store') }}" enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end"
                         x-data="uploadProgress()" @submit.prevent="submitViaXhr">
@@ -43,7 +37,7 @@
                 </div>
             @endcan
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-900">
@@ -54,7 +48,7 @@
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="bg-white dark:bg-ink-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse ($materials as $material)
                                 <tr x-data="{ replacing: {{ old('material_id') == $material->id ? 'true' : 'false' }} }">
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $material->title }}</td>
@@ -68,14 +62,15 @@
                                     </td>
                                     <td class="px-6 py-3 text-right text-sm">
                                         <div class="flex items-center justify-end gap-3">
-                                            <a href="{{ route('materials.download', $material) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('ダウンロード') }}</a>
+                                            <a href="{{ route('materials.download', $material) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('ダウンロード') }}</a>
                                             @can('manage')
                                                 <button type="button" @click="replacing = !replacing" class="text-xs text-gray-600 dark:text-gray-400 hover:underline">{{ __('差し替え') }}</button>
-                                                <form method="POST" action="{{ route('materials.destroy', $material) }}" class="inline" onsubmit="return confirm('{{ __('この資料を削除しますか?') }}');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
-                                                </form>
+                                                <x-confirm-delete-button
+                                                    :id="'delete-material-'.$material->id"
+                                                    :action="route('materials.destroy', $material)"
+                                                    :message="__('この資料を削除しますか?')">
+                                                    {{ __('削除') }}
+                                                </x-confirm-delete-button>
                                             @endcan
                                         </div>
                                         @can('manage')

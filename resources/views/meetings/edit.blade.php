@@ -3,10 +3,10 @@
 
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
                 {{ __('会議編集') }}: {{ $meeting->name }}
             </h2>
-            <a href="{{ route('meetings.show', $meeting) }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+            <a href="{{ route('meetings.show', $meeting) }}" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">
                 {{ __('会議画面を見る') }}
             </a>
         </div>
@@ -15,13 +15,7 @@
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            @if (session('status'))
-                <div class="px-4 py-3 rounded-md bg-green-50 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm">
-                    {{ session('status') }}
-                </div>
-            @endif
-
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('会議情報') }}</h3>
                 <form method="POST" action="{{ route('meetings.update', $meeting) }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
@@ -35,7 +29,7 @@
                 </form>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('議案ファイル') }}</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('この会議専用にアップロードされます。他の会議の次第からは選択できません。') }}</p>
 
@@ -46,7 +40,7 @@
                                 x-data="{ replacing: {{ old('site_id') == $site->id ? 'true' : 'false' }} }">
                                 <div class="flex items-center justify-between text-sm">
                                     <div>
-                                        <a href="{{ $site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $site->title }}</a>
+                                        <a href="{{ $site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-leather-500 dark:text-leather-300 hover:underline">{{ $site->title }}</a>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">
                                             {{ __('アップロード') }}: {{ $site->created_at->format('Y-m-d H:i') }}
                                             @unless ($site->updated_at->equalTo($site->created_at))
@@ -56,11 +50,13 @@
                                     </div>
                                     <div class="flex items-center gap-3 shrink-0">
                                         <button type="button" @click="replacing = !replacing" class="text-xs text-gray-600 dark:text-gray-400 hover:underline">{{ __('差し替え') }}</button>
-                                        <form method="POST" action="{{ route('sites.destroy', $site) }}" onsubmit="return confirm('{{ __('この議案ファイルを削除しますか?') }}');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-xs text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
-                                        </form>
+                                        <x-confirm-delete-button
+                                            :id="'delete-site-'.$site->id"
+                                            :action="route('sites.destroy', $site)"
+                                            :message="__('この議案ファイルを削除しますか?')"
+                                            class="text-xs">
+                                            {{ __('削除') }}
+                                        </x-confirm-delete-button>
                                     </div>
                                 </div>
 
@@ -117,7 +113,7 @@
             </div>
 
             @if ($pastMeetings->isNotEmpty())
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('過去の次第からコピー') }}</h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('選択した項目(子項目も含む)をこの会議の次第の末尾に追加します。議案ファイルのリンクはコピーされません。') }}</p>
 
@@ -128,7 +124,7 @@
                                 <option value="">{{ __('選択してください') }}</option>
                                 @foreach ($pastMeetings as $pastMeeting)
                                     <option value="{{ $pastMeeting->id }}" @selected($copySourceMeeting?->id === $pastMeeting->id)>
-                                        {{ $pastMeeting->name }}@if ($pastMeeting->held_at) ({{ $pastMeeting->held_at->format('Y-m-d') }})@endif
+                                        {{ $pastMeeting->name }}@if ($pastMeeting->held_at) ({{ $pastMeeting->heldAtDateLabel() }})@endif
                                     </option>
                                 @endforeach
                             </select>
@@ -148,7 +144,7 @@
                                         <li class="text-sm">
                                             <label class="flex items-center gap-2">
                                                 <input type="checkbox" name="item_ids[]" value="{{ $item->id }}"
-                                                    class="rounded border-gray-300 dark:border-gray-700 text-indigo-600 focus:ring-indigo-500">
+                                                    class="rounded border-gray-300 dark:border-gray-700 text-leather-500 focus:ring-leather-400">
                                                 <span class="text-gray-900 dark:text-gray-100">{{ $item->title }}</span>
                                                 @if ($item->children->isNotEmpty())
                                                     <span class="text-xs text-gray-500 dark:text-gray-400">({{ __('子項目:') }} {{ $item->children->count() }})</span>
@@ -165,7 +161,7 @@
                 </div>
             @endif
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('次第') }}</h3>
 
                 <div class="space-y-3">
@@ -186,7 +182,7 @@
                             @endforeach
 
                             <button type="button" x-show="!showAddChild" @click="showAddChild = true"
-                                class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+                                class="text-xs text-leather-500 dark:text-leather-300 hover:underline">
                                 + {{ __('子項目を追加') }}
                             </button>
 

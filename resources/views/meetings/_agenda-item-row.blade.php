@@ -14,7 +14,7 @@
                     @endif
                     @if ($linkTitle)
                         @if ($item->assigneeLabel())・@endif
-                        <a href="{{ $item->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('議案') }}: {{ $linkTitle }}</a>
+                        <a href="{{ $item->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('議案') }}: {{ $linkTitle }}</a>
                     @endif
                 </p>
             @endif
@@ -28,12 +28,14 @@
                 @csrf
                 <button type="submit" @if($isLast) disabled class="opacity-30" @endif class="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">&darr;</button>
             </form>
-            <button type="button" @click="editing = true" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('編集') }}</button>
-            <form method="POST" action="{{ route('agenda-items.destroy', [$meeting, $item]) }}" onsubmit="return confirm('{{ __('この次第を削除しますか?') }}');">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
-            </form>
+            <button type="button" @click="editing = true" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">{{ __('編集') }}</button>
+            <x-confirm-delete-button
+                :id="'delete-agenda-item-'.$item->id"
+                :action="route('agenda-items.destroy', [$meeting, $item])"
+                :message="__('この次第を削除しますか?')"
+                class="text-sm">
+                {{ __('削除') }}
+            </x-confirm-delete-button>
         </div>
     </div>
 

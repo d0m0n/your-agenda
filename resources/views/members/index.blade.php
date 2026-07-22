@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
                 {{ __('メンバー一覧') }}
             </h2>
             @can('manage')
-                <a href="{{ route('members.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
+                <a href="{{ route('members.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-leather-400 focus:ring-offset-2 transition">
                     {{ __('新規登録') }}
                 </a>
             @endcan
@@ -31,12 +31,6 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            @if (session('status'))
-                <div class="px-4 py-3 rounded-md bg-green-50 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm">
-                    {{ session('status') }}
-                </div>
-            @endif
-
             @if ($errors->any())
                 <div class="px-4 py-3 rounded-md bg-red-50 dark:bg-red-900 text-red-800 dark:text-red-200 text-sm">
                     <ul class="list-disc list-inside">
@@ -48,13 +42,13 @@
             @endif
 
             @can('manage')
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
+                <div class="bg-white dark:bg-ink-800 shadow-sm sm:rounded-lg p-6">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('CSV一括登録') }}</h3>
                     <div class="flex flex-wrap items-center gap-4">
-                        <a href="{{ route('members.csv-template') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                        <a href="{{ route('members.csv-template') }}" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">
                             {{ __('CSVテンプレートをダウンロード') }}
                         </a>
-                        <a href="{{ route('members.export') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                        <a href="{{ route('members.export') }}" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">
                             {{ __('登録メンバーをCSVでダウンロード') }}
                         </a>
                         <form method="POST" action="{{ route('members.import') }}" enctype="multipart/form-data" class="flex items-center gap-2">
@@ -67,7 +61,7 @@
                 </div>
             @endcan
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-900">
@@ -95,7 +89,7 @@
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="bg-white dark:bg-ink-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse ($members as $member)
                                 <tr>
                                     <td class="px-6 py-3 whitespace-nowrap">
@@ -114,12 +108,13 @@
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $member->birth_date?->format('Y-m-d') }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-right text-sm space-x-3">
                                         @can('manage')
-                                            <a href="{{ route('members.edit', $member) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('編集') }}</a>
-                                            <form method="POST" action="{{ route('members.destroy', $member) }}" class="inline" onsubmit="return confirm('{{ __('このメンバーを削除しますか?') }}');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
-                                            </form>
+                                            <a href="{{ route('members.edit', $member) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('編集') }}</a>
+                                            <x-confirm-delete-button
+                                                :id="'delete-member-'.$member->id"
+                                                :action="route('members.destroy', $member)"
+                                                :message="__('このメンバーを削除しますか?')">
+                                                {{ __('削除') }}
+                                            </x-confirm-delete-button>
                                         @endcan
                                     </td>
                                 </tr>

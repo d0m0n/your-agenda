@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToOrganization;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -68,9 +69,24 @@ class Meeting extends Model
         $sameDay = $this->ends_at && $this->held_at->isSameDay($this->ends_at);
 
         return match (true) {
-            $this->ends_at && $sameDay => $this->held_at->format('Y-m-d H:i').' 〜 '.$this->ends_at->format('H:i'),
-            (bool) $this->ends_at => $this->held_at->format('Y-m-d H:i').' 〜 '.$this->ends_at->format('Y-m-d H:i'),
-            default => $this->held_at->format('Y-m-d H:i'),
+            $this->ends_at && $sameDay => $this->heldAtDateLabel().' '.$this->held_at->format('H:i').' 〜 '.$this->ends_at->format('H:i'),
+            (bool) $this->ends_at => $this->heldAtDateLabel().' '.$this->held_at->format('H:i').' 〜 '.self::formatJapaneseDate($this->ends_at).' '.$this->ends_at->format('H:i'),
+            default => $this->heldAtDateLabel().' '.$this->held_at->format('H:i'),
         };
+    }
+
+    /**
+     * held_at's date portion as "YYYY年MM月DD日(曜)", e.g. "2026年07月22日(水)".
+     */
+    public function heldAtDateLabel(): ?string
+    {
+        return $this->held_at ? self::formatJapaneseDate($this->held_at) : null;
+    }
+
+    private static function formatJapaneseDate(Carbon $date): string
+    {
+        $weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+
+        return $date->format('Y年m月d日').'('.$weekdays[$date->dayOfWeek].')';
     }
 }

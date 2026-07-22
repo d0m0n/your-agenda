@@ -1,6 +1,6 @@
 <x-admin-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
             {{ __('組織一覧') }}
         </h2>
     </x-slot>
@@ -8,13 +8,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            @if (session('status'))
-                <div class="px-4 py-3 rounded-md bg-green-50 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm">
-                    {{ session('status') }}
-                </div>
-            @endif
-
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-900">
@@ -27,7 +21,7 @@
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="bg-white dark:bg-ink-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse ($organizations as $organization)
                                 <tr>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $organization->name }}</td>
@@ -38,7 +32,7 @@
                                         {{ \App\Services\StorageUsageService::formatBytes($usageByOrganization[$organization->id]) }}
                                     </td>
                                     <td class="px-6 py-3 whitespace-nowrap text-right text-sm">
-                                        <a href="{{ route('admin.organizations.show', $organization) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('詳細') }}</a>
+                                        <a href="{{ route('admin.organizations.show', $organization) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('詳細') }}</a>
                                     </td>
                                 </tr>
                             @empty

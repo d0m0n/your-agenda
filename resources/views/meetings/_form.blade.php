@@ -45,7 +45,7 @@
     <div class="sm:col-span-2">
         <x-input-label for="memo" :value="__('メモ')" />
         <textarea id="memo" name="memo" rows="4"
-            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $value('memo') }}</textarea>
+            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400">{{ $value('memo') }}</textarea>
         <x-input-error :messages="$errors->get('memo')" class="mt-2" />
     </div>
 
