@@ -95,6 +95,7 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
 // /meetings/create 等の固定セグメントより後に登録し、{meeting}に吸収されないようにする。
 Route::middleware('auth')->group(function () {
     Route::get('/meetings/{meeting}', [MeetingController::class, 'show'])->name('meetings.show');
+    Route::get('/members/{member}', [MemberController::class, 'show'])->name('members.show');
 });
 
 require __DIR__.'/auth.php';

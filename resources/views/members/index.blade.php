@@ -91,7 +91,7 @@
                         </thead>
                         <tbody class="bg-paper-50 dark:bg-ink-800 divide-y divide-paper-200 dark:divide-ink-700">
                             @forelse ($members as $member)
-                                <tr>
+                                <tr x-data x-on:click="window.location = '{{ route('members.show', $member) }}'" class="cursor-pointer hover:bg-paper-200/40 dark:hover:bg-ink-700/50 transition-colors">
                                     <td class="px-6 py-3 whitespace-nowrap">
                                         @if ($member->photoUrl())
                                             <img src="{{ $member->photoUrl() }}" alt="" class="h-10 w-10 rounded-full object-cover">
@@ -106,7 +106,7 @@
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $genderLabels[$member->gender] ?? '' }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $member->company }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $member->birth_date?->format('Y-m-d') }}</td>
-                                    <td class="px-6 py-3 whitespace-nowrap text-right text-sm space-x-3">
+                                    <td class="px-6 py-3 whitespace-nowrap text-right text-sm space-x-3" x-on:click.stop>
                                         @can('manage')
                                             <a href="{{ route('members.edit', $member) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('編集') }}</a>
                                             <x-confirm-delete-button

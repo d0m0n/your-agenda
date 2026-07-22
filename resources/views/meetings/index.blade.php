@@ -49,13 +49,11 @@
                         </thead>
                         <tbody class="bg-paper-50 dark:bg-ink-800 divide-y divide-paper-200 dark:divide-ink-700">
                             @forelse ($meetings as $meeting)
-                                <tr>
-                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        <a href="{{ route('meetings.show', $meeting) }}" class="hover:underline">{{ $meeting->name }}</a>
-                                    </td>
+                                <tr x-data x-on:click="window.location = '{{ route('meetings.show', $meeting) }}'" class="cursor-pointer hover:bg-paper-200/40 dark:hover:bg-ink-700/50 transition-colors">
+                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $meeting->name }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $meeting->scheduleLabel() }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $meeting->location }}</td>
-                                    <td class="px-6 py-3 whitespace-nowrap text-right text-sm space-x-3">
+                                    <td class="px-6 py-3 whitespace-nowrap text-right text-sm space-x-3" x-on:click.stop>
                                         @can('manage')
                                             <a href="{{ route('meetings.edit', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('編集') }}</a>
                                             <x-confirm-delete-button
@@ -64,8 +62,6 @@
                                                 :message="__('この会議を削除しますか?(次第も削除されます)')">
                                                 {{ __('削除') }}
                                             </x-confirm-delete-button>
-                                        @else
-                                            <a href="{{ route('meetings.show', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('詳細') }}</a>
                                         @endcan
                                     </td>
                                 </tr>

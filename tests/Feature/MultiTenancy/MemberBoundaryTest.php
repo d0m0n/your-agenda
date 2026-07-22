@@ -24,6 +24,18 @@ class MemberBoundaryTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_general_user_cannot_view_another_organizations_member_profile(): void
+    {
+        [, $userA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        $memberB = Member::factory()->for($orgB, 'organization')->create();
+
+        $this->actingAs($userA)
+            ->get(route('members.show', $memberB))
+            ->assertNotFound();
+    }
+
     public function test_general_user_cannot_update_another_organizations_member(): void
     {
         [, $userA] = $this->createTenant();

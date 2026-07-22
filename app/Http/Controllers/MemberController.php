@@ -39,6 +39,13 @@ class MemberController extends Controller
         return view('members.index', ['members' => $members, 'sort' => $sort, 'direction' => $direction]);
     }
 
+    public function show(Member $member): View
+    {
+        $member->load(['position', 'organization']);
+
+        return view('members.show', ['member' => $member]);
+    }
+
     public function create(): View
     {
         $positions = Position::orderBy('serial_number')->get();
