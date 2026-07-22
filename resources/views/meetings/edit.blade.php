@@ -15,7 +15,7 @@
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('会議情報') }}</h3>
                 <form method="POST" action="{{ route('meetings.update', $meeting) }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
@@ -29,7 +29,7 @@
                 </form>
             </div>
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('議案ファイル') }}</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('この会議専用にアップロードされます。他の会議の次第からは選択できません。') }}</p>
 
@@ -113,7 +113,7 @@
             </div>
 
             @if ($pastMeetings->isNotEmpty())
-                <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('過去の次第からコピー') }}</h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('選択した項目(子項目も含む)をこの会議の次第の末尾に追加します。議案ファイルのリンクはコピーされません。') }}</p>
 
@@ -161,7 +161,7 @@
                 </div>
             @endif
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('次第') }}</h3>
 
                 <div class="space-y-3">

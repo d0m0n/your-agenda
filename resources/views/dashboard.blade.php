@@ -24,7 +24,7 @@
         $lastPane = $visiblePanes->last();
         $expandLast = $visiblePanes->count() % 2 === 1;
 
-        $paneCardClass = 'bg-white dark:bg-ink-800 border border-gray-100 dark:border-ink-700 shadow-sm sm:rounded-lg p-6';
+        $paneCardClass = 'bg-paper-50 dark:bg-ink-800 border border-gray-100 dark:border-ink-700 shadow-sm sm:rounded-lg p-6';
         $paneIconBadge = 'flex h-8 w-8 shrink-0 items-center justify-center rounded-full';
     @endphp
 

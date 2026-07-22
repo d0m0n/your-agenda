@@ -9,7 +9,7 @@
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             @can('manage')
-                <div class="bg-white dark:bg-ink-800 shadow-sm sm:rounded-lg p-6">
+                <div class="bg-paper-50 dark:bg-ink-800 shadow-sm sm:rounded-lg p-6">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('資料をアップロード') }}</h3>
                     <form method="POST" action="{{ route('materials.store') }}" enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end"
                         x-data="uploadProgress()" @submit.prevent="submitViaXhr">
@@ -37,10 +37,10 @@
                 </div>
             @endcan
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
+                    <table class="min-w-full divide-y divide-paper-200 dark:divide-ink-700">
+                        <thead class="bg-paper-200 dark:bg-ink-900">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('タイトル') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('アップロード者') }}</th>
@@ -48,7 +48,7 @@
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-ink-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="bg-paper-50 dark:bg-ink-800 divide-y divide-paper-200 dark:divide-ink-700">
                             @forelse ($materials as $material)
                                 <tr x-data="{ replacing: {{ old('material_id') == $material->id ? 'true' : 'false' }} }">
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $material->title }}</td>

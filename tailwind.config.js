@@ -53,6 +53,7 @@ export default {
                 },
                 paper: {
                     DEFAULT: '#F3ECDD',
+                    50: '#FEFCF7',
                     100: '#FAF6EC',
                     200: '#E7DCC2',
                 },

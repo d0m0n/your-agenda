@@ -16,7 +16,7 @@
                     default => 'bg-leather-500',
                 };
             @endphp
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('データ使用量') }}</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
                     {{ __('資料置き場・議案ファイル・各種画像の合計です。') }}
@@ -33,7 +33,7 @@
                 @endif
             </div>
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('組織情報') }}</h3>
                 <form method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
@@ -103,7 +103,7 @@
                 </form>
             </div>
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('オブザーブユーザー') }}</h3>
                     <a href="{{ route('observers.index') }}" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">{{ __('管理する') }}</a>
@@ -111,7 +111,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('閲覧専用アカウントの作成・パスワード変更・削除ができます。') }}</p>
             </div>
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('次第の一括ダウンロード') }}</h3>

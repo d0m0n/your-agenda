@@ -42,7 +42,7 @@
             @endif
 
             @can('manage')
-                <div class="bg-white dark:bg-ink-800 shadow-sm sm:rounded-lg p-6">
+                <div class="bg-paper-50 dark:bg-ink-800 shadow-sm sm:rounded-lg p-6">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('CSV一括登録') }}</h3>
                     <div class="flex flex-wrap items-center gap-4">
                         <a href="{{ route('members.csv-template') }}" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">
@@ -61,10 +61,10 @@
                 </div>
             @endcan
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
+                    <table class="min-w-full divide-y divide-paper-200 dark:divide-ink-700">
+                        <thead class="bg-paper-200 dark:bg-ink-900">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"></th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -89,7 +89,7 @@
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-ink-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="bg-paper-50 dark:bg-ink-800 divide-y divide-paper-200 dark:divide-ink-700">
                             @forelse ($members as $member)
                                 <tr>
                                     <td class="px-6 py-3 whitespace-nowrap">

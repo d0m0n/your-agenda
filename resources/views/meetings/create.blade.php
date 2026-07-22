@@ -7,7 +7,7 @@
 
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <form method="POST" action="{{ route('meetings.store') }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
 

@@ -13,7 +13,7 @@
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('契約状況') }}</h3>
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
@@ -27,7 +27,7 @@
                 </dl>
             </div>
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="flex items-center justify-between mb-1">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('データ使用量') }}</h3>
                     <x-confirm-delete-button
@@ -43,13 +43,13 @@
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('資料置き場・議案ファイル・各種画像の合計です。') }}</p>
             </div>
 
-            <div class="bg-white dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 pb-0">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('ユーザー') }}</h3>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
+                    <table class="min-w-full divide-y divide-paper-200 dark:divide-ink-700">
+                        <thead class="bg-paper-200 dark:bg-ink-900">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('氏名') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('メールアドレス') }}</th>
@@ -58,7 +58,7 @@
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-ink-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="bg-paper-50 dark:bg-ink-800 divide-y divide-paper-200 dark:divide-ink-700">
                             @forelse ($users as $orgUser)
                                 <tr>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $orgUser->name }}</td>
