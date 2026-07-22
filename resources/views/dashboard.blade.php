@@ -29,9 +29,9 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 @if ($organization->show_meetings_pane)
-                    {{-- ペイン1: 会議一覧 --}}
+                    {{-- ペイン1: 今後の会議予定 --}}
                     <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 @if($expandLast && $lastPane === 'meetings') lg:col-span-2 @endif">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('会議一覧') }}</h3>
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('今後の会議予定') }}</h3>
                         <ul class="space-y-3">
                             @forelse ($meetings as $meeting)
                                 <li>
@@ -46,7 +46,7 @@
                                     </p>
                                 </li>
                             @empty
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('会議はまだ登録されていません。') }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('予定なし') }}</p>
                             @endforelse
                         </ul>
                         @can('manage')

@@ -18,7 +18,10 @@ class DashboardController extends Controller
 
         $organization = auth()->user()->organization;
 
-        $meetings = Meeting::orderByDesc('held_at')->take(5)->get();
+        $meetings = Meeting::where('held_at', '>=', now()->startOfDay())
+            ->orderBy('held_at')
+            ->take(5)
+            ->get();
 
         $birthdayMembers = Member::whereNotNull('birth_date')
             ->whereMonth('birth_date', now()->month)
