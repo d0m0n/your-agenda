@@ -1,58 +1,221 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# あなた次第(Your agenda)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+青年会議所(JC)の委員会運営を楽にするWebサービスです。委員会組織ごとに契約し、
+会議・次第・メンバー・資料を一元管理できます。アップロードしたZipファイル内の
+HTML議案(gian.htm)や、PDF・画像単体の議案ファイルをURLひとつで共有できます。
 
-## About Laravel
+サービス名の由来:「議題(agenda)はあなた次第」
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 目次
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [利用ユーザーの種類](#利用ユーザーの種類)
+- [画面一覧と使い方](#画面一覧と使い方)
+  - [ログイン・パスワード再設定](#ログインパスワード再設定)
+  - [ダッシュボード](#ダッシュボードトップページ)
+  - [会議管理](#会議管理)
+  - [役職管理](#役職管理)
+  - [メンバー管理](#メンバー管理)
+  - [資料管理](#資料管理資料置き場)
+  - [基本設定](#基本設定)
+  - [オブザーブユーザー管理](#オブザーブユーザー管理)
+  - [管理者パネル(super_admin)](#管理者パネルsuper_admin)
+- [制限事項一覧](#制限事項一覧)
+- [開発環境のセットアップ](#開発環境のセットアップ)
+- [未実装の機能](#未実装の機能)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 利用ユーザーの種類
 
-## Learning Laravel
+| 種別 | 説明 | できること |
+| --- | --- | --- |
+| 一般ユーザー | 委員会組織ごとに契約するアカウント | 組織情報・メンバー・役職・会議・次第・資料の全CRUD、オブザーブユーザーの管理、基本設定の変更 |
+| オブザーブユーザー | 一般ユーザーが作成する閲覧専用アカウント | ダッシュボード・会議一覧・会議詳細・メンバー一覧・資料の閲覧のみ(作成・編集・削除・CSV入出力は不可) |
+| 管理者アカウント(super_admin) | 運営側がプラットフォーム全体を管理するための、組織に属さないアカウント | 全組織の契約状況・データ使用量の閲覧、ユーザーごとの容量変更、アップロード済みデータの削除、アカウントの削除 |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+一般ユーザーの新規登録画面は現在無効化されています(下記「未実装の機能」参照)。
+オブザーブユーザーは一般ユーザーが基本設定画面から作成し、管理者アカウントは
+サーバー管理者が `php artisan admin:create-super-admin` コマンドで作成します。
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 画面一覧と使い方
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### ログイン・パスワード再設定
 
-## Agentic Development
+- ログイン画面(`/login`)からメールアドレスとパスワードでログインします。
+- 「パスワードを忘れた場合」からパスワード再設定メールを送信できます(`/forgot-password`)。
+- 新規ユーザー登録画面は無効化されています。アカウント発行はサーバー管理者へ依頼してください。
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### ダッシュボード(トップページ)
 
-```bash
-composer require laravel/boost --dev
+ログイン後の最初の画面。組織のヘッダー画像の下に、最大4つのペインを表示します。
+一般ユーザー・オブザーブユーザーどちらも閲覧できます。
 
-php artisan boost:install
-```
+| ペイン | 内容 |
+| --- | --- |
+| 会議一覧 | 直近の会議を開催日時順に表示(開催日時・開催場所・会議画面へのリンク) |
+| カレンダー | 基本設定で登録したGoogleカレンダーをiframeで埋め込み表示 |
+| 今月の誕生日 | メンバーの生年月日から当月分を抽出して表示 |
+| 資料置き場 | 資料の一覧とダウンロードリンク(直近5件) |
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+各ペインの表示・非表示は基本設定画面から切り替えられます。ペインが奇数個
+表示される場合、最後の1つは2カラム分に広がって表示されます。
 
-## Contributing
+**制限**: 管理者アカウント(super_admin)はダッシュボードを利用しません。ログイン後は
+自動的に管理者パネルへリダイレクトされます。
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 会議管理
 
-## Code of Conduct
+会議の一覧・作成・編集・詳細画面です。一覧・詳細はオブザーブユーザーも閲覧できますが、
+作成・編集・削除は一般ユーザーのみです。
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### 会議一覧(`/meetings`)
 
-## Security Vulnerabilities
+会議名・開催日時・開催場所の一覧です。一般ユーザーには新規登録・編集・削除リンクが、
+オブザーブユーザーには「詳細」リンクのみが表示されます。
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+#### 会議作成・編集
 
-## License
+以下の項目を設定できます。
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- 会議名(必須)
+- 開始日時・終了日時(どちらも任意。終了日時は開始日時より後である必要があります)
+- 開催場所
+- Wi-Fi SSID・パスワード(閲覧権限のある組織メンバーのみ表示されます)
+- メモ
+- 会議ヘッダー画像(jpg/png/webp、自動でリサイズ・再エンコードして保存)
+
+会議編集画面ではさらに以下を扱います。
+
+- **議案ファイルのアップロード**: Zip、またはPDF・画像(jpg/jpeg/png/gif/webp)
+  単体をアップロードできます。Zipの場合は `gian.htm` をZip直下または1階層下の
+  フォルダに配置してください。PDF・画像は単体アップロードのためファイル名を
+  問わずそのまま公開されます。アップロード中は進捗バーが表示されます。
+- **次第(アジェンダ)の追加・編集・削除・並び替え**: タイトル・担当者(登録済み
+  メンバーまたは自由入力の氏名)・議案ファイルのリンクを設定できます。項目は
+  1階層だけ子項目を持てます(子項目にはさらに子項目を追加できません)。
+- **過去の次第からコピー**: 他の会議の次第(トップレベル項目とその子項目)を
+  選んで、この会議の次第の末尾にまとめて追加できます。議案ファイルのリンクは
+  会議ごとに紐付くためコピーされません。コピー元として選べるのは「次第が
+  1件以上登録されている、この会議以外の会議」のみです。該当する会議がない
+  場合、この欄自体が表示されません。
+
+#### 会議詳細画面(`/meetings/{id}`)
+
+会議名・開催日時・開催場所・次第・Wi-Fi情報・メモを表示します。次第の議案ファイル
+リンクをクリックすると議案を確認できます。一般ユーザーには編集画面へのリンクが
+表示されます。
+
+### 役職管理
+
+`/positions` — 会長・副会長など、委員会内の役職マスタを管理します。表示順を
+決める通し番号(組織内で一意)と役職名を登録し、メンバー登録時に紐付けます。
+
+### メンバー管理
+
+`/members` — 会議の出欠管理や誕生日表示、次第の担当者選択に使うメンバー名簿です。
+ログインアカウントとは別の概念で、メンバー自身がログインすることはありません。
+
+- 必須項目は氏名のみ。よみがな・ローマ字表記・生年月日・性別・役職・所属企業・
+  電話番号・メールアドレス・LINE ID・各種SNSアカウント・趣味・座右の銘・
+  通し番号(組織内一意)・顔写真は任意です。
+- 顔写真はjpg/png/webpのみアップロード可能で、自動でリサイズ・再エンコードされます。
+- 一覧は氏名・よみがな・所属企業・生年月日・通し番号・役職でソートできます。
+- **CSV一括登録**: テンプレートをダウンロードして入力し、アップロードすると
+  一括登録できます(顔写真はCSVの対象外)。
+- **CSVエクスポート**: 登録済みメンバー全員をCSVでダウンロードできます。
+- 一覧の閲覧はオブザーブユーザーも可能ですが、新規登録・編集・削除・
+  CSV一括登録/エクスポートは一般ユーザーのみです。
+
+### 資料管理(資料置き場)
+
+`/materials` — 総会資料や規約など、会議に紐付かない資料を保管する場所です。
+
+- アップロード可能: pdf, doc(x), xls(x), ppt(x), zip, jpg, png, gif, webp,
+  txt, csv。最大20MB。
+- アップロードには進捗バーが表示されます。
+- 閲覧・ダウンロードはオブザーブユーザーも可能ですが、アップロード・削除は
+  一般ユーザーのみです。
+
+### 基本設定
+
+`/settings` — 一般ユーザーのみアクセスできます。
+
+- **データ使用量**: 資料・議案ファイル・各種画像の合計使用量を、割り当て容量
+  (デフォルト2GB)に対する割合とともにプログレスバーで表示します。
+- **組織情報**: 組織名、GoogleカレンダーID、ダッシュボードのヘッダー画像・
+  アイコン画像(jpg/png/webp、自動リサイズ)を編集します。
+- **ダッシュボード表示設定**: 4つのペイン(会議一覧・カレンダー・誕生日・
+  資料置き場)の表示・非表示を切り替えます。
+- **オブザーブユーザー管理**: 専用画面(下記)への入口です。
+- **次第の一括ダウンロード**: 組織の全会議・次第・議案ファイルをZipにまとめて
+  ダウンロードします(会議ごとにフォルダ分け、次第はHTMLで書き出し)。解約時の
+  データ持ち出し手段としても利用できます。
+
+### オブザーブユーザー管理
+
+`/observers` — 一般ユーザーが、閲覧専用アカウントを作成・編集・削除します。
+
+- 作成時はログインID(メールアドレス)とパスワードが必須です。
+- 編集時にパスワード欄を空欄のままにすると、パスワードは変更されません。
+- ログインIDはシステム全体で一意である必要があります(他組織・他ユーザーと重複不可)。
+
+### 管理者パネル(super_admin)
+
+`/admin` — 運営側の管理者アカウント専用の画面です。通常のログイン画面から
+ログインしますが、ログイン後は専用レイアウトで管理者パネルが表示されます。
+一般ユーザー・オブザーブユーザーはアクセスできません。
+
+- **組織一覧**: 全組織の契約ステータス・契約日・ユーザー数・データ使用量を一覧表示します。
+- **組織詳細**: 契約状況の確認、組織に属するユーザー(一般/オブザーブ)の一覧、
+  一般ユーザーごとの割り当て容量(GB単位)の変更、アカウントの削除ができます。
+- **アップロード済みデータの削除**: その組織の資料・議案ファイル・各種画像を
+  すべて削除して使用量をゼロに戻します。会議・メンバー等のレコード自体は
+  削除されません(業務データを残したまま、ストレージだけ解放する操作です)。
+- 契約ステータス自体の変更・組織の完全削除・課金操作は未実装です。
+
+## 制限事項一覧
+
+| 項目 | 制限内容 |
+| --- | --- |
+| 議案Zip | 展開後合計200MB以下、ファイル数1000件以下。拡張子ホワイトリスト方式(html, htm, css, js, png, jpg, jpeg, gif, svg, webp, ico, woff, woff2, ttf, json, txt, pdf, mp4 のみ展開、.php等は展開しない) |
+| 議案ファイル単体 | PDF・jpg・jpeg・png・gif・webpのみ、最大200MB |
+| 資料(materials) | pdf, doc(x), xls(x), ppt(x), zip, jpg, png, gif, webp, txt, csv、最大20MB |
+| 各種画像(ヘッダー・アイコン・顔写真) | jpg/png/webpのみ、最大5MB。アップロード後は自動でリサイズ・再エンコードされる |
+| 次第の階層 | 親子1階層のみ(子項目にさらに子項目は作れない) |
+| 次第のコピー | 議案ファイルのリンクはコピーされない。コピー元は次第が1件以上ある他会議のみ選択可 |
+| データ容量 | 一般ユーザー1人あたりデフォルト2GB(管理者パネルからユーザーごとに変更可)。資料・議案ファイル・各種画像の合計で判定し、超過時は新規アップロードを拒否(既存データは保持される) |
+| オブザーブユーザー | 閲覧のみ。作成・編集・削除・CSV入出力は一般ユーザーのみ |
+| ログインID(メールアドレス) | 全ユーザーを通してシステム全体で一意 |
+| マルチテナント | 全データは組織(organization)単位でスコープされ、他組織のデータには一切アクセスできない |
+| 一般ユーザーの新規登録 | 現在無効化されている(下記「未実装の機能」参照) |
+
+## 開発環境のセットアップ
+
+- Docker + Laravel Sail(PHP 8.3固定)、DBはMySQLを使用します。
+- 初回セットアップの概要:
+
+  ```bash
+  composer install
+  cp .env.example .env
+  php artisan key:generate
+  ./vendor/bin/sail up -d
+  ./vendor/bin/sail artisan migrate
+  ./vendor/bin/sail artisan storage:link
+  npm install && npm run build
+  ```
+
+- 一般ユーザー・オブザーブユーザーの登録画面は無効化されているため、
+  テストアカウントは `tinker` やシーダーで作成してください。
+- 管理者アカウントは以下のコマンドで作成します。
+
+  ```bash
+  ./vendor/bin/sail artisan admin:create-super-admin "管理者名" admin@example.com "パスワード"
+  ```
+
+- 本番環境(さくらのレンタルサーバー)向けのデプロイ手順・制約は `CLAUDE.md` を参照してください。
+
+## 未実装の機能
+
+- **ランディングページ・組織登録フロー**: 未ログイン向けのLPと、LP経由での
+  組織契約・一般ユーザー登録フローは未実装です。`resources/views/welcome.blade.php`
+  はBreeze標準のまま残っていますが、どのルートからも参照されない未使用のファイルです。
+- **課金**: 決済手段(Stripe + Laravel Cashier を第一候補として検討中)・
+  契約ステータスの変更・組織の完全削除は未実装です。

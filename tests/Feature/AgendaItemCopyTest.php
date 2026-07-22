@@ -70,4 +70,24 @@ class AgendaItemCopyTest extends TestCase
         $response->assertSessionHasErrors('source_meeting_id');
         $this->assertDatabaseMissing('agenda_items', ['meeting_id' => $targetMeeting->id, 'title' => '他組織の議題']);
     }
+
+    public function test_copy_section_is_hidden_when_no_other_meeting_has_agenda_items(): void
+    {
+        $organization = Organization::factory()->create();
+        $user = User::factory()->for($organization, 'organization')->create();
+        $meetingWithItems = Meeting::factory()->for($organization, 'organization')->create();
+        $emptyMeeting = Meeting::factory()->for($organization, 'organization')->create();
+        AgendaItem::create(['meeting_id' => $meetingWithItems->id, 'order' => 1, 'title' => '既存議題']);
+
+        // Editing the only meeting that has items: there's nothing else to copy from.
+        $response = $this->actingAs($user)->get(route('meetings.edit', $meetingWithItems));
+        $response->assertOk();
+        $response->assertDontSee('過去の次第からコピー');
+
+        // Editing the empty meeting: the populated meeting is offered as a copy source.
+        $response = $this->actingAs($user)->get(route('meetings.edit', $emptyMeeting));
+        $response->assertOk();
+        $response->assertSee('過去の次第からコピー');
+        $response->assertSee($meetingWithItems->name);
+    }
 }
