@@ -39,7 +39,7 @@
                         </li>
                         <li class="agenda-reveal-item flex items-baseline gap-3 text-paper-100/60" data-reveal-order="2">
                             <span class="font-serif text-xs text-brass-300/90">02</span>
-                            <span class="text-sm">議案審議</span>
+                            <span class="text-sm">議案協議</span>
                         </li>
                         <li class="agenda-reveal-item flex items-baseline gap-3 text-paper-100/60" data-reveal-order="3">
                             <span class="font-serif text-xs text-brass-300/90">03</span>
@@ -52,7 +52,7 @@
                             すべては、<br class="hidden sm:block">あなた次第。
                         </p>
                         <p class="mt-4 max-w-sm text-sm leading-relaxed text-paper-100/60">
-                            会議・次第・メンバー・資料を、ひとつの場所で。
+                            会議・次第・メンバー・資料を、ひとつの場所で。<br>
                             議題を決めるのも、進めるのも――あなた次第です。
                         </p>
                     </div>
@@ -62,10 +62,6 @@
             {{-- フォームパネル --}}
             <div class="flex items-center justify-center px-6 py-12 sm:px-12 lg:px-16">
                 <div class="w-full max-w-sm">
-                    <div class="mb-8 lg:hidden">
-                        <p class="font-serif text-2xl font-semibold text-ink-800 dark:text-paper-100">あなた次第</p>
-                    </div>
-
                     {{ $slot }}
                 </div>
             </div>

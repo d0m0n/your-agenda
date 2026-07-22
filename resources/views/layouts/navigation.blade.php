@@ -63,9 +63,11 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('プロフィール') }}
-                        </x-dropdown-link>
+                        @can('manage')
+                            <x-dropdown-link :href="route('profile.edit')">
+                                {{ __('プロフィール') }}
+                            </x-dropdown-link>
+                        @endcan
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
@@ -137,9 +139,11 @@
             @endif
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('プロフィール') }}
-                </x-responsive-nav-link>
+                @can('manage')
+                    <x-responsive-nav-link :href="route('profile.edit')">
+                        {{ __('プロフィール') }}
+                    </x-responsive-nav-link>
+                @endcan
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
