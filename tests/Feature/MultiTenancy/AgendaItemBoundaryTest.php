@@ -3,6 +3,7 @@
 namespace Tests\Feature\MultiTenancy;
 
 use App\Models\AgendaItem;
+use App\Models\Material;
 use App\Models\Meeting;
 use App\Models\Member;
 use App\Models\Site;
@@ -62,10 +63,27 @@ class AgendaItemBoundaryTest extends TestCase
 
         $response = $this->actingAs($userA)->post(route('agenda-items.store', $meetingA), [
             'title' => '議題',
-            'site_id' => $siteFromOtherMeeting->id,
+            'agenda_link' => 'site:'.$siteFromOtherMeeting->id,
         ]);
 
         $response->assertSessionHasErrors('site_id');
+        $this->assertDatabaseMissing('agenda_items', ['meeting_id' => $meetingA->id]);
+    }
+
+    public function test_agenda_item_cannot_be_linked_to_a_material_from_another_organization(): void
+    {
+        [$orgA, $userA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        $meetingA = Meeting::factory()->for($orgA, 'organization')->create();
+        $materialB = Material::factory()->for($orgB, 'organization')->create();
+
+        $response = $this->actingAs($userA)->post(route('agenda-items.store', $meetingA), [
+            'title' => '議題',
+            'agenda_link' => 'material:'.$materialB->id,
+        ]);
+
+        $response->assertSessionHasErrors('material_id');
         $this->assertDatabaseMissing('agenda_items', ['meeting_id' => $meetingA->id]);
     }
 

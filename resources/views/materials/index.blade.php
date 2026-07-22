@@ -56,18 +56,51 @@
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse ($materials as $material)
-                                <tr>
+                                <tr x-data="{ replacing: {{ old('material_id') == $material->id ? 'true' : 'false' }} }">
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $material->title }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $material->user?->name }}</td>
-                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $material->created_at->format('Y-m-d H:i') }}</td>
-                                    <td class="px-6 py-3 whitespace-nowrap text-right text-sm space-x-3">
-                                        <a href="{{ route('materials.download', $material) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('ダウンロード') }}</a>
+                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $material->created_at->format('Y-m-d H:i') }}
+                                        @unless ($material->updated_at->equalTo($material->created_at))
+                                            <br>
+                                            <span class="text-xs">{{ __('差し替え') }}: {{ $material->updated_at->format('Y-m-d H:i') }}</span>
+                                        @endunless
+                                    </td>
+                                    <td class="px-6 py-3 text-right text-sm">
+                                        <div class="flex items-center justify-end gap-3">
+                                            <a href="{{ route('materials.download', $material) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('ダウンロード') }}</a>
+                                            @can('manage')
+                                                <button type="button" @click="replacing = !replacing" class="text-xs text-gray-600 dark:text-gray-400 hover:underline">{{ __('差し替え') }}</button>
+                                                <form method="POST" action="{{ route('materials.destroy', $material) }}" class="inline" onsubmit="return confirm('{{ __('この資料を削除しますか?') }}');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
+                                                </form>
+                                            @endcan
+                                        </div>
                                         @can('manage')
-                                            <form method="POST" action="{{ route('materials.destroy', $material) }}" class="inline" onsubmit="return confirm('{{ __('この資料を削除しますか?') }}');">
+                                            <form x-show="replacing" x-cloak method="POST" action="{{ route('materials.update', $material) }}"
+                                                enctype="multipart/form-data" class="mt-2 flex flex-col items-end gap-2"
+                                                x-data="uploadProgress()" @submit.prevent="submitViaXhr">
                                                 @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">{{ __('削除') }}</button>
+                                                @method('PUT')
+                                                <input type="hidden" name="material_id" value="{{ $material->id }}">
+                                                <div class="w-full text-left">
+                                                    <input type="file" name="file" required
+                                                        class="block w-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 rounded-md cursor-pointer focus:outline-none" />
+                                                    @if (old('material_id') == $material->id)
+                                                        <x-input-error :messages="$errors->get('file')" class="mt-1" />
+                                                    @endif
+                                                    <x-upload-progress-bar />
+                                                </div>
+                                                <x-secondary-button type="submit" class="disabled:opacity-50 disabled:cursor-not-allowed shrink-0" x-bind:disabled="uploading">
+                                                    <span x-show="!uploading">{{ __('差し替える') }}</span>
+                                                    <span x-show="uploading" x-cloak>{{ __('アップロード中…') }}</span>
+                                                </x-secondary-button>
                                             </form>
+                                            <p x-show="replacing" x-cloak class="mt-1 text-xs text-gray-500 dark:text-gray-400 text-left">
+                                                {{ __('タイトルはそのまま、ファイルの中身だけを差し替えます。') }}
+                                            </p>
                                         @endcan
                                     </td>
                                 </tr>

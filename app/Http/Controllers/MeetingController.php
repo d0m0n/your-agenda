@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\MeetingRequest;
+use App\Models\Material;
 use App\Models\Meeting;
 use App\Services\ImageUploadService;
 use Illuminate\Http\RedirectResponse;
@@ -11,11 +12,19 @@ use Illuminate\View\View;
 
 class MeetingController extends Controller
 {
-    public function index(): View
-    {
-        $meetings = Meeting::orderByDesc('held_at')->paginate(20);
+    private const SORTABLE_COLUMNS = ['name', 'held_at', 'location'];
 
-        return view('meetings.index', ['meetings' => $meetings]);
+    public function index(Request $request): View
+    {
+        $sort = $request->get('sort', 'held_at');
+        if (! in_array($sort, self::SORTABLE_COLUMNS, true)) {
+            $sort = 'held_at';
+        }
+        $direction = $request->get('direction') === 'asc' ? 'asc' : 'desc';
+
+        $meetings = Meeting::orderBy($sort, $direction)->paginate(20)->withQueryString();
+
+        return view('meetings.index', ['meetings' => $meetings, 'sort' => $sort, 'direction' => $direction]);
     }
 
     public function create(): View
@@ -41,8 +50,10 @@ class MeetingController extends Controller
         'organization',
         'topLevelAgendaItems.member.position',
         'topLevelAgendaItems.site',
+        'topLevelAgendaItems.material',
         'topLevelAgendaItems.children.member.position',
         'topLevelAgendaItems.children.site',
+        'topLevelAgendaItems.children.material',
     ];
 
     public function show(Meeting $meeting): View
@@ -57,6 +68,7 @@ class MeetingController extends Controller
         $meeting->load(self::AGENDA_ITEM_RELATIONS);
         $members = $meeting->organization->members()->with('position')->orderBy('name')->get();
         $sites = $meeting->sites;
+        $materials = Material::orderBy('title')->get();
 
         $pastMeetings = Meeting::where('id', '!=', $meeting->id)
             ->whereHas('agendaItems', fn ($query) => $query->whereNull('parent_id'))
@@ -75,7 +87,7 @@ class MeetingController extends Controller
         }
 
         return view('meetings.edit', [
-            'meeting' => $meeting, 'members' => $members, 'sites' => $sites,
+            'meeting' => $meeting, 'members' => $members, 'sites' => $sites, 'materials' => $materials,
             'pastMeetings' => $pastMeetings,
             'copySourceMeeting' => $copySourceMeeting,
             'copyCandidates' => $copyCandidates,

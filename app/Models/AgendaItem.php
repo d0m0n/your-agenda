@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['meeting_id', 'parent_id', 'order', 'title', 'member_id', 'assignee_name', 'site_id'])]
+#[Fillable(['meeting_id', 'parent_id', 'order', 'title', 'member_id', 'assignee_name', 'site_id', 'material_id'])]
 class AgendaItem extends Model
 {
     use HasFactory;
@@ -57,6 +57,14 @@ class AgendaItem extends Model
     }
 
     /**
+     * @return BelongsTo<Material, $this>
+     */
+    public function material(): BelongsTo
+    {
+        return $this->belongsTo(Material::class);
+    }
+
+    /**
      * Display label for the assignee: registered members are shown as
      * "{役職} {氏名}", free-typed names are shown as-is.
      */
@@ -67,5 +75,24 @@ class AgendaItem extends Model
         }
 
         return $this->assignee_name;
+    }
+
+    /**
+     * URL for the linked agenda data: a meeting-scoped site (Zip/PDF/image)
+     * opens its public storage URL directly, while an organization-wide
+     * material goes through the authenticated download route (materials
+     * aren't stored on the public disk).
+     */
+    public function linkUrl(): ?string
+    {
+        if ($this->site) {
+            return $this->site->publicUrl();
+        }
+
+        if ($this->material) {
+            return route('materials.download', $this->material);
+        }
+
+        return null;
     }
 }

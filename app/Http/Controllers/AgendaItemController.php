@@ -56,7 +56,9 @@ class AgendaItemController extends Controller
      * Copies selected top-level items (and their children) from another
      * meeting in the same organization onto the end of this meeting's
      * agenda. Site links aren't carried over since a Zip/PDF/image upload
-     * belongs to the meeting it was uploaded for, not the item itself.
+     * belongs to the meeting it was uploaded for, not the item itself —
+     * but material_id links are, since materials are shared organization-
+     * wide and stay just as valid in the new meeting.
      */
     public function copyFromMeeting(CopyAgendaItemsRequest $request, Meeting $meeting): RedirectResponse
     {
@@ -74,6 +76,7 @@ class AgendaItemController extends Controller
                 'title' => $sourceItem->title,
                 'member_id' => $sourceItem->member_id,
                 'assignee_name' => $sourceItem->assignee_name,
+                'material_id' => $sourceItem->material_id,
                 'order' => ++$nextOrder,
             ]);
 
@@ -84,6 +87,7 @@ class AgendaItemController extends Controller
                     'title' => $child->title,
                     'member_id' => $child->member_id,
                     'assignee_name' => $child->assignee_name,
+                    'material_id' => $child->material_id,
                     'order' => ++$childOrder,
                 ]);
             }

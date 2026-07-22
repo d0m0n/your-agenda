@@ -39,7 +39,13 @@
     (XHRで送信し進捗を表示、レスポンスはそのまま画面に差し替えるため
     サーバー側のリダイレクト/バリデーションエラー表示はそのまま機能する)
   - 次第作成画面で、他の会議の次第(トップレベル項目+子項目)を選んで
-    コピーする機能(議案ファイルのリンクはコピーしない)
+    コピーする機能(会議専用の議案ファイル(sites)のリンクはコピーしないが、
+    組織内共有の資料(materials)のリンクはコピーする)
+  - 次第の議案データのリンク先に、この会議専用の議案ファイル(sites)だけ
+    でなく、組織内で共有されている資料置き場(materials)のデータも選べる
+    ように変更(下記「データ構造」のagenda_itemsを参照)
+  - 議案ファイル(sites)・資料(materials)ともに、アップロード済みファイルの
+    中身だけを差し替える機能(id・URL・次第からのリンクは維持したまま)
   - オブザーブユーザーのナビに「会議一覧」「メンバー一覧」を追加
     (meetings.index / members.index を一般ユーザーと共有し、
     作成・編集・削除・CSV入出力のUIのみ@can('manage')で隠す)
@@ -143,7 +149,17 @@
 - agenda_items(次第): meeting_id, parent_id(nullable, 自己参照FKで1階層の
   子項目に対応), order, title, member_id(担当者, nullable),
   assignee_name(nullable, member未登録時の自由入力担当者名),
-  site_id(nullable, 議案ファイルへのリンク), timestamps
+  site_id(nullable, この会議専用の議案ファイルへのリンク),
+  material_id(nullable, 組織内共有の資料置き場データへのリンク),
+  timestamps
+  - site_id/material_idは排他(同時に両方は入らない)。画面上は
+    「議案データのリンク」という単一のセレクトで選ばせ、
+    site:{id} / material:{id} という値(フォーム上のフィールド名は
+    agenda_link)をAgendaItemRequest::prepareForValidation()で
+    site_id/material_idに振り分けてから通常のバリデーションにかける
+  - 次第コピー機能(過去の次第からコピー)では、site_idは会議ごとに
+    紐付くためコピーされないが、material_idは組織内で共有される
+    データのため次第と一緒にコピーされる
 - sites(議案ファイル): organization_id, meeting_id(nullable), uuid, title,
   original_filename, index_path, user_id, timestamps
   - meeting_id が null の場合は組織共通の公開サイト、値がある場合はその
@@ -153,6 +169,10 @@
     ファイル名を問わずそのまま公開する(gian.htmという名前は不要)
 - materials(資料置き場): organization_id, title, file_path,
   original_filename, user_id, timestamps
+  - 差し替え(MaterialController::update)に対応。id・title・ダウンロードURL
+    (materials.downloadはidキー)は変わらず、file_path/original_filenameの
+    みが更新される。site同様、新ファイルを先に保存してから旧ファイルを
+    削除する順序で処理し、失敗時に既存ファイルが消えないようにしている
 
 ## 画面構成
 
@@ -189,9 +209,14 @@
 - 次第管理メニュー(一般ユーザーのみ):
   会議名 / 開始・終了日時(ends_at) / 開催場所 / Wi-Fi情報 / 次第 /
   議題の担当者 / 会議ヘッダー画像 を追加・入力・編集・削除できる
+  - 各次第項目の「議案データのリンク」は、この会議専用の議案ファイル
+    (sites)と、組織内で共有されている資料置き場(materials)のどちらか
+    一方を選べる(単一のセレクトに議案ファイル/資料置き場をoptgroupで
+    まとめて表示)
   - 次第は他の会議からのコピーにも対応(トップレベル項目を選ぶと
-    その子項目もまとめて末尾に追加される。議案ファイルのリンクは
-    会議ごとの紐付けのためコピーされない)
+    その子項目もまとめて末尾に追加される。会議専用の議案ファイル
+    (sites)のリンクは会議ごとの紐付けのためコピーされないが、
+    組織内共有の資料(materials)のリンクはコピーされる)
   - 議案ファイル・資料のアップロードは進捗バー付き
     (XHR送信+アップロード中%表示、完了後は通常のリダイレクト/
     バリデーションエラー表示にそのまま切り替わる)

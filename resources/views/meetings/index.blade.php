@@ -12,6 +12,21 @@
         </div>
     </x-slot>
 
+    @php
+        $sortUrl = function (string $column) use ($sort, $direction) {
+            $newDirection = ($sort === $column && $direction === 'asc') ? 'desc' : 'asc';
+
+            return request()->fullUrlWithQuery(['sort' => $column, 'direction' => $newDirection]);
+        };
+        $sortIcon = function (string $column) use ($sort, $direction) {
+            if ($sort !== $column) {
+                return '';
+            }
+
+            return $direction === 'asc' ? ' ▲' : ' ▼';
+        };
+    @endphp
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
@@ -26,9 +41,15 @@
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-900">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('会議名') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('開催日時') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('開催場所') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <a href="{{ $sortUrl('name') }}" class="hover:text-gray-700 dark:hover:text-gray-200">{{ __('会議名') }}{{ $sortIcon('name') }}</a>
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <a href="{{ $sortUrl('held_at') }}" class="hover:text-gray-700 dark:hover:text-gray-200">{{ __('開催日時') }}{{ $sortIcon('held_at') }}</a>
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    <a href="{{ $sortUrl('location') }}" class="hover:text-gray-700 dark:hover:text-gray-200">{{ __('開催場所') }}{{ $sortIcon('location') }}</a>
+                                </th>
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>

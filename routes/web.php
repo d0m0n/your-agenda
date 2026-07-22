@@ -76,6 +76,7 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::post('/meetings/{meeting}/agenda-items/{agendaItem}/move-down', [AgendaItemController::class, 'moveDown'])->name('agenda-items.move-down');
 
     Route::post('/materials', [MaterialController::class, 'store'])->name('materials.store');
+    Route::put('/materials/{material}', [MaterialController::class, 'update'])->name('materials.update');
     Route::delete('/materials/{material}', [MaterialController::class, 'destroy'])->name('materials.destroy');
 
     Route::get('/settings', [OrganizationSettingsController::class, 'edit'])->name('settings.edit');

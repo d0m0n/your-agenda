@@ -42,8 +42,8 @@
                             <div class="flex items-center justify-between gap-4">
                                 <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
                                     {{ $index + 1 }}.
-                                    @if ($item->site)
-                                        <a href="{{ $item->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $item->title }}</a>
+                                    @if ($item->linkUrl())
+                                        <a href="{{ $item->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $item->title }}</a>
                                     @else
                                         {{ $item->title }}
                                     @endif
@@ -59,8 +59,8 @@
                                         <li class="flex items-center justify-between gap-4">
                                             <p class="text-sm text-gray-700 dark:text-gray-300">
                                                 {{ sprintf('%02d', $childIndex + 1) }}.
-                                                @if ($child->site)
-                                                    <a href="{{ $child->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $child->title }}</a>
+                                                @if ($child->linkUrl())
+                                                    <a href="{{ $child->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $child->title }}</a>
                                                 @else
                                                     {{ $child->title }}
                                                 @endif

@@ -171,7 +171,7 @@
                 <div class="space-y-3">
                     @forelse ($meeting->topLevelAgendaItems as $item)
                         @include('meetings._agenda-item-row', [
-                            'meeting' => $meeting, 'item' => $item, 'members' => $members, 'sites' => $sites,
+                            'meeting' => $meeting, 'item' => $item, 'members' => $members, 'sites' => $sites, 'materials' => $materials,
                             'number' => $loop->iteration, 'isFirst' => $loop->first, 'isLast' => $loop->last,
                         ])
 
@@ -179,7 +179,7 @@
                             x-data="{ showAddChild: {{ old('parent_id') == $item->id ? 'true' : 'false' }} }">
                             @foreach ($item->children as $child)
                                 @include('meetings._agenda-item-row', [
-                                    'meeting' => $meeting, 'item' => $child, 'members' => $members, 'sites' => $sites,
+                                    'meeting' => $meeting, 'item' => $child, 'members' => $members, 'sites' => $sites, 'materials' => $materials,
                                     'number' => sprintf('%02d', $loop->iteration), 'isFirst' => $loop->first, 'isLast' => $loop->last,
                                     'nested' => true,
                                 ])
@@ -203,13 +203,7 @@
                                     @include('meetings._assignee-field', ['members' => $members])
                                 </div>
                                 <div>
-                                    <x-input-label :value="__('Zip議案')" />
-                                    <select name="site_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
-                                        <option value="">{{ __('なし') }}</option>
-                                        @foreach ($sites as $site)
-                                            <option value="{{ $site->id }}">{{ $site->title }}</option>
-                                        @endforeach
-                                    </select>
+                                    @include('meetings._agenda-link-field', ['sites' => $sites, 'materials' => $materials])
                                 </div>
                                 <div class="flex gap-3">
                                     <x-primary-button>{{ __('子項目を追加') }}</x-primary-button>
@@ -233,13 +227,7 @@
                         @include('meetings._assignee-field', ['members' => $members])
                     </div>
                     <div>
-                        <x-input-label :value="__('Zip議案')" />
-                        <select name="site_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
-                            <option value="">{{ __('なし') }}</option>
-                            @foreach ($sites as $site)
-                                <option value="{{ $site->id }}">{{ $site->title }}</option>
-                            @endforeach
-                        </select>
+                        @include('meetings._agenda-link-field', ['sites' => $sites, 'materials' => $materials])
                     </div>
                     <div>
                         <x-primary-button>{{ __('追加') }}</x-primary-button>

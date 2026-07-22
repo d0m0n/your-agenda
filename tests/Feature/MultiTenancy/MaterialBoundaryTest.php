@@ -6,6 +6,7 @@ use App\Models\Material;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\Concerns\CreatesTenants;
@@ -94,8 +95,27 @@ class MaterialBoundaryTest extends TestCase
         $material = $this->createMaterialWithFile($orgA, $userA);
 
         $this->actingAs($observerA)->delete(route('materials.destroy', $material))->assertForbidden();
+        $this->actingAs($observerA)->put(route('materials.update', $material), [
+            'file' => UploadedFile::fake()->create('new.pdf', 10, 'application/pdf'),
+        ])->assertForbidden();
 
         $this->assertModelExists($material);
+    }
+
+    public function test_general_user_cannot_replace_another_organizations_material(): void
+    {
+        [, $userA] = $this->createTenant();
+        [$orgB, $userB] = $this->createTenant();
+
+        $materialB = $this->createMaterialWithFile($orgB, $userB);
+
+        $this->actingAs($userA)
+            ->put(route('materials.update', $materialB), [
+                'file' => UploadedFile::fake()->create('new.pdf', 10, 'application/pdf'),
+            ])
+            ->assertNotFound();
+
+        Storage::disk('local')->assertExists($materialB->file_path);
     }
 
     private function createMaterialWithFile(Organization $organization, User $user, string $title = '資料'): Material

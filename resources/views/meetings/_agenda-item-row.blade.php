@@ -1,19 +1,20 @@
 @php
     $nested = $nested ?? false;
+    $linkTitle = $item->site->title ?? $item->material->title ?? null;
 @endphp
 
 <div x-data="{ editing: false }" class="border border-gray-200 dark:border-gray-700 rounded-md p-4 {{ $nested ? 'bg-gray-50 dark:bg-gray-900/40' : '' }}">
     <div x-show="!editing" class="flex items-center justify-between gap-4">
         <div>
             <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $number }}. {{ $item->title }}</p>
-            @if ($item->assigneeLabel() || $item->site)
+            @if ($item->assigneeLabel() || $linkTitle)
                 <p class="text-xs text-gray-500 dark:text-gray-400">
                     @if ($item->assigneeLabel())
                         {{ __('担当者') }}: {{ $item->assigneeLabel() }}
                     @endif
-                    @if ($item->site)
+                    @if ($linkTitle)
                         @if ($item->assigneeLabel())・@endif
-                        <a href="{{ $item->site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('議案') }}: {{ $item->site->title }}</a>
+                        <a href="{{ $item->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('議案') }}: {{ $linkTitle }}</a>
                     @endif
                 </p>
             @endif
@@ -47,13 +48,10 @@
             @include('meetings._assignee-field', ['members' => $members, 'memberId' => $item->member_id, 'assigneeName' => $item->assignee_name])
         </div>
         <div>
-            <x-input-label :value="__('Zip議案')" />
-            <select name="site_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
-                <option value="">{{ __('なし') }}</option>
-                @foreach ($sites as $site)
-                    <option value="{{ $site->id }}" @selected($item->site_id === $site->id)>{{ $site->title }}</option>
-                @endforeach
-            </select>
+            @include('meetings._agenda-link-field', [
+                'sites' => $sites, 'materials' => $materials,
+                'selected' => $item->site_id ? 'site:'.$item->site_id : ($item->material_id ? 'material:'.$item->material_id : ''),
+            ])
         </div>
         <div class="flex gap-3">
             <x-primary-button>{{ __('保存') }}</x-primary-button>
