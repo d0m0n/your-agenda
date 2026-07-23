@@ -31,7 +31,7 @@ class AgendaItemCopyTest extends TestCase
             'item_ids' => [$parent->id],
         ]);
 
-        $response->assertRedirect(route('meetings.edit', $targetMeeting));
+        $response->assertRedirect(route('meetings.agenda', $targetMeeting));
         $response->assertSessionHasNoErrors();
 
         $targetMeeting->refresh();
@@ -80,12 +80,12 @@ class AgendaItemCopyTest extends TestCase
         AgendaItem::create(['meeting_id' => $meetingWithItems->id, 'order' => 1, 'title' => '既存議題']);
 
         // Editing the only meeting that has items: there's nothing else to copy from.
-        $response = $this->actingAs($user)->get(route('meetings.edit', $meetingWithItems));
+        $response = $this->actingAs($user)->get(route('meetings.agenda', $meetingWithItems));
         $response->assertOk();
         $response->assertDontSee('過去の次第からコピー');
 
         // Editing the empty meeting: the populated meeting is offered as a copy source.
-        $response = $this->actingAs($user)->get(route('meetings.edit', $emptyMeeting));
+        $response = $this->actingAs($user)->get(route('meetings.agenda', $emptyMeeting));
         $response->assertOk();
         $response->assertSee('過去の次第からコピー');
         $response->assertSee($meetingWithItems->name);

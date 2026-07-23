@@ -24,7 +24,7 @@ class AgendaItemController extends Controller
 
         $status = $parentId ? '子項目を追加しました。' : '次第を追加しました。';
 
-        return redirect()->route('meetings.edit', $meeting)->with('status', $status);
+        return redirect()->route('meetings.agenda', $meeting)->with('status', $status);
     }
 
     public function update(AgendaItemRequest $request, Meeting $meeting, AgendaItem $agendaItem): RedirectResponse
@@ -33,7 +33,7 @@ class AgendaItemController extends Controller
 
         $agendaItem->update($this->normalizeAssignee($request->validated()));
 
-        return redirect()->route('meetings.edit', $meeting)->with('status', '次第を更新しました。');
+        return redirect()->route('meetings.agenda', $meeting)->with('status', '次第を更新しました。');
     }
 
     /**
@@ -93,7 +93,7 @@ class AgendaItemController extends Controller
             }
         }
 
-        return redirect()->route('meetings.edit', $meeting)
+        return redirect()->route('meetings.agenda', $meeting)
             ->with('status', $sourceItems->count().'件の次第をコピーしました。');
     }
 
@@ -103,21 +103,21 @@ class AgendaItemController extends Controller
 
         $agendaItem->delete();
 
-        return redirect()->route('meetings.edit', $meeting)->with('status', '次第を削除しました。');
+        return redirect()->route('meetings.agenda', $meeting)->with('status', '次第を削除しました。');
     }
 
     public function moveUp(Meeting $meeting, AgendaItem $agendaItem): RedirectResponse
     {
         $this->swapOrder($meeting, $agendaItem, 'up');
 
-        return redirect()->route('meetings.edit', $meeting);
+        return redirect()->route('meetings.agenda', $meeting);
     }
 
     public function moveDown(Meeting $meeting, AgendaItem $agendaItem): RedirectResponse
     {
         $this->swapOrder($meeting, $agendaItem, 'down');
 
-        return redirect()->route('meetings.edit', $meeting);
+        return redirect()->route('meetings.agenda', $meeting);
     }
 
     private function swapOrder(Meeting $meeting, AgendaItem $agendaItem, string $direction): void

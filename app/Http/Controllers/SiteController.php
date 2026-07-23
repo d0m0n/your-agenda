@@ -71,7 +71,7 @@ class SiteController extends Controller
             'user_id' => $request->user()->id,
         ]);
 
-        return redirect()->route('meetings.edit', $meeting)->with('status', '議案ファイルをアップロードしました。');
+        return redirect()->route('meetings.agenda', $meeting)->with('status', '議案ファイルをアップロードしました。');
     }
 
     /**
@@ -116,7 +116,7 @@ class SiteController extends Controller
             'index_path' => $indexPath,
         ]);
 
-        return redirect()->route('meetings.edit', $meeting)->with('status', '議案ファイルを差し替えました。');
+        return redirect()->route('meetings.agenda', $meeting)->with('status', '議案ファイルを差し替えました。');
     }
 
     public function destroy(Site $site): RedirectResponse

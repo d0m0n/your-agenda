@@ -24,7 +24,7 @@ class SiteFileUploadTest extends TestCase
                 'title' => 'PDF議案',
                 'zip_file' => $pdf,
             ])
-            ->assertRedirect(route('meetings.edit', $meeting));
+            ->assertRedirect(route('meetings.agenda', $meeting));
 
         $this->assertDatabaseHas('sites', [
             'title' => 'PDF議案',
@@ -47,7 +47,7 @@ class SiteFileUploadTest extends TestCase
                 'title' => '画像議案',
                 'zip_file' => $image,
             ])
-            ->assertRedirect(route('meetings.edit', $meeting));
+            ->assertRedirect(route('meetings.agenda', $meeting));
 
         $this->assertDatabaseHas('sites', [
             'title' => '画像議案',
@@ -66,7 +66,7 @@ class SiteFileUploadTest extends TestCase
         ]);
         $site = $meeting->sites()->where('title', 'PDF議案')->firstOrFail();
 
-        $response = $this->actingAs($user)->get(route('meetings.edit', $meeting));
+        $response = $this->actingAs($user)->get(route('meetings.agenda', $meeting));
 
         $response->assertOk();
         $response->assertSee('アップロード: '.$site->created_at->format('Y-m-d H:i'));

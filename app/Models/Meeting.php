@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'organization_id', 'name', 'held_at', 'ends_at', 'location',
+    'venue_address', 'venue_map_url', 'social_event_info', 'recommended_hotel_info',
     'wifi_ssid', 'wifi_password', 'memo', 'header_image_path',
+    'invitation_pdf_body', 'invitation_email_body', 'invitation_line_body',
 ])]
 class Meeting extends Model
 {

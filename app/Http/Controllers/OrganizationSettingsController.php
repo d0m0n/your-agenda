@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\OrganizationSettingsRequest;
 use App\Services\ImageUploadService;
 use App\Services\MeetingArchiveExportService;
+use App\Services\MeetingInvitationTemplateService;
 use App\Services\StorageUsageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -12,14 +13,22 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class OrganizationSettingsController extends Controller
 {
-    public function edit(StorageUsageService $storageUsage): View
+    public function edit(StorageUsageService $storageUsage, MeetingInvitationTemplateService $templates): View
     {
         $user = auth()->user();
+
+        $invitationTemplates = [
+            'pdf' => $templates->organizationTemplate($user->organization, 'pdf'),
+            'email' => $templates->organizationTemplate($user->organization, 'email'),
+            'line' => $templates->organizationTemplate($user->organization, 'line'),
+        ];
 
         return view('settings.edit', [
             'organization' => $user->organization,
             'usedBytes' => $storageUsage->usedBytes($user->organization),
             'quotaBytes' => $storageUsage->quotaBytes($user),
+            'invitationTemplates' => $invitationTemplates,
+            'invitationPlaceholders' => MeetingInvitationTemplateService::PLACEHOLDERS,
         ]);
     }
 

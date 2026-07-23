@@ -11,8 +11,11 @@
                     {{ __('印刷') }}
                 </button>
                 @can('manage')
+                    <a href="{{ route('meetings.agenda', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">
+                        {{ __('次第を編集') }}
+                    </a>
                     <a href="{{ route('meetings.edit', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">
-                        {{ __('編集') }}
+                        {{ __('会議情報を編集') }}
                     </a>
                 @endcan
             </div>

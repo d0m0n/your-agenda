@@ -44,7 +44,7 @@ class MeetingController extends Controller
 
         $meeting = Meeting::create($data);
 
-        return redirect()->route('meetings.edit', $meeting)->with('status', '会議を登録しました。続けて次第を追加できます。');
+        return redirect()->route('meetings.agenda', $meeting)->with('status', '会議を登録しました。続けて次第を追加できます。');
     }
 
     private const AGENDA_ITEM_RELATIONS = [
@@ -64,7 +64,14 @@ class MeetingController extends Controller
         return view('meetings.show', ['meeting' => $meeting]);
     }
 
-    public function edit(Meeting $meeting, Request $request): View
+    public function edit(Meeting $meeting): View
+    {
+        $meeting->load('organization');
+
+        return view('meetings.edit', ['meeting' => $meeting]);
+    }
+
+    public function agenda(Meeting $meeting, Request $request): View
     {
         $meeting->load(self::AGENDA_ITEM_RELATIONS);
         $members = $meeting->organization->members()->with('position')->orderBy('name')->get();
@@ -87,7 +94,7 @@ class MeetingController extends Controller
             $copyCandidates = $copySourceMeeting?->topLevelAgendaItems ?? collect();
         }
 
-        return view('meetings.edit', [
+        return view('meetings.agenda', [
             'meeting' => $meeting, 'members' => $members, 'sites' => $sites, 'materials' => $materials,
             'pastMeetings' => $pastMeetings,
             'copySourceMeeting' => $copySourceMeeting,

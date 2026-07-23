@@ -4,8 +4,10 @@ use App\Http\Controllers\AgendaItemController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\MeetingInvitationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ObserverUserController;
+use App\Http\Controllers\OrganizationInvitationTemplateController;
 use App\Http\Controllers\OrganizationSettingsController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ProfileController;
@@ -58,10 +60,16 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::get('/meetings/create', [MeetingController::class, 'create'])->name('meetings.create');
     Route::post('/meetings', [MeetingController::class, 'store'])->name('meetings.store');
     Route::get('/meetings/{meeting}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
+    Route::get('/meetings/{meeting}/agenda', [MeetingController::class, 'agenda'])->name('meetings.agenda');
     Route::put('/meetings/{meeting}', [MeetingController::class, 'update'])->name('meetings.update');
     Route::delete('/meetings/{meeting}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
     Route::post('/meetings/{meeting}/public-link', [MeetingController::class, 'enablePublicLink'])->name('meetings.public-link.enable');
     Route::delete('/meetings/{meeting}/public-link', [MeetingController::class, 'disablePublicLink'])->name('meetings.public-link.disable');
+
+    Route::get('/meetings/{meeting}/invitation', [MeetingInvitationController::class, 'edit'])->name('meetings.invitation.edit');
+    Route::put('/meetings/{meeting}/invitation', [MeetingInvitationController::class, 'update'])->name('meetings.invitation.update');
+    Route::delete('/meetings/{meeting}/invitation/{type}', [MeetingInvitationController::class, 'reset'])->name('meetings.invitation.reset');
+    Route::get('/meetings/{meeting}/invitation/pdf', [MeetingInvitationController::class, 'pdf'])->name('meetings.invitation.pdf');
 
     Route::get('/positions', [PositionController::class, 'index'])->name('positions.index');
     Route::get('/positions/create', [PositionController::class, 'create'])->name('positions.create');
@@ -87,6 +95,9 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::get('/settings', [OrganizationSettingsController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [OrganizationSettingsController::class, 'update'])->name('settings.update');
     Route::get('/settings/export', [OrganizationSettingsController::class, 'export'])->name('settings.export');
+
+    Route::put('/settings/invitation-templates', [OrganizationInvitationTemplateController::class, 'update'])->name('settings.invitation-templates.update');
+    Route::delete('/settings/invitation-templates/{type}', [OrganizationInvitationTemplateController::class, 'reset'])->name('settings.invitation-templates.reset');
 
     Route::get('/observers', [ObserverUserController::class, 'index'])->name('observers.index');
     Route::get('/observers/create', [ObserverUserController::class, 'create'])->name('observers.create');

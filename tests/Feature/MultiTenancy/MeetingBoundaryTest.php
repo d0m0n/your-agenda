@@ -23,6 +23,18 @@ class MeetingBoundaryTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_general_user_cannot_view_agenda_edit_page_of_another_organizations_meeting(): void
+    {
+        [, $userA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        $meetingB = Meeting::factory()->for($orgB, 'organization')->create();
+
+        $this->actingAs($userA)
+            ->get(route('meetings.agenda', $meetingB))
+            ->assertNotFound();
+    }
+
     public function test_general_user_cannot_update_another_organizations_meeting(): void
     {
         [, $userA] = $this->createTenant();
@@ -90,6 +102,44 @@ class MeetingBoundaryTest extends TestCase
         $response->assertDontSee('他組織の例会');
     }
 
+    public function test_general_user_cannot_view_invitation_edit_page_of_another_organizations_meeting(): void
+    {
+        [, $userA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        $meetingB = Meeting::factory()->for($orgB, 'organization')->create();
+
+        $this->actingAs($userA)
+            ->get(route('meetings.invitation.edit', $meetingB))
+            ->assertNotFound();
+    }
+
+    public function test_general_user_cannot_update_invitation_text_of_another_organizations_meeting(): void
+    {
+        [, $userA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        $meetingB = Meeting::factory()->for($orgB, 'organization')->create();
+
+        $this->actingAs($userA)
+            ->put(route('meetings.invitation.update', $meetingB), ['type' => 'email', 'body' => '不正な更新'])
+            ->assertNotFound();
+
+        $this->assertNull($meetingB->fresh()->invitation_email_body);
+    }
+
+    public function test_general_user_cannot_view_invitation_pdf_of_another_organizations_meeting(): void
+    {
+        [, $userA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        $meetingB = Meeting::factory()->for($orgB, 'organization')->create();
+
+        $this->actingAs($userA)
+            ->get(route('meetings.invitation.pdf', $meetingB))
+            ->assertNotFound();
+    }
+
     public function test_observer_cannot_access_meeting_management_routes(): void
     {
         [$orgA, , $observerA] = $this->createTenant();
@@ -98,6 +148,7 @@ class MeetingBoundaryTest extends TestCase
 
         $this->actingAs($observerA)->get(route('meetings.create'))->assertForbidden();
         $this->actingAs($observerA)->get(route('meetings.edit', $meeting))->assertForbidden();
+        $this->actingAs($observerA)->get(route('meetings.agenda', $meeting))->assertForbidden();
         $this->actingAs($observerA)->put(route('meetings.update', $meeting), ['name' => '不正更新'])->assertForbidden();
         $this->actingAs($observerA)->delete(route('meetings.destroy', $meeting))->assertForbidden();
 

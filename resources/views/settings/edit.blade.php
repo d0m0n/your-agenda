@@ -103,6 +103,62 @@
                 </form>
             </div>
 
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6" x-data="{ tab: 'pdf' }">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('案内文のデフォルト') }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    {{ __('各会議の案内文作成画面で最初に表示されるテンプレートです。下のプレースホルダーを使うと、会議ごとの情報に自動で置き換わります。') }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    {{ __('利用できるプレースホルダー') }}:
+                    <span class="font-mono">{{ implode(' ', $invitationPlaceholders) }}</span>
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    {{ __('PDF案内文では、行の先頭に') }} <span class="font-mono">&gt;&gt;</span> {{ __('を付けると、その行だけ右揃えで表示されます(差出人情報など)。') }}
+                </p>
+
+                <div class="flex gap-1 border-b border-paper-200 dark:border-ink-700 mb-4">
+                    <button type="button" @click="tab = 'pdf'"
+                        :class="tab === 'pdf' ? 'border-leather-500 text-leather-500 dark:text-leather-300' : 'border-transparent text-gray-500 dark:text-gray-400'"
+                        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px">{{ __('PDF案内文') }}</button>
+                    <button type="button" @click="tab = 'email'"
+                        :class="tab === 'email' ? 'border-leather-500 text-leather-500 dark:text-leather-300' : 'border-transparent text-gray-500 dark:text-gray-400'"
+                        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px">{{ __('メール本文') }}</button>
+                    <button type="button" @click="tab = 'line'"
+                        :class="tab === 'line' ? 'border-leather-500 text-leather-500 dark:text-leather-300' : 'border-transparent text-gray-500 dark:text-gray-400'"
+                        class="px-4 py-2 text-sm font-medium border-b-2 -mb-px">{{ __('LINE本文') }}</button>
+                </div>
+
+                @foreach (['pdf' => __('PDF案内文'), 'email' => __('メール本文'), 'line' => __('LINE本文')] as $type => $label)
+                    <div x-show="tab === '{{ $type }}'" x-cloak>
+                        <form method="POST" action="{{ route('settings.invitation-templates.update') }}" class="space-y-3">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="type" value="{{ $type }}">
+                            <textarea name="body" rows="12"
+                                class="block w-full text-sm font-mono border-paper-200 dark:border-ink-600 dark:bg-ink-900 dark:text-paper-100 rounded-md shadow-sm">{{ old('type') === $type ? old('body') : $invitationTemplates[$type] }}</textarea>
+                            @if (old('type') === $type)
+                                <x-input-error :messages="$errors->get('body')" class="mt-2" />
+                            @endif
+
+                            <div class="flex flex-wrap items-center gap-4">
+                                <x-primary-button>{{ __('保存') }}</x-primary-button>
+
+                                @if ($organization->{'invitation_'.$type.'_template'})
+                                    <x-confirm-delete-button
+                                        :id="'reset-org-invitation-'.$type"
+                                        :action="route('settings.invitation-templates.reset', $type)"
+                                        :message="__('編集内容を破棄して、組み込みの既定テンプレートに戻しますか?')"
+                                        :confirm-label="__('既定に戻す')"
+                                        class="text-sm">
+                                        {{ __('既定に戻す') }}
+                                    </x-confirm-delete-button>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
+                @endforeach
+            </div>
+
             <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('オブザーブユーザー') }}</h3>

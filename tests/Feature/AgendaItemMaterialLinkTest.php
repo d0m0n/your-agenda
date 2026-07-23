@@ -99,7 +99,7 @@ class AgendaItemMaterialLinkTest extends TestCase
         $site = Site::factory()->for($organization, 'organization')->for($user)->create(['meeting_id' => $meeting->id, 'title' => '会議専用議案']);
         $material = Material::factory()->for($organization, 'organization')->for($user)->create(['title' => '組織共有資料']);
 
-        $response = $this->actingAs($user)->get(route('meetings.edit', $meeting));
+        $response = $this->actingAs($user)->get(route('meetings.agenda', $meeting));
 
         $response->assertOk();
         $response->assertSee('議案データのリンク');

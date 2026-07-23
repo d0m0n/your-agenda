@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'name', 'header_image_path', 'icon_image_path', 'google_calendar_id', 'contracted_at', 'plan_status',
     'show_meetings_pane', 'show_calendar_pane', 'show_birthday_pane', 'show_materials_pane',
+    'invitation_pdf_template', 'invitation_email_template', 'invitation_line_template',
 ])]
 class Organization extends Model
 {

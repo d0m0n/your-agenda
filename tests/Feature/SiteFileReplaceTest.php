@@ -46,7 +46,7 @@ class SiteFileReplaceTest extends TestCase
             'zip_file' => $image,
         ]);
 
-        $response->assertRedirect(route('meetings.edit', $meeting));
+        $response->assertRedirect(route('meetings.agenda', $meeting));
         $response->assertSessionHasNoErrors();
 
         $site->refresh();
@@ -75,7 +75,7 @@ class SiteFileReplaceTest extends TestCase
         ]);
         $site->refresh();
 
-        $response = $this->actingAs($user)->get(route('meetings.edit', $meeting));
+        $response = $this->actingAs($user)->get(route('meetings.agenda', $meeting));
 
         $response->assertOk();
         $response->assertSee('アップロード: '.$site->created_at->format('Y-m-d H:i'));
@@ -190,7 +190,7 @@ class SiteFileReplaceTest extends TestCase
             'zip_file' => $small,
         ]);
 
-        $response->assertRedirect(route('meetings.edit', $meeting));
+        $response->assertRedirect(route('meetings.agenda', $meeting));
         $response->assertSessionHasNoErrors();
         $this->assertSame('document.png', $site->fresh()->index_path);
         $this->assertSame($smallBytes, filesize(storage_path("app/public/sites/{$site->uuid}/document.png")));
