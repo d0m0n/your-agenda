@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="view-transition" content="same-origin">
 
         @include('layouts.theme-init')
 
@@ -20,12 +21,12 @@
     <body class="font-sans antialiased">
         <x-toast />
 
-        <div class="min-h-screen bg-paper-100 dark:bg-night">
+        <div class="min-h-screen bg-paper-100 dark:bg-night print:bg-white">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white dark:bg-ink-800 shadow-sm">
+                <header class="print-hidden bg-white dark:bg-ink-800 shadow-sm">
                     <div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>

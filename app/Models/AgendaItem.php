@@ -95,4 +95,25 @@ class AgendaItem extends Model
 
         return null;
     }
+
+    /**
+     * linkUrl()の非ログイン公開版。site側は元々公開ディスク上のURLのため
+     * そのまま使えるが、material側はログイン必須の通常ルートではなく、
+     * この会議のpublic_tokenに紐づく公開ダウンロードルートを使う。
+     */
+    public function publicLinkUrl(): ?string
+    {
+        if ($this->site) {
+            return $this->site->publicUrl();
+        }
+
+        if ($this->material && $this->meeting->public_token) {
+            return route('public.meetings.materials.download', [
+                'meeting' => $this->meeting->public_token,
+                'material' => $this->material,
+            ]);
+        }
+
+        return null;
+    }
 }

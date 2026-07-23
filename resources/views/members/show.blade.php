@@ -41,12 +41,12 @@
     <div class="py-12">
         <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
 
-            {{-- 印刷した名刺を模したカード。真鍮色の箔押しラインを最上部に置き、
-                 表面(氏名・役職・連絡先)と裏面(生年月日・趣味・座右の銘・SNS)を
-                 破線の区切りで分ける。 --}}
-            <div class="relative bg-paper-50 dark:bg-ink-800 shadow-xl rounded-lg overflow-hidden border border-brass-300/50 dark:border-ink-700">
-                <div class="h-1.5 bg-gradient-to-r from-brass-300 via-brass-500 to-brass-300"></div>
-
+            {{-- 印刷した名刺を模したカード。表面(氏名・役職・連絡先)と
+                 裏面(生年月日・趣味・座右の銘・SNS)を破線の区切りで分ける。
+                 view-transition-name により、前後のメンバーへ移動する際に
+                 このカードだけがめくれるようにアニメーションする(対応
+                 ブラウザのみ。非対応ブラウザは通常の画面遷移になる)。 --}}
+            <div class="relative bg-paper-50 dark:bg-ink-800 shadow-xl rounded-lg overflow-hidden border border-paper-200 dark:border-ink-700" style="view-transition-name: member-card;">
                 @if ($member->serial_number)
                     <p class="absolute top-6 right-6 sm:right-10 text-[11px] tracking-[0.2em] text-ink-400 dark:text-ink-200 uppercase">
                         No. {{ str_pad((string) $member->serial_number, 3, '0', STR_PAD_LEFT) }}
@@ -57,10 +57,10 @@
                 <div class="px-8 pt-8 pb-6 sm:px-10">
                     <div class="flex items-start gap-6">
                         @if ($member->photoUrl())
-                            <img src="{{ $member->photoUrl() }}" alt="" class="h-24 w-24 rounded-full object-cover ring-4 ring-paper-100 dark:ring-ink-900 border border-brass-300/60 shrink-0">
+                            <img src="{{ $member->photoUrl() }}" alt="" class="h-24 w-24 rounded-full object-cover shrink-0">
                         @else
-                            <div class="h-24 w-24 rounded-full bg-ink-800 dark:bg-ink-900 ring-4 ring-paper-100 dark:ring-ink-900 border border-brass-300/60 shrink-0 flex items-center justify-center">
-                                <span class="font-serif text-3xl text-brass-200">{{ mb_substr($member->name, 0, 1) }}</span>
+                            <div class="h-24 w-24 rounded-full bg-ink-800 dark:bg-ink-900 shrink-0 flex items-center justify-center">
+                                <span class="font-serif text-3xl text-paper-100">{{ mb_substr($member->name, 0, 1) }}</span>
                             </div>
                         @endif
 
@@ -157,6 +157,22 @@
                             </div>
                         @endif
                     </div>
+                @endif
+            </div>
+
+            <div class="mt-4 flex items-center justify-between text-sm">
+                @if ($previousMember)
+                    <a href="{{ route('members.show', $previousMember) }}" class="text-leather-500 dark:text-leather-300 hover:underline">
+                        {{ __('← 前のメンバー') }}
+                    </a>
+                @else
+                    <span></span>
+                @endif
+
+                @if ($nextMember)
+                    <a href="{{ route('members.show', $nextMember) }}" class="text-leather-500 dark:text-leather-300 hover:underline">
+                        {{ __('次のメンバー →') }}
+                    </a>
                 @endif
             </div>
         </div>

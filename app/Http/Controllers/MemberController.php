@@ -43,7 +43,18 @@ class MemberController extends Controller
     {
         $member->load(['position', 'organization']);
 
-        return view('members.show', ['member' => $member]);
+        // 名刺めくり用に、氏名順での前後のメンバーを求める。
+        $orderedIds = Member::orderBy('name')->orderBy('id')->pluck('id')->values();
+        $currentIndex = $orderedIds->search($member->id);
+
+        $previousMember = $currentIndex > 0 ? Member::find($orderedIds[$currentIndex - 1]) : null;
+        $nextMember = $currentIndex < $orderedIds->count() - 1 ? Member::find($orderedIds[$currentIndex + 1]) : null;
+
+        return view('members.show', [
+            'member' => $member,
+            'previousMember' => $previousMember,
+            'nextMember' => $nextMember,
+        ]);
     }
 
     public function create(): View

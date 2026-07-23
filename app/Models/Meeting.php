@@ -60,6 +60,14 @@ class Meeting extends Model
         return $this->header_image_path ? asset('storage/'.$this->header_image_path) : null;
     }
 
+    /**
+     * ログイン不要で閲覧できる公開次第のURL。public_tokenが未発行の間はnull。
+     */
+    public function publicUrl(): ?string
+    {
+        return $this->public_token ? route('public.meetings.show', $this->public_token) : null;
+    }
+
     public function scheduleLabel(): ?string
     {
         if (! $this->held_at) {

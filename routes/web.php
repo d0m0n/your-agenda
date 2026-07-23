@@ -9,6 +9,7 @@ use App\Http\Controllers\ObserverUserController;
 use App\Http\Controllers\OrganizationSettingsController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicMeetingController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,8 @@ Route::get('/', function () {
 
     return redirect()->route(auth()->user()->isSuperAdmin() ? 'admin.dashboard' : 'dashboard');
 });
+
+Route::get('/lp', fn () => view('welcome'))->name('lp');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -57,6 +60,8 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::get('/meetings/{meeting}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
     Route::put('/meetings/{meeting}', [MeetingController::class, 'update'])->name('meetings.update');
     Route::delete('/meetings/{meeting}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
+    Route::post('/meetings/{meeting}/public-link', [MeetingController::class, 'enablePublicLink'])->name('meetings.public-link.enable');
+    Route::delete('/meetings/{meeting}/public-link', [MeetingController::class, 'disablePublicLink'])->name('meetings.public-link.disable');
 
     Route::get('/positions', [PositionController::class, 'index'])->name('positions.index');
     Route::get('/positions/create', [PositionController::class, 'create'])->name('positions.create');
@@ -97,6 +102,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/meetings/{meeting}', [MeetingController::class, 'show'])->name('meetings.show');
     Route::get('/members/{member}', [MemberController::class, 'show'])->name('members.show');
 });
+
+// 次第の外部共有用リンク。ログイン不要でアクセスできる(public_tokenが
+// 十分に推測困難なUUIDのため)。{meeting}はpublic_tokenで解決する。
+Route::get('/s/meetings/{meeting:public_token}', [PublicMeetingController::class, 'show'])->name('public.meetings.show');
+Route::get('/s/meetings/{meeting:public_token}/materials/{material}', [PublicMeetingController::class, 'downloadMaterial'])->name('public.meetings.materials.download');
 
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

@@ -8,6 +8,7 @@ use App\Models\Meeting;
 use App\Services\ImageUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class MeetingController extends Controller
@@ -115,5 +116,25 @@ class MeetingController extends Controller
         $meeting->delete();
 
         return redirect()->route('meetings.index')->with('status', '会議を削除しました。');
+    }
+
+    /**
+     * 公開次第リンクを発行する。既に発行済みの場合はトークンを再発行し、
+     * それまでのリンクを無効化する(漏洩時の再発行にも使う)。
+     */
+    public function enablePublicLink(Meeting $meeting): RedirectResponse
+    {
+        $meeting->public_token = (string) Str::uuid();
+        $meeting->save();
+
+        return redirect()->route('meetings.show', $meeting)->with('status', '公開リンクを発行しました。');
+    }
+
+    public function disablePublicLink(Meeting $meeting): RedirectResponse
+    {
+        $meeting->public_token = null;
+        $meeting->save();
+
+        return redirect()->route('meetings.show', $meeting)->with('status', '公開リンクを無効化しました。');
     }
 }

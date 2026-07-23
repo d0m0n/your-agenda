@@ -32,3 +32,69 @@
         transform: translateY(0);
     }
 }
+
+/*
+ * メンバー名刺カードの前後移動時、カードだけを「めくる」ように
+ * 遷移させる(ナビ・見出し等ページの他要素は対象外)。
+ * view-transition-name を持つ要素のみ対象になるため、対応ブラウザでは
+ * カードだけがアニメーションし、非対応ブラウザは通常の画面遷移になる。
+ */
+@media (prefers-reduced-motion: no-preference) {
+    ::view-transition-old(member-card) {
+        animation: 280ms ease-in both member-card-flip-out;
+    }
+
+    ::view-transition-new(member-card) {
+        animation: 280ms ease-out both member-card-flip-in;
+    }
+}
+
+@keyframes member-card-flip-out {
+    from {
+        opacity: 1;
+        transform: perspective(1200px) rotateY(0deg) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: perspective(1200px) rotateY(-14deg) scale(0.96);
+    }
+}
+
+@keyframes member-card-flip-in {
+    from {
+        opacity: 0;
+        transform: perspective(1200px) rotateY(14deg) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: perspective(1200px) rotateY(0deg) scale(1);
+    }
+}
+
+/*
+ * 次第の印刷用スタイル。ナビ・トースト・ヘッダー画像・操作ボタンなど
+ * 印刷に不要な要素は.print-hiddenで隠す。.print-sheetは配色を白黒に
+ * 統一し、ダークモードで印刷しても紙とインクを無駄にしないようにする
+ * (アクセントカラーは失われるが、可読性とインク消費を優先する)。
+ */
+@media print {
+    .print-hidden {
+        display: none !important;
+    }
+
+    .print-sheet,
+    .print-sheet * {
+        background-color: transparent !important;
+        color: #000 !important;
+        border-color: #ccc !important;
+        box-shadow: none !important;
+    }
+
+    .print-sheet {
+        border: 1px solid #ccc !important;
+    }
+
+    .print-sheet li {
+        break-inside: avoid;
+    }
+}

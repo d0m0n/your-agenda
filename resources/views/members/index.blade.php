@@ -1,14 +1,28 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-4">
             <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
                 {{ __('メンバー一覧') }}
             </h2>
-            @can('manage')
-                <a href="{{ route('members.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-leather-400 focus:ring-offset-2 transition">
-                    {{ __('新規登録') }}
-                </a>
-            @endcan
+            <div class="flex items-center gap-4">
+                <div x-data class="inline-flex rounded-md border border-paper-200 dark:border-ink-700 overflow-hidden text-sm">
+                    <button type="button" @click="$store.membersView.set('table')"
+                        :class="$store.membersView.mode === 'table' ? 'bg-leather-500 text-white' : 'bg-paper-50 dark:bg-ink-800 text-gray-600 dark:text-gray-300'"
+                        class="px-3 py-1.5 transition-colors">
+                        {{ __('表形式') }}
+                    </button>
+                    <button type="button" @click="$store.membersView.set('card')"
+                        :class="$store.membersView.mode === 'card' ? 'bg-leather-500 text-white' : 'bg-paper-50 dark:bg-ink-800 text-gray-600 dark:text-gray-300'"
+                        class="px-3 py-1.5 border-l border-paper-200 dark:border-ink-700 transition-colors">
+                        {{ __('カード形式') }}
+                    </button>
+                </div>
+                @can('manage')
+                    <a href="{{ route('members.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-leather-400 focus:ring-offset-2 transition">
+                        {{ __('新規登録') }}
+                    </a>
+                @endcan
+            </div>
         </div>
     </x-slot>
 
@@ -29,7 +43,7 @@
     @endphp
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div x-data class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             @if ($errors->any())
                 <div class="px-4 py-3 rounded-md bg-red-50 dark:bg-red-900 text-red-800 dark:text-red-200 text-sm">
@@ -61,7 +75,7 @@
                 </div>
             @endcan
 
-            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div x-show="$store.membersView.mode === 'table'" x-cloak class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-paper-200 dark:divide-ink-700">
                         <thead class="bg-paper-200 dark:bg-ink-900">
@@ -126,6 +140,38 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <div x-show="$store.membersView.mode === 'card'" x-cloak class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                @forelse ($members as $member)
+                    <a href="{{ route('members.show', $member) }}"
+                        class="group block bg-paper-50 dark:bg-ink-800 border border-paper-200 dark:border-ink-700 rounded-lg shadow-sm hover:shadow-md transition-shadow p-5">
+                        <div class="flex items-center gap-4">
+                            @if ($member->photoUrl())
+                                <img src="{{ $member->photoUrl() }}" alt="" class="h-14 w-14 rounded-full object-cover shrink-0">
+                            @else
+                                <div class="h-14 w-14 rounded-full bg-ink-800 dark:bg-ink-900 shrink-0 flex items-center justify-center">
+                                    <span class="font-serif text-lg text-paper-100">{{ mb_substr($member->name, 0, 1) }}</span>
+                                </div>
+                            @endif
+                            <div class="min-w-0">
+                                <p class="font-serif text-base font-semibold text-ink-800 dark:text-paper-100 truncate group-hover:text-leather-500 dark:group-hover:text-leather-300">
+                                    {{ $member->name }}
+                                </p>
+                                @if ($member->position)
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $member->position->name }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        @if ($member->company)
+                            <p class="mt-3 pt-3 border-t border-dashed border-paper-200 dark:border-ink-700 text-xs text-gray-500 dark:text-gray-400 truncate">
+                                {{ $member->company }}
+                            </p>
+                        @endif
+                    </a>
+                @empty
+                    <p class="col-span-full text-sm text-gray-500 dark:text-gray-400">{{ __('登録されているメンバーはいません。') }}</p>
+                @endforelse
             </div>
 
             <div>

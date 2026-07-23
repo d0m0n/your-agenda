@@ -100,4 +100,60 @@ class MemberProfileTest extends TestCase
         $response->assertOk();
         $response->assertSee(route('members.show', $member), false);
     }
+
+    public function test_member_index_shows_card_grid_alongside_table(): void
+    {
+        [$organization, $general] = $this->createTenant();
+
+        Member::factory()->for($organization, 'organization')->create(['name' => 'カード太郎']);
+
+        $response = $this->actingAs($general)->get(route('members.index'));
+
+        $response->assertOk();
+        $response->assertSee(__('表形式'));
+        $response->assertSee(__('カード形式'));
+    }
+
+    public function test_member_profile_page_links_to_adjacent_members_in_name_order(): void
+    {
+        [$organization, $general] = $this->createTenant();
+
+        $first = Member::factory()->for($organization, 'organization')->create(['name' => 'あ田一郎']);
+        $middle = Member::factory()->for($organization, 'organization')->create(['name' => 'い田二郎']);
+        $last = Member::factory()->for($organization, 'organization')->create(['name' => 'う田三郎']);
+
+        $response = $this->actingAs($general)->get(route('members.show', $middle));
+
+        $response->assertOk();
+        $response->assertSee(route('members.show', $first), false);
+        $response->assertSee(route('members.show', $last), false);
+    }
+
+    public function test_member_profile_page_omits_previous_link_for_first_member(): void
+    {
+        [$organization, $general] = $this->createTenant();
+
+        $first = Member::factory()->for($organization, 'organization')->create(['name' => 'あ田一郎']);
+        $second = Member::factory()->for($organization, 'organization')->create(['name' => 'い田二郎']);
+
+        $response = $this->actingAs($general)->get(route('members.show', $first));
+
+        $response->assertOk();
+        $response->assertDontSee(__('← 前のメンバー'));
+        $response->assertSee(route('members.show', $second), false);
+    }
+
+    public function test_member_profile_page_omits_next_link_for_last_member(): void
+    {
+        [$organization, $general] = $this->createTenant();
+
+        $first = Member::factory()->for($organization, 'organization')->create(['name' => 'あ田一郎']);
+        $last = Member::factory()->for($organization, 'organization')->create(['name' => 'い田二郎']);
+
+        $response = $this->actingAs($general)->get(route('members.show', $last));
+
+        $response->assertOk();
+        $response->assertDontSee(__('次のメンバー →'));
+        $response->assertSee(route('members.show', $first), false);
+    }
 }

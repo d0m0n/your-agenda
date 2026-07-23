@@ -9,7 +9,7 @@
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 translate-y-2"
-        class="fixed top-4 right-4 z-50 flex items-start gap-3 max-w-sm rounded-lg border border-gray-100 dark:border-ink-700 bg-white dark:bg-ink-800 px-4 py-3 shadow-lg"
+        class="print-hidden fixed top-4 right-4 z-50 flex items-start gap-3 max-w-sm rounded-lg border border-gray-100 dark:border-ink-700 bg-white dark:bg-ink-800 px-4 py-3 shadow-lg"
         role="status"
     >
         <svg class="h-5 w-5 shrink-0 text-green-500 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
