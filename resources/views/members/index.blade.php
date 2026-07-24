@@ -90,6 +90,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     <a href="{{ $sortUrl('position') }}" class="hover:text-gray-700 dark:hover:text-gray-200">{{ __('役職') }}{{ $sortIcon('position') }}</a>
                                 </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('所属部署') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     <a href="{{ $sortUrl('name_kana') }}" class="hover:text-gray-700 dark:hover:text-gray-200">{{ __('よみがな') }}{{ $sortIcon('name_kana') }}</a>
                                 </th>
@@ -116,6 +117,7 @@
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $member->serial_number }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $member->name }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $member->position?->name }}</td>
+                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $member->department?->name }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $member->name_kana }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $genderLabels[$member->gender] ?? '' }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $member->company }}</td>
@@ -134,7 +136,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('登録されているメンバーはいません。') }}</td>
+                                    <td colspan="10" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('登録されているメンバーはいません。') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -158,8 +160,14 @@
                                 <p class="font-serif text-base font-semibold text-ink-800 dark:text-paper-100 truncate group-hover:text-leather-500 dark:group-hover:text-leather-300">
                                     {{ $member->name }}
                                 </p>
-                                @if ($member->position)
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $member->position->name }}</p>
+                                @if ($member->position || $member->department)
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                        {{ $member->position?->name }}
+                                        @if ($member->position && $member->department)
+                                            <span class="text-gray-400 dark:text-gray-600">/</span>
+                                        @endif
+                                        {{ $member->department?->name }}
+                                    </p>
                                 @endif
                             </div>
                         </div>

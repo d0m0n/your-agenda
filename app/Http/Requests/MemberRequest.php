@@ -29,6 +29,10 @@ class MemberRequest extends FormRequest
                 'nullable',
                 Rule::exists('positions', 'id')->where('organization_id', $this->user()->organization_id),
             ],
+            'department_id' => [
+                'nullable',
+                Rule::exists('departments', 'id')->where('organization_id', $this->user()->organization_id),
+            ],
             'serial_number' => [
                 'nullable', 'integer', 'min:1',
                 Rule::unique('members', 'serial_number')

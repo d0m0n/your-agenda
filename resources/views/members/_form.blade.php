@@ -41,6 +41,18 @@
     </div>
 
     <div>
+        <x-input-label for="department_id" :value="__('所属部署')" />
+        <select id="department_id" name="department_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+            <option value="">{{ __('未設定') }}</option>
+            @foreach ($departments as $department)
+                <option value="{{ $department->id }}" @selected(old('department_id', $m?->department_id) == $department->id)>{{ $department->name }}</option>
+            @endforeach
+        </select>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('小委員会・小会議など、組織内の所属部署です。') }}</p>
+        <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
+    </div>
+
+    <div>
         <x-input-label for="birth_date" :value="__('生年月日')" />
         <x-text-input id="birth_date" name="birth_date" type="date" class="mt-1 block w-full" :value="$m?->birth_date?->format('Y-m-d') ?? old('birth_date')" />
         <x-input-error :messages="$errors->get('birth_date')" class="mt-2" />

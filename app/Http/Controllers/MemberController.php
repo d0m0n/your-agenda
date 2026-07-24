@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\MemberRequest;
+use App\Models\Department;
 use App\Models\Member;
 use App\Models\Position;
 use App\Services\ImageUploadService;
@@ -24,7 +25,7 @@ class MemberController extends Controller
         }
         $direction = $request->get('direction') === 'desc' ? 'desc' : 'asc';
 
-        $query = Member::with('position');
+        $query = Member::with(['position', 'department']);
 
         if ($sort === 'position') {
             $query->leftJoin('positions', 'positions.id', '=', 'members.position_id')
@@ -41,7 +42,7 @@ class MemberController extends Controller
 
     public function show(Member $member): View
     {
-        $member->load(['position', 'organization']);
+        $member->load(['position', 'department', 'organization']);
 
         // 名刺めくり用に、氏名順での前後のメンバーを求める。
         $orderedIds = Member::orderBy('name')->orderBy('id')->pluck('id')->values();
@@ -60,8 +61,12 @@ class MemberController extends Controller
     public function create(): View
     {
         $positions = Position::orderBy('serial_number')->get();
+        $departments = Department::orderBy('serial_number')->get();
 
-        return view('members.create', ['positions' => $positions, 'nextSerialNumber' => $this->nextAvailableSerialNumber()]);
+        return view('members.create', [
+            'positions' => $positions, 'departments' => $departments,
+            'nextSerialNumber' => $this->nextAvailableSerialNumber(),
+        ]);
     }
 
     public function store(MemberRequest $request, ImageUploadService $imageUploader): RedirectResponse
@@ -81,8 +86,12 @@ class MemberController extends Controller
     public function edit(Member $member): View
     {
         $positions = Position::orderBy('serial_number')->get();
+        $departments = Department::orderBy('serial_number')->get();
 
-        return view('members.edit', ['member' => $member, 'positions' => $positions, 'nextSerialNumber' => null]);
+        return view('members.edit', [
+            'member' => $member, 'positions' => $positions, 'departments' => $departments,
+            'nextSerialNumber' => null,
+        ]);
     }
 
     public function update(MemberRequest $request, Member $member, ImageUploadService $imageUploader): RedirectResponse

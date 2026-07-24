@@ -77,13 +77,12 @@
                                 </p>
                             @endif
 
-                            @if ($member->position || $member->company)
+                            @php
+                                $affiliationParts = collect([$member->position?->name, $member->department?->name, $member->company])->filter();
+                            @endphp
+                            @if ($affiliationParts->isNotEmpty())
                                 <p class="mt-3 text-sm font-medium tracking-wide text-leather-500 dark:text-leather-300">
-                                    {{ $member->position?->name }}
-                                    @if ($member->position && $member->company)
-                                        <span class="text-gray-400 dark:text-gray-600">/</span>
-                                    @endif
-                                    {{ $member->company }}
+                                    {{ $affiliationParts->implode(' / ') }}
                                 </p>
                             @endif
                         </div>

@@ -25,6 +25,9 @@
                         <x-nav-link :href="route('positions.index')" :active="request()->routeIs('positions.*')">
                             {{ __('役職管理') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('departments.index')" :active="request()->routeIs('departments.*')">
+                            {{ __('部署管理') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('members.index')" :active="request()->routeIs('members.*')">
                             {{ __('メンバー管理') }}
                         </x-nav-link>
@@ -102,6 +105,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('positions.index')" :active="request()->routeIs('positions.*')">
                     {{ __('役職管理') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('departments.index')" :active="request()->routeIs('departments.*')">
+                    {{ __('部署管理') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('members.index')" :active="request()->routeIs('members.*')">
                     {{ __('メンバー管理') }}

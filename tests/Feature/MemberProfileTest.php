@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Department;
 use App\Models\Member;
 use App\Models\Position;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,9 +17,11 @@ class MemberProfileTest extends TestCase
     {
         [$organization, $general] = $this->createTenant();
         $position = Position::factory()->for($organization, 'organization')->create(['name' => '理事長']);
+        $department = Department::factory()->for($organization, 'organization')->create(['name' => '総務委員会']);
 
         $member = Member::factory()->for($organization, 'organization')->create([
             'position_id' => $position->id,
+            'department_id' => $department->id,
             'serial_number' => 7,
             'name' => '山田太郎',
             'name_kana' => 'ヤマダタロウ',
@@ -44,6 +47,7 @@ class MemberProfileTest extends TestCase
         $response->assertSee('ヤマダタロウ');
         $response->assertSee('Taro Yamada');
         $response->assertSee('理事長');
+        $response->assertSee('総務委員会');
         $response->assertSee('株式会社サンプル');
         $response->assertSee('090-1234-5678');
         $response->assertSee('taro@example.com');
@@ -155,5 +159,20 @@ class MemberProfileTest extends TestCase
         $response->assertOk();
         $response->assertDontSee(__('次のメンバー →'));
         $response->assertSee(route('members.show', $first), false);
+    }
+
+    public function test_member_index_shows_department_in_table_and_card_views(): void
+    {
+        [$organization, $general] = $this->createTenant();
+        $department = Department::factory()->for($organization, 'organization')->create(['name' => '国際交流委員会']);
+        Member::factory()->for($organization, 'organization')->create([
+            'name' => '部署太郎',
+            'department_id' => $department->id,
+        ]);
+
+        $response = $this->actingAs($general)->get(route('members.index'));
+
+        $response->assertOk();
+        $response->assertSee('国際交流委員会');
     }
 }
