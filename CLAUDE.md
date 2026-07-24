@@ -11,6 +11,12 @@
 - APP_NAME: あなた次第
 - 英語表記: Your agenda
 - ログイン画面・ヘッダー・LPにサービス名を表示する
+- ブランドマーク(`x-brand-mark`、次第の書類としおりをかたどったアイコン)を
+  favicon(`public/favicon.svg`、`favicon.ico`、`apple-touch-icon.png`)にも
+  使用する。SVGラスタライズツールがサーバー環境に無いため、GDのプリミティブ
+  (矩形・楕円・多角形)で同モチーフを直接描画して生成した
+  (`resources/views/layouts/_favicon.blade.php`を各レイアウトの
+  `<head>`でtheme-initと一緒にincludeする)
 
 ## 現在の進捗
 - 実装の推奨順序 1〜8 まですべて完了(詳細は下記「実装の推奨順序」参照)
@@ -103,6 +109,22 @@
     汎用的な表現に統一(特定団体名を出さない方針)
 - 8(課金)完了: Stripe + Laravel Cashierによる月額課金と、14日間の
   無料トライアル(カード登録不要)を実装。詳細は下記「契約・課金」参照
+- 上記に加え、進捗ログ未記載のまま以下も実装済み:
+  - 部署管理(departments テーブル・CRUD、メンバーへの紐付け、ナビ
+    「部署管理」。positionsと同じマスタ管理方式)
+  - 解約・トライアル終了後を「次第の閲覧専用モード」にする変更、無償提供
+    モード、常設の再課金導線バナー(詳細は「契約・課金」参照)
+  - 次第の個別ダウンロード(会議一覧から会議1件分だけダウンロード、
+    `meetings.export`)と、一括/個別ダウンロード共通のフォルダ命名を
+    開催日時ベース(`YmdHi`)に変更(詳細は「次第の一括ダウンロード・
+    個別ダウンロード」参照)
+  - 案内文作成画面(会議ごと)に、基本設定のデフォルト編集画面と同じ
+    `>>`(右揃え)・`[改ページ]`の説明文を追記
+  - 基本設定画面のカード表示順を変更(オブザーブユーザー管理を案内文の
+    デフォルトより上に配置)
+  - ダークモードの配色統一(下記「デザイン方針」のガイドライン参照。
+    テーブルヘッダー・ドロップダウンメニュー・お問い合わせフォーム等で
+    Tailwind標準のgray-*系が混入していたのをブランドトークンに統一)
 
 ## 開発環境
 - Docker + Laravel Sail
@@ -191,17 +213,24 @@
     php artisan admin:create-super-admin {name} {email} {password}
     でのみ作成する(一般ユーザーの登録がseeder/tinker限定なのと同じ方針)
 - members: organization_id, name, name_kana, name_romaji, birth_date,
-  gender, position_id(nullable, positionsへのFK), serial_number(組織内一意),
+  gender, position_id(nullable, positionsへのFK), department_id
+  (nullable, departmentsへのFK。小委員会・小会議など組織内の所属部署),
+  serial_number(組織内一意),
   company, phone, email, line_id, x_account, instagram_account,
   facebook_account, tiktok_account, hobby, motto, photo_path, timestamps
   - ログインユーザーとは別概念。誕生日表示・議題担当者に使う
   - 必須項目は name のみ、他は任意
   - CSVの一括登録・テンプレートDL・一括エクスポートに対応
-    (photo_pathはCSVの対象外。写真はメンバーごとに個別アップロード)
+    (photo_path/position_id/department_idはCSVの対象外。写真は
+    メンバーごとに個別アップロード、役職・部署はマスタ選択のため)
   - 顔写真はjpg/png/webpのみ許可し、リサイズ・再エンコードして保存する
 - positions(役職): organization_id, serial_number(組織内一意, 表示順),
   name, timestamps
   - メンバー管理から独立した役職マスタ。ナビ「役職管理」から管理する
+- departments(部署): organization_id, serial_number(組織内一意, 表示順),
+  name, timestamps
+  - positionsと同じマスタ管理方式の部署(小委員会・小会議等)マスタ。
+    ナビ「部署管理」から管理し、メンバー登録時に紐付ける
 - meetings: organization_id, name, held_at, ends_at(nullable, 終了日時),
   location, venue_address(nullable, 開催場所の住所), venue_map_url
   (nullable, 地図URL。設定するとPDF案内文にQRコードが自動掲載される),
@@ -260,15 +289,20 @@
 ### ナビゲーションメニュー(一般ユーザーのみ表示)
 1. 会議管理
 2. 役職管理(positions の CRUD、メンバーへの紐付けに使う役職マスタ)
-3. メンバー管理(members の CRUD、誕生日登録)
-4. 資料管理(資料置き場にアップするデータの管理画面)
-5. 基本設定
+3. 部署管理(departments の CRUD、メンバーへの紐付けに使う部署マスタ。
+   positions と同じ管理方式)
+4. メンバー管理(members の CRUD、誕生日登録)
+5. 資料管理(資料置き場にアップするデータの管理画面)
+6. 基本設定
    - ダッシュボードの組織ヘッダー画像の設定
    - 組織情報の編集
    - GoogleカレンダーIDの設定(独立したメニュー項目ではなく基本設定に統合)
+   - オブザーブユーザー管理への導線
    - 案内文のデフォルトテンプレート編集(下記「案内文作成」参照)
    - 次第の一括ダウンロード機能(下記参照)
    - データ使用量の表示(下記「ストレージ容量」参照)
+   - (画面上の表示順は上記の並びのとおり。オブザーブユーザー管理の
+     カードを案内文のデフォルトより上に配置している)
 - オブザーブユーザーには上記の管理系メニューを一切表示しない(Blade側の
   @can だけでなく、ルート側でも必ずミドルウェア/Gateでガードする)。
   ただし「会議一覧」「メンバー一覧」は閲覧専用として例外的に表示する
@@ -280,6 +314,10 @@
   さりげなく警告バッジを表示する(基本設定へのリンク付き)
 
 ### 会議画面(次第・会議情報編集・次第編集)
+- `meetings.index`(会議一覧): 一般ユーザーには新規登録・編集・次第編集・
+  案内文作成・削除に加え、会議単体の次第を個別ダウンロードするリンク
+  (`meetings.export`)を表示する。オブザーブユーザーには詳細への
+  遷移のみ表示する
 - `meetings.show`(次第画面): 会議ごとのヘッダー画像をトップに表示
   (設定可能)。アジェンダ(次第)を表示し、各議題にアップ済み議案
   ファイル(sites)や資料(materials)をリンク、クリックで確認できる。
@@ -439,12 +477,23 @@
   (退会処理)。詳細はREADME.mdの「課金・トライアル」セクション参照
   (テストモードでのセットアップ手順を含む)
 
-## 次第の一括ダウンロード
+## 次第の一括ダウンロード・個別ダウンロード
 - 組織の meetings + agenda_items + 紐付くsites(Zip議案)をまとめて
-  1つのZipに固めてダウンロードさせる
-- 会議ごとにフォルダ分けし、次第はHTMLで書き出す
-  (app/Services/MeetingArchiveExportService)
-- 解約時のデータ持ち出し手段でもあるため、確実に全件含めること
+  1つのZipに固めてダウンロードさせる(基本設定、`settings.export`)。
+  会議一覧からは会議1件分だけをダウンロードすることもできる
+  (`meetings.export`、`MeetingArchiveExportService::exportMeeting()`)。
+  どちらも中身の構成(HTML書き出し+sites同梱)を共有する
+  private `addMeetingContents()` を経由する
+- 会議ごとのフォルダ名は `held_at` を `YmdHi`(例: `202608221900`)形式に
+  したもの(以前は会議IDとスラッグ化した会議名だったが、わかりにくいため
+  変更した)。`held_at` が未設定(開催日時未定)の会議は会議IDを使う。
+  同一分に複数の会議がある場合は2件目以降に `-{会議ID}` を付けて衝突を
+  回避する(衝突したままだとZip内で同名の agenda.html が欠落するため)
+- 次第はHTMLで書き出す(app/Services/MeetingArchiveExportService)
+- 一括ダウンロードは解約時のデータ持ち出し手段でもあるため、確実に
+  全件含めること。一括・個別どちらのダウンロードルートも
+  `subscribed`ミドルウェアの対象外(トライアル終了・未契約でも
+  ダウンロードできる。詳細は下記「契約・課金」参照)
 
 ## ストレージ容量
 - 一般ユーザー1人あたり、デフォルトで最大2GBのデータ容量を割り当てる
@@ -518,6 +567,16 @@
 - Breeze標準のレイアウト(layouts/app.blade.php)をベースに管理画面を統一
 - デザイン変更時は機能・ルーティング・バリデーションに手を加えないこと
 - 進め方: まず機能を動く状態まで実装し、その後デザインを磨く2段階で行う
+- **ダークモードの配色は、Tailwind標準のgray-*系ではなくブランドトークン
+  (ink/paper/brass/leather、tailwind.config.jsのcolors参照)を使うこと**。
+  Breezeの標準コンポーネント(x-dropdown、x-text-input以外の生の
+  select/textarea等)をコピーして使うと`dark:bg-gray-900`のような汎用色が
+  混入しやすく、実際に複数箇所で「他のUIパーツと色が浮く」不具合が
+  発生した。特に`dark:bg-night`(ページ背景)と`dark:bg-ink-900`は
+  たまたま同一色(#16110B)のため、テーブルヘッダー等の背景に
+  `dark:bg-ink-900`を使うと背景と一体化して見えなくなる点に注意
+  (カード本体は`dark:bg-ink-800`、それより目立たせたい見出し帯は
+  `dark:bg-ink-700`を使う)
 
 ## 実装の推奨順序
 1. organizations / role / マルチテナント基盤(既存sitesにorganization_id追加) ✅
