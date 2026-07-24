@@ -14,7 +14,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['organization_id', 'role', 'name', 'email', 'password', 'storage_quota_bytes'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -31,6 +31,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
+            'locked_until' => 'datetime',
         ];
     }
 
@@ -70,5 +74,41 @@ class User extends Authenticatable
     public function storageQuotaBytes(): int
     {
         return $this->storage_quota_bytes ?? config('storage_quota.default_bytes');
+    }
+
+    public function hasConfirmedTwoFactorAuthentication(): bool
+    {
+        return ! is_null($this->two_factor_confirmed_at);
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->locked_until !== null && $this->locked_until->isFuture();
+    }
+
+    /**
+     * ログイン失敗を1回記録する。super_adminのアカウントロック機能
+     * (config('admin_security.lockout_threshold')回で一定時間ロック)
+     * のためのカウンター。呼び出し側でisSuperAdmin()を確認してから使うこと。
+     */
+    public function registerFailedLoginAttempt(): void
+    {
+        $attempts = $this->failed_login_attempts + 1;
+        $threshold = config('admin_security.lockout_threshold');
+
+        $this->forceFill([
+            'failed_login_attempts' => $attempts,
+            'locked_until' => $attempts >= $threshold
+                ? now()->addMinutes(config('admin_security.lockout_cooldown_minutes'))
+                : $this->locked_until,
+        ])->save();
+    }
+
+    public function clearFailedLoginAttempts(): void
+    {
+        $this->forceFill([
+            'failed_login_attempts' => 0,
+            'locked_until' => null,
+        ])->save();
     }
 }

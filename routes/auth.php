@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\TwoFactorAuthController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,9 +35,21 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    // super_adminのパスワード認証成功後、Auth::loginする前に挟む
+    // 二段階認証(TOTP)のセットアップ/確認画面。この時点ではまだ
+    // 認証されていない(guest)ため、この位置にまとめている。
+    Route::get('two-factor-login', [TwoFactorAuthController::class, 'show'])
+        ->name('two-factor.login');
+
+    Route::post('two-factor-login', [TwoFactorAuthController::class, 'store'])
+        ->name('two-factor.login.store');
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('two-factor-recovery-codes', [TwoFactorAuthController::class, 'recoveryCodes'])
+        ->name('two-factor.recovery-codes');
+
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 

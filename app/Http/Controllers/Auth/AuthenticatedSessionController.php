@@ -26,6 +26,12 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // super_adminはこの時点ではまだAuth::loginされておらず、二段階認証
+        // (セットアップ or 確認)を経由する必要がある(LoginRequest::authenticate参照)。
+        if ($request->session()->has('two_factor.login.id')) {
+            return redirect()->route('two-factor.login');
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));

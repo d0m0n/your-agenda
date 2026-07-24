@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminOrganizationController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'can:super-admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['admin.basic_auth', 'auth', 'can:super-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/organizations/{organization}', [AdminOrganizationController::class, 'show'])->name('organizations.show');
