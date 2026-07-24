@@ -8,7 +8,7 @@
     <button
         type="button"
         @click="dark = !dark"
-        class="inline-flex items-center justify-center h-9 w-9 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none transition"
+        class="inline-flex items-center justify-center h-9 w-9 rounded-full text-gray-500 dark:text-paper-100/70 hover:text-gray-700 dark:hover:text-paper-100 hover:bg-gray-100 dark:hover:bg-ink-800 focus:outline-none transition"
         :aria-label="dark ? '{{ __('ライトモードに切り替え') }}' : '{{ __('ダークモードに切り替え') }}'"
     >
         <svg x-show="!dark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
