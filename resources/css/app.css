@@ -72,11 +72,19 @@
 }
 
 /*
- * 次第の印刷用スタイル。ナビ・トースト・ヘッダー画像・操作ボタンなど
- * 印刷に不要な要素は.print-hiddenで隠す。.print-sheetは配色を白黒に
+ * 次第・案内文の印刷用スタイル。ナビ・トースト・ヘッダー画像・操作ボタン
+ * など印刷に不要な要素は.print-hiddenで隠す。.print-sheetは配色を白黒に
  * 統一し、ダークモードで印刷しても紙とインクを無駄にしないようにする
  * (アクセントカラーは失われるが、可読性とインク消費を優先する)。
+ * 用紙サイズはA4に固定し、ページ分割位置が不自然にならないよう
+ * break-inside/break-afterで制御する(具体的な行ごとの指定は
+ * meetings/invitation-pdf.blade.php側で付与)。
  */
+@page {
+    size: A4;
+    margin: 20mm 18mm;
+}
+
 @media print {
     .print-hidden {
         display: none !important;
@@ -91,10 +99,18 @@
     }
 
     .print-sheet {
-        border: 1px solid #ccc !important;
+        border: none !important;
     }
 
     .print-sheet li {
         break-inside: avoid;
+    }
+
+    .print-avoid-break {
+        break-inside: avoid;
+    }
+
+    .print-avoid-break-after {
+        break-after: avoid;
     }
 }

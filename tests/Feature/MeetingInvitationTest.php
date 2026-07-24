@@ -174,9 +174,9 @@ class MeetingInvitationTest extends TestCase
 
         $response->assertOk();
         // built-in default template contains 記/敬具/以上 and a "...ご案内" title line
-        $response->assertSee('<div class="whitespace-pre-wrap text-center tracking-[0.4em]">記</div>', false);
-        $response->assertSee('<div class="whitespace-pre-wrap text-right">敬具</div>', false);
-        $response->assertSee('<div class="whitespace-pre-wrap text-right">以上</div>', false);
+        $response->assertSee('<div class="whitespace-pre-wrap text-center tracking-[0.4em] print-avoid-break print-avoid-break-after">記</div>', false);
+        $response->assertSee('<div class="whitespace-pre-wrap text-right print-avoid-break">敬具</div>', false);
+        $response->assertSee('<div class="whitespace-pre-wrap text-right print-avoid-break">以上</div>', false);
         $response->assertSee('text-center font-semibold text-base underline underline-offset-4', false);
     }
 
@@ -193,8 +193,27 @@ class MeetingInvitationTest extends TestCase
         $response = $this->actingAs($general)->get(route('meetings.invitation.pdf', $meeting));
 
         $response->assertOk();
-        $response->assertSee('<div class="whitespace-pre-wrap text-right">差出人情報</div>', false);
+        $response->assertSee('<div class="whitespace-pre-wrap text-right print-avoid-break">差出人情報</div>', false);
         $response->assertDontSee('>>差出人情報');
+    }
+
+    public function test_pdf_view_inserts_a_forced_page_break_for_the_marker_line(): void
+    {
+        [$organization, $general] = $this->createTenant();
+        $meeting = Meeting::factory()->for($organization, 'organization')->create();
+
+        $this->actingAs($general)->put(route('meetings.invitation.update', $meeting), [
+            'type' => 'pdf',
+            'body' => "1日目のプログラム\n[改ページ]\n2日目のプログラム",
+        ]);
+
+        $response = $this->actingAs($general)->get(route('meetings.invitation.pdf', $meeting));
+
+        $response->assertOk();
+        $response->assertSee('<div style="break-before: page; page-break-before: always;"></div>', false);
+        $response->assertDontSee('[改ページ]');
+        $response->assertSee('1日目のプログラム');
+        $response->assertSee('2日目のプログラム');
     }
 
     public function test_pdf_default_template_marks_the_sender_line_for_right_alignment(): void
@@ -208,7 +227,7 @@ class MeetingInvitationTest extends TestCase
         $response->assertSee('メンバー各位');
         $response->assertDontSee('>>');
         // the sender line (second occurrence of the org name) is right-aligned
-        $response->assertSee('<div class="whitespace-pre-wrap text-right">'.$organization->name.'</div>', false);
+        $response->assertSee('<div class="whitespace-pre-wrap text-right print-avoid-break">'.$organization->name.'</div>', false);
     }
 
     public function test_pdf_default_template_uses_a_seasonal_greeting_matching_the_current_month(): void

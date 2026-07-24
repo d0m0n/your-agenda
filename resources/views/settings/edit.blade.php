@@ -115,6 +115,9 @@
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
                     {{ __('PDF案内文では、行の先頭に') }} <span class="font-mono">&gt;&gt;</span> {{ __('を付けると、その行だけ右揃えで表示されます(差出人情報など)。') }}
                 </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    {{ __('行に') }} <span class="font-mono">[改ページ]</span> {{ __('とだけ書くと、印刷時にそこで強制的にページを分けます(複数日程・複数プログラムの長い案内文向け)。') }}
+                </p>
 
                 <div class="flex gap-1 border-b border-paper-200 dark:border-ink-700 mb-4">
                     <button type="button" @click="tab = 'pdf'"

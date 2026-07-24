@@ -22,10 +22,14 @@
         // 一切変更せず、行ごとに「記」「敬具」「以上」など定型句や、
         // 行頭の ">>" マーカー(差出人情報など任意の行を右揃えにしたい
         // ときに使う)を検出して配置だけを調整する(該当しない行はそのまま)。
+        // 行全体が「[改ページ]」の場合は、その行自体は表示せず、そこで
+        // 強制的にページを分ける(複数日程・複数プログラムの長い案内文向け)。
         $lines = explode("\n", $body);
         $centeredLines = ['記'];
         $rightAlignedLines = ['敬具', '以上'];
+        $pageBreakMarker = '[改ページ]';
         $isTitleLine = fn (string $line) => str_ends_with($line, 'ご案内');
+        $isHeadingLine = fn (string $line) => str_starts_with($line, '【') && str_ends_with($line, '】');
     @endphp
 
     <div class="py-12 print:py-0">
@@ -37,6 +41,12 @@
                     @foreach ($lines as $line)
                         @php
                             $trimmed = trim($line);
+                        @endphp
+                        @if ($trimmed === $pageBreakMarker)
+                            <div style="break-before: page; page-break-before: always;"></div>
+                            @continue
+                        @endif
+                        @php
                             $isRightAlignMarked = str_starts_with($trimmed, '>>');
                             $displayLine = $isRightAlignMarked ? substr($trimmed, 2) : $line;
                             // 空行はテキストが一切ないdivになり、CSS上は高さ0に潰れて
@@ -44,6 +54,7 @@
                             if ($displayLine === '') {
                                 $displayLine = "\u{00A0}";
                             }
+                            $isHeading = $trimmed === '記' || $isHeadingLine($trimmed) || ($trimmed !== '' && $isTitleLine($trimmed));
                             $alignClass = match (true) {
                                 $isRightAlignMarked => 'text-right',
                                 in_array($trimmed, $centeredLines, true) => 'text-center tracking-[0.4em]',
@@ -51,13 +62,14 @@
                                 $trimmed !== '' && $isTitleLine($trimmed) => 'text-center font-semibold text-base underline underline-offset-4',
                                 default => '',
                             };
+                            $breakClass = 'print-avoid-break'.($isHeading ? ' print-avoid-break-after' : '');
                         @endphp
-                        <div class="whitespace-pre-wrap {{ $alignClass }}">{{ $displayLine }}</div>
+                        <div class="whitespace-pre-wrap {{ $alignClass }} {{ $breakClass }}">{{ $displayLine }}</div>
                     @endforeach
                 </div>
 
                 @if ($mapQrCodeDataUri || $meeting->venue_address)
-                    <div class="mt-8 pt-6 border-t border-dashed border-paper-200 dark:border-ink-600 flex items-center gap-6">
+                    <div class="print-avoid-break mt-8 pt-6 border-t border-dashed border-paper-200 dark:border-ink-600 flex items-center gap-6">
                         @if ($mapQrCodeDataUri)
                             <img src="{{ $mapQrCodeDataUri }}" alt="{{ __('地図QRコード') }}" class="h-28 w-28 shrink-0">
                         @endif
