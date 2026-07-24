@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\InquiryCategory;
 use App\Http\Controllers\Controller;
 use App\Models\Inquiry;
+use App\Models\Organization;
 use App\Models\Scopes\OrganizationScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,6 +28,13 @@ class AdminInquiryController extends Controller
             $query->where('category', $category);
         }
 
+        $organization = null;
+
+        if ($organizationId = $request->query('organization_id')) {
+            $organization = Organization::find($organizationId);
+            $query->where('organization_id', $organizationId);
+        }
+
         if ($keyword = trim((string) $request->query('q'))) {
             $query->where(function ($q) use ($keyword) {
                 $q->where('subject', 'like', "%{$keyword}%")
@@ -44,7 +52,8 @@ class AdminInquiryController extends Controller
             'inquiries' => $inquiries,
             'categories' => InquiryCategory::cases(),
             'unhandledCount' => $unhandledCount,
-            'filters' => $request->only(['status', 'category', 'q']),
+            'filters' => $request->only(['status', 'category', 'q', 'organization_id']),
+            'filteredOrganization' => $organization,
         ]);
     }
 

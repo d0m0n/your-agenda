@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\UserRole;
+use App\Models\Inquiry;
 use App\Models\Material;
 use App\Models\Organization;
 use App\Models\User;
@@ -45,6 +46,21 @@ class AdminPanelTest extends TestCase
         $this->actingAs($admin)->get(route('admin.organizations.show', $organization))
             ->assertOk()
             ->assertSee('テストJC');
+    }
+
+    public function test_organization_list_shows_inquiry_count_and_links_to_filtered_list(): void
+    {
+        $admin = $this->makeSuperAdmin();
+        $organizationA = Organization::factory()->create(['name' => '問い合わせ多め組織']);
+        $organizationB = Organization::factory()->create(['name' => '問い合わせなし組織']);
+
+        Inquiry::factory()->for($organizationA, 'organization')->count(3)->create();
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('3件');
+        $response->assertSee(route('admin.inquiries.index', ['organization_id' => $organizationA->id]), false);
     }
 
     public function test_super_admin_can_change_a_general_users_storage_quota(): void

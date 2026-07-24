@@ -100,6 +100,23 @@ class AdminInquiryTest extends TestCase
         $response->assertDontSee('見つからないはず');
     }
 
+    public function test_super_admin_can_filter_inquiries_by_organization(): void
+    {
+        $admin = $this->makeSuperAdmin();
+        $orgA = Organization::factory()->create(['name' => 'A組織']);
+        $orgB = Organization::factory()->create(['name' => 'B組織']);
+
+        Inquiry::factory()->for($orgA, 'organization')->create(['subject' => 'A組織の件']);
+        Inquiry::factory()->for($orgB, 'organization')->create(['subject' => 'B組織の件']);
+
+        $response = $this->actingAs($admin)->get(route('admin.inquiries.index', ['organization_id' => $orgA->id]));
+
+        $response->assertOk();
+        $response->assertSee('A組織の件');
+        $response->assertDontSee('B組織の件');
+        $response->assertSee(__('組織で絞り込み中'));
+    }
+
     public function test_super_admin_can_toggle_handled_status(): void
     {
         $admin = $this->makeSuperAdmin();

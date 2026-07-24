@@ -66,4 +66,12 @@ class Organization extends Model
     {
         return $this->hasMany(Position::class);
     }
+
+    /**
+     * @return HasMany<Inquiry, $this>
+     */
+    public function inquiries(): HasMany
+    {
+        return $this->hasMany(Inquiry::class);
+    }
 }

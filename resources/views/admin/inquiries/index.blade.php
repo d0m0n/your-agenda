@@ -14,7 +14,18 @@
                 </div>
             @endif
 
+            @if ($filteredOrganization)
+                <div class="px-4 py-3 rounded-md bg-brass-100 dark:bg-brass-600/25 text-brass-700 dark:text-brass-300 text-sm flex items-center justify-between gap-4">
+                    <span>{{ __('組織で絞り込み中') }}: <strong>{{ $filteredOrganization->name }}</strong></span>
+                    <a href="{{ route('admin.inquiries.index', array_diff_key($filters, ['organization_id' => null])) }}" class="hover:underline shrink-0">{{ __('絞り込みを解除') }}</a>
+                </div>
+            @endif
+
             <form method="GET" action="{{ route('admin.inquiries.index') }}" class="bg-paper-50 dark:bg-ink-800 shadow-sm sm:rounded-lg p-4 flex flex-wrap items-end gap-4">
+                @if ($filters['organization_id'] ?? null)
+                    <input type="hidden" name="organization_id" value="{{ $filters['organization_id'] }}">
+                @endif
+
                 <div>
                     <x-input-label for="filter_status" :value="__('状態')" />
                     <select id="filter_status" name="status" class="mt-1 block border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm text-sm">
