@@ -7,7 +7,7 @@
         @include('layouts.theme-init')
 
         <title>{{ config('app.name') }} | 議題はあなた次第。委員会運営がもっと楽になる</title>
-        <meta name="description" content="会議・次第・メンバー・資料をひとつの場所で。青年会議所の委員会運営を、毎月タバコ1箱分の負担で楽にするクラウドサービス「あなた次第」。">
+        <meta name="description" content="会議・次第・メンバー・資料をひとつの場所で。委員会運営を、毎月タバコ1箱分の負担で楽にするクラウドサービス「あなた次第」。">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,7 +54,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                     <div>
                         <p class="text-xs font-medium tracking-[0.2em] text-leather-500 dark:text-leather-300 uppercase">
-                            青年会議所の委員会運営を、もっと軽やかに
+                            委員会運営を、もっと軽やかに
                         </p>
                         <h1 class="mt-4 font-serif text-4xl sm:text-5xl font-bold leading-tight text-ink-800 dark:text-paper-100">
                             議題を決めるのも、<br>進めるのも――<br>
