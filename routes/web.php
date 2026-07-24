@@ -4,6 +4,7 @@ use App\Http\Controllers\AgendaItemController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MeetingController;
@@ -61,6 +62,11 @@ Route::middleware(['auth', 'subscribed'])->group(function () {
 // ため、subscribedミドルウェアを外している。
 Route::middleware('auth')->group(function () {
     Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+
+    // 取扱説明書。一般/オブザーブ両方が読めるよう、また未契約状態でも
+    // 読めるよう can:manage・subscribed のどちらも外している(HelpController側で
+    // ロールに応じて表示するセクションを切り替える)。
+    Route::get('/help', [HelpController::class, 'index'])->name('help.index');
 
     // 議案ファイル(sites)は展開後の中身をWebサーバーが直接配信する静的ファイルのため
     // ルート/ミドルウェアを経由しない。「開く入口」だけをここでラップし、

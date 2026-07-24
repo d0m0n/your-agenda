@@ -47,41 +47,37 @@
         </header>
 
         {{-- ヒーロー --}}
-        <section class="relative overflow-hidden">
-            <div class="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-brass-400/10 blur-3xl"></div>
-            <div class="pointer-events-none absolute top-40 -left-24 h-72 w-72 rounded-full bg-leather-400/10 blur-3xl"></div>
+        <section class="relative isolate overflow-hidden flex items-center min-h-[560px] sm:min-h-[620px] lg:min-h-[720px]">
+            <div class="absolute inset-0">
+                <x-image-placeholder label="メインビジュアル画像" fill />
+                <div class="absolute inset-0 bg-gradient-to-t from-ink-900/90 via-ink-900/55 to-ink-900/20"></div>
+            </div>
 
-            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 lg:pt-24 lg:pb-28">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-                    <div>
-                        <p class="text-xs font-medium tracking-[0.2em] text-leather-500 dark:text-leather-300 uppercase">
-                            面倒な会議準備を、もっと軽やかに
-                        </p>
-                        <h1 class="mt-4 font-serif text-4xl sm:text-5xl font-bold leading-tight text-ink-800 dark:text-paper-100">
-                            議題を決めるのも、<br>進めるのも――<br>
-                            <span class="text-leather-500 dark:text-leather-300">あなた次第</span>です。
-                        </h1>
-                        <p class="mt-6 text-base leading-relaxed text-ink-600 dark:text-paper-100/70 max-w-lg">
-                            会議の日程、次第(進行表)、メンバーの連絡先、資料が、
-                            Excelやメール、LINEに散らばっていませんか。
-                            「あなた次第」なら、ぜんぶひとつの場所にまとまります。
-                        </p>
-                        <div class="mt-8 flex flex-wrap items-center gap-4">
-                            <a href="{{ route('register') }}" class="inline-flex items-center px-6 py-3 rounded-md bg-leather-500 hover:bg-leather-600 text-white font-semibold shadow-md transition-colors">
-                                無料ではじめる
-                            </a>
-                            <a href="#features" class="inline-flex items-center px-6 py-3 rounded-md border border-paper-200 dark:border-ink-600 text-ink-700 dark:text-paper-100 font-medium hover:bg-paper-50 dark:hover:bg-ink-800 transition-colors">
-                                機能を見る
-                            </a>
-                        </div>
-                        <p class="mt-4 text-xs text-ink-400 dark:text-paper-100/40">
-                            クレジットカード登録は不要です。まずは組織名・お名前・メールアドレスだけでお試しいただけます。
-                        </p>
+            <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                <div class="max-w-2xl">
+                    <p class="text-xs font-medium tracking-[0.2em] text-brass-200 uppercase">
+                        面倒な会議準備を、もっと軽やかに
+                    </p>
+                    <h1 class="mt-4 font-serif text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-paper-50">
+                        議題を決めるのも、<br>進めるのも――<br>
+                        <span class="text-leather-200">あなた次第</span>です。
+                    </h1>
+                    <p class="mt-6 text-base leading-relaxed text-paper-100/85 max-w-lg">
+                        会議の日程、次第(進行表)、メンバーの連絡先、資料が、
+                        Excelやメール、LINEに散らばっていませんか。
+                        「あなた次第」なら、ぜんぶひとつの場所にまとまります。
+                    </p>
+                    <div class="mt-8 flex flex-wrap items-center gap-4">
+                        <a href="{{ route('register') }}" class="inline-flex items-center px-6 py-3 rounded-md bg-leather-500 hover:bg-leather-600 text-white font-semibold shadow-md transition-colors">
+                            無料ではじめる
+                        </a>
+                        <a href="#features" class="inline-flex items-center px-6 py-3 rounded-md border border-white/40 text-white font-medium hover:bg-white/10 transition-colors">
+                            機能を見る
+                        </a>
                     </div>
-
-                    <div class="lg:pl-6">
-                        <x-image-placeholder label="メインビジュアル画像" />
-                    </div>
+                    <p class="mt-4 text-xs text-paper-100/60">
+                        クレジットカード登録は不要です。まずは組織名・お名前・メールアドレスだけでお試しいただけます。
+                    </p>
                 </div>
             </div>
         </section>

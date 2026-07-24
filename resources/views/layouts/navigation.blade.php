@@ -52,6 +52,16 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6 gap-2">
                 @include('layouts._trial-status-badge')
                 @include('layouts._storage-usage-badge')
+                <a href="{{ route('help.index') }}"
+                    class="inline-flex items-center justify-center h-9 w-9 rounded-full text-gray-500 dark:text-paper-100/70 hover:text-gray-700 dark:hover:text-paper-100 hover:bg-gray-100 dark:hover:bg-ink-800 focus:outline-none transition"
+                    title="{{ __('取扱説明書') }}">
+                    <span class="sr-only">{{ __('取扱説明書') }}</span>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M9.6 9.75a2.4 2.4 0 114.6 1.2c-.5.6-1.6.9-1.6 2.05" />
+                        <circle cx="12.5" cy="16.5" r=".9" fill="currentColor" stroke="none" />
+                    </svg>
+                </a>
                 <button type="button" x-data x-on:click="$dispatch('open-modal', 'inquiry-form')"
                     class="inline-flex items-center justify-center h-9 w-9 rounded-full text-gray-500 dark:text-paper-100/70 hover:text-gray-700 dark:hover:text-paper-100 hover:bg-gray-100 dark:hover:bg-ink-800 focus:outline-none transition"
                     title="{{ __('お問い合わせ') }}">
@@ -145,6 +155,16 @@
                     <div class="font-medium text-sm text-gray-500 dark:text-paper-100/50">{{ Auth::user()->email }}</div>
                 </div>
                 <div class="flex items-center gap-1">
+                    <a href="{{ route('help.index') }}"
+                        class="inline-flex items-center justify-center h-9 w-9 rounded-full text-gray-500 dark:text-paper-100/70 hover:text-gray-700 dark:hover:text-paper-100 hover:bg-gray-100 dark:hover:bg-ink-800 focus:outline-none transition"
+                        title="{{ __('取扱説明書') }}">
+                        <span class="sr-only">{{ __('取扱説明書') }}</span>
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M9.6 9.75a2.4 2.4 0 114.6 1.2c-.5.6-1.6.9-1.6 2.05" />
+                            <circle cx="12.5" cy="16.5" r=".9" fill="currentColor" stroke="none" />
+                        </svg>
+                    </a>
                     <button type="button" x-data x-on:click="$dispatch('open-modal', 'inquiry-form')"
                         class="inline-flex items-center justify-center h-9 w-9 rounded-full text-gray-500 dark:text-paper-100/70 hover:text-gray-700 dark:hover:text-paper-100 hover:bg-gray-100 dark:hover:bg-ink-800 focus:outline-none transition"
                         title="{{ __('お問い合わせ') }}">
