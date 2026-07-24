@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Meeting;
 use App\Models\Organization;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Str;
 use ZipArchive;
 
 class MeetingArchiveExportService
@@ -32,9 +31,20 @@ class MeetingArchiveExportService
             'topLevelAgendaItems.children.site',
         ])->get();
 
+        $usedFolders = [];
+
         foreach ($meetings as $meeting) {
-            $folder = $meeting->id.'_'.Str::slug($meeting->name, '-', 'ja');
-            $folder = $folder === $meeting->id.'_' ? (string) $meeting->id : $folder;
+            // フォルダ名を開催日時順にソートしやすいYYYYMMDDhhmm形式にする
+            // (Zipを展開したときに元のスラッグ名より一目で分かるように)。
+            // held_atが未定(null)の会議は日時の代わりに会議IDを使う。
+            // 同一分に複数の会議がある稀なケースでは会議IDを付けて衝突を防ぐ
+            // (衝突したままだとZip内で同名のagenda.htmlが上書きされてしまうため)。
+            $folder = $meeting->held_at?->format('YmdHi') ?? (string) $meeting->id;
+
+            if (isset($usedFolders[$folder])) {
+                $folder .= '-'.$meeting->id;
+            }
+            $usedFolders[$folder] = true;
 
             $this->addMeetingContents($zip, $meeting, $folder.'/');
         }

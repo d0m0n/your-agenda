@@ -103,6 +103,14 @@
                 </form>
             </div>
 
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('オブザーブユーザー') }}</h3>
+                    <a href="{{ route('observers.index') }}" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">{{ __('管理する') }}</a>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('閲覧専用アカウントの作成・パスワード変更・削除ができます。') }}</p>
+            </div>
+
             <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6" x-data="{ tab: 'pdf' }">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ __('案内文のデフォルト') }}</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
@@ -160,14 +168,6 @@
                         </form>
                     </div>
                 @endforeach
-            </div>
-
-            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('オブザーブユーザー') }}</h3>
-                    <a href="{{ route('observers.index') }}" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">{{ __('管理する') }}</a>
-                </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('閲覧専用アカウントの作成・パスワード変更・削除ができます。') }}</p>
             </div>
 
             <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
