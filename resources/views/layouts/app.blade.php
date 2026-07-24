@@ -20,6 +20,7 @@
     </head>
     <body class="font-sans antialiased">
         <x-toast />
+        <x-inquiry-modal />
 
         <div class="min-h-screen bg-paper-100 dark:bg-night print:bg-white">
             @include('layouts.navigation')

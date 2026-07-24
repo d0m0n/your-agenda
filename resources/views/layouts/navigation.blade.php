@@ -51,6 +51,14 @@
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6 gap-2">
                 @include('layouts._storage-usage-badge')
+                <button type="button" x-data x-on:click="$dispatch('open-modal', 'inquiry-form')"
+                    class="inline-flex items-center justify-center h-9 w-9 rounded-full text-gray-500 dark:text-paper-100/70 hover:text-gray-700 dark:hover:text-paper-100 hover:bg-gray-100 dark:hover:bg-ink-800 focus:outline-none transition"
+                    title="{{ __('お問い合わせ') }}">
+                    <span class="sr-only">{{ __('お問い合わせ') }}</span>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
+                    </svg>
+                </button>
                 <x-theme-toggle />
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
@@ -135,7 +143,17 @@
                     <div class="font-medium text-base text-gray-800 dark:text-paper-100">{{ Auth::user()->name }}</div>
                     <div class="font-medium text-sm text-gray-500 dark:text-paper-100/50">{{ Auth::user()->email }}</div>
                 </div>
-                <x-theme-toggle />
+                <div class="flex items-center gap-1">
+                    <button type="button" x-data x-on:click="$dispatch('open-modal', 'inquiry-form')"
+                        class="inline-flex items-center justify-center h-9 w-9 rounded-full text-gray-500 dark:text-paper-100/70 hover:text-gray-700 dark:hover:text-paper-100 hover:bg-gray-100 dark:hover:bg-ink-800 focus:outline-none transition"
+                        title="{{ __('お問い合わせ') }}">
+                        <span class="sr-only">{{ __('お問い合わせ') }}</span>
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
+                        </svg>
+                    </button>
+                    <x-theme-toggle />
+                </div>
             </div>
 
             @if (($storageUsagePercent ?? 0) >= 80)

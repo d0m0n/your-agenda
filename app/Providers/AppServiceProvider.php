@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Inquiry;
+use App\Models\Scopes\OrganizationScope;
 use App\Models\User;
 use App\Services\StorageUsageService;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +56,13 @@ class AppServiceProvider extends ServiceProvider
             );
 
             $view->with('storageUsagePercent', $percent);
+        });
+
+        View::composer('layouts.admin', function ($view) {
+            $view->with(
+                'adminUnhandledInquiriesCount',
+                Inquiry::withoutGlobalScope(OrganizationScope::class)->whereNull('handled_at')->count()
+            );
         });
     }
 }

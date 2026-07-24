@@ -28,6 +28,14 @@
                                 {{ __('あなた次第 管理者パネル') }}
                             </a>
                             <a href="{{ route('admin.dashboard') }}" class="text-sm text-paper-100/70 hover:text-paper-100">{{ __('組織一覧') }}</a>
+                            <a href="{{ route('admin.inquiries.index') }}" class="inline-flex items-center gap-1.5 text-sm text-paper-100/70 hover:text-paper-100">
+                                {{ __('お問い合わせ') }}
+                                @if (($adminUnhandledInquiriesCount ?? 0) > 0)
+                                    <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-brass-400 text-ink-900 text-xs font-semibold">
+                                        {{ $adminUnhandledInquiriesCount }}
+                                    </span>
+                                @endif
+                            </a>
                         </div>
                         <div class="flex items-center gap-4">
                             <x-theme-toggle />

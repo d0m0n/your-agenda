@@ -3,6 +3,7 @@
 use App\Http\Controllers\AgendaItemController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\MeetingInvitationController;
@@ -37,6 +38,10 @@ Route::middleware('auth')->group(function () {
     // 引き続き can:manage 側のみ。ビュー側で @can('manage') により操作系UIを隠す)
     Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
     Route::get('/members', [MemberController::class, 'index'])->name('members.index');
+
+    // 問い合わせ・不具合報告・機能要望の送信フォーム。一般/オブザーブ両方が
+    // 送信できるため can:manage の外に置く(super_adminはInquiryRequestで拒否)。
+    Route::post('/inquiries', [InquiryController::class, 'store'])->name('inquiries.store');
 });
 
 Route::middleware(['auth', 'can:manage'])->group(function () {
