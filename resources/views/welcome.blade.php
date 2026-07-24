@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         @include('layouts.theme-init')
+        @include('layouts._favicon')
 
         <title>{{ config('app.name') }} | 議題はあなた次第。委員会運営がもっと楽になる</title>
         <meta name="description" content="会議・次第・メンバー・資料をひとつの場所で。委員会運営を、毎月タバコ1箱分の負担で楽にするクラウドサービス「あなた次第」。">

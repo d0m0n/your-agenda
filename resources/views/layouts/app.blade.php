@@ -7,6 +7,7 @@
         <meta name="view-transition" content="same-origin">
 
         @include('layouts.theme-init')
+        @include('layouts._favicon')
 
         <title>@isset($title){{ $title }}@else{{ config('app.name', 'Laravel') }}@endisset</title>
 

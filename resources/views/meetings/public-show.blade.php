@@ -6,6 +6,7 @@
         <meta name="robots" content="noindex">
 
         @include('layouts.theme-init')
+        @include('layouts._favicon')
 
         <title>{{ $meeting->organization->name }}の次第 | {{ $meeting->name }}</title>
 

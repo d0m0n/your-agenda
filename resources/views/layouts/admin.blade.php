@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         @include('layouts.theme-init')
+        @include('layouts._favicon')
 
         <title>{{ __('管理者パネル') }} - {{ config('app.name', 'Laravel') }}</title>
 
