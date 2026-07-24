@@ -68,10 +68,11 @@ Route::middleware('auth')->group(function () {
     Route::middleware('subscribed')->get('/sites/{site}/open', [SiteController::class, 'open'])->name('sites.open');
 });
 
-// 解約・トライアル終了後もデータを持ち出せるよう、一括ダウンロードだけは
+// 解約・トライアル終了後もデータを持ち出せるよう、一括/個別ダウンロードは
 // subscribedミドルウェアの対象外にする(CLAUDE.mdの解約時データ持ち出し要件)。
 Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::get('/settings/export', [OrganizationSettingsController::class, 'export'])->name('settings.export');
+    Route::get('/meetings/{meeting}/export', [MeetingController::class, 'export'])->name('meetings.export');
 });
 
 Route::middleware(['auth', 'can:manage', 'subscribed'])->group(function () {

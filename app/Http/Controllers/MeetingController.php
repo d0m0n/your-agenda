@@ -6,10 +6,12 @@ use App\Http\Requests\MeetingRequest;
 use App\Models\Material;
 use App\Models\Meeting;
 use App\Services\ImageUploadService;
+use App\Services\MeetingArchiveExportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class MeetingController extends Controller
 {
@@ -143,5 +145,19 @@ class MeetingController extends Controller
         $meeting->save();
 
         return redirect()->route('meetings.show', $meeting)->with('status', '公開リンクを無効化しました。');
+    }
+
+    /**
+     * 会議単体の次第(HTML)+紐づくZip議案一式をダウンロードする。組織
+     * 一括ダウンロード(settings.export)と同じ仕組みで、会議1件分だけを
+     * 取得する。解約・トライアル終了後もデータ持ち出しができるよう、
+     * settings.exportと同様にsubscribedミドルウェアの対象外にしている。
+     */
+    public function export(Meeting $meeting, MeetingArchiveExportService $exporter): BinaryFileResponse
+    {
+        $zipPath = $exporter->exportMeeting($meeting);
+        $filename = $meeting->name.'_次第_'.now()->format('Ymd').'.zip';
+
+        return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
     }
 }

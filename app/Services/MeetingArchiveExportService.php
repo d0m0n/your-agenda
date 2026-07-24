@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Meeting;
 use App\Models\Organization;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
@@ -35,20 +36,7 @@ class MeetingArchiveExportService
             $folder = $meeting->id.'_'.Str::slug($meeting->name, '-', 'ja');
             $folder = $folder === $meeting->id.'_' ? (string) $meeting->id : $folder;
 
-            $html = View::make('exports.agenda', ['meeting' => $meeting])->render();
-            $zip->addFromString($folder.'/agenda.html', $html);
-
-            foreach ($meeting->topLevelAgendaItems as $item) {
-                if ($item->site) {
-                    $this->addSiteDirectory($zip, $item->site->uuid, $folder.'/sites/'.$item->site->uuid);
-                }
-
-                foreach ($item->children as $child) {
-                    if ($child->site) {
-                        $this->addSiteDirectory($zip, $child->site->uuid, $folder.'/sites/'.$child->site->uuid);
-                    }
-                }
-            }
+            $this->addMeetingContents($zip, $meeting, $folder.'/');
         }
 
         if ($zip->numFiles === 0) {
@@ -60,6 +48,52 @@ class MeetingArchiveExportService
         $zip->close();
 
         return $zipPath;
+    }
+
+    /**
+     * 会議単体の次第(HTML)+紐づくZip議案一式をダウンロードする。
+     * export()と中身の構成は同じだが、会議1件分だけをZip直下に展開する
+     * (組織一括ダウンロードのような会議IDフォルダは作らない)。
+     *
+     * @return string Absolute path to the generated zip (caller must clean it up).
+     */
+    public function exportMeeting(Meeting $meeting): string
+    {
+        $meeting->loadMissing([
+            'topLevelAgendaItems.member.position',
+            'topLevelAgendaItems.site',
+            'topLevelAgendaItems.children.member.position',
+            'topLevelAgendaItems.children.site',
+        ]);
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'meeting-export-').'.zip';
+
+        $zip = new ZipArchive;
+        $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+        $this->addMeetingContents($zip, $meeting, '');
+
+        $zip->close();
+
+        return $zipPath;
+    }
+
+    private function addMeetingContents(ZipArchive $zip, Meeting $meeting, string $basePath): void
+    {
+        $html = View::make('exports.agenda', ['meeting' => $meeting])->render();
+        $zip->addFromString($basePath.'agenda.html', $html);
+
+        foreach ($meeting->topLevelAgendaItems as $item) {
+            if ($item->site) {
+                $this->addSiteDirectory($zip, $item->site->uuid, $basePath.'sites/'.$item->site->uuid);
+            }
+
+            foreach ($item->children as $child) {
+                if ($child->site) {
+                    $this->addSiteDirectory($zip, $child->site->uuid, $basePath.'sites/'.$child->site->uuid);
+                }
+            }
+        }
     }
 
     private function addSiteDirectory(ZipArchive $zip, string $uuid, string $zipBasePath): void

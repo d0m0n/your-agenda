@@ -89,4 +89,50 @@ class DashboardAndSettingsBoundaryTest extends TestCase
         $this->actingAs($observerA)->get(route('settings.export'))->assertForbidden();
         $this->actingAs($observerA)->put(route('settings.update'), ['name' => '不正更新'])->assertForbidden();
     }
+
+    public function test_meeting_individual_export_contains_only_that_meetings_agenda(): void
+    {
+        [$orgA, $userA] = $this->createTenant();
+
+        $meetingA = Meeting::factory()->for($orgA, 'organization')->create(['name' => '自組織の総会']);
+        $otherMeetingA = Meeting::factory()->for($orgA, 'organization')->create(['name' => '自組織の別会議']);
+
+        $response = $this->actingAs($userA)->get(route('meetings.export', $meetingA));
+
+        $response->assertOk();
+
+        $zipPath = $response->getFile()->getPathname();
+        $zip = new ZipArchive;
+        $zip->open($zipPath);
+
+        $agendaHtml = '';
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = $zip->getNameIndex($i);
+            if (str_ends_with($name, 'agenda.html')) {
+                $agendaHtml .= $zip->getFromIndex($i);
+            }
+        }
+        $zip->close();
+
+        $this->assertStringContainsString('自組織の総会', $agendaHtml);
+        $this->assertStringNotContainsString('自組織の別会議', $agendaHtml);
+    }
+
+    public function test_general_user_cannot_export_another_organizations_meeting(): void
+    {
+        [, $userA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        $meetingB = Meeting::factory()->for($orgB, 'organization')->create();
+
+        $this->actingAs($userA)->get(route('meetings.export', $meetingB))->assertNotFound();
+    }
+
+    public function test_observer_cannot_export_a_meeting(): void
+    {
+        [$orgA, , $observerA] = $this->createTenant();
+        $meetingA = Meeting::factory()->for($orgA, 'organization')->create();
+
+        $this->actingAs($observerA)->get(route('meetings.export', $meetingA))->assertForbidden();
+    }
 }

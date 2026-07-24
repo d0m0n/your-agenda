@@ -58,6 +58,7 @@
                                             <a href="{{ route('meetings.edit', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('編集') }}</a>
                                             <a href="{{ route('meetings.agenda', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('次第編集') }}</a>
                                             <a href="{{ route('meetings.invitation.edit', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('案内文作成') }}</a>
+                                            <a href="{{ route('meetings.export', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('ダウンロード') }}</a>
                                             <x-confirm-delete-button
                                                 :id="'delete-meeting-'.$meeting->id"
                                                 :action="route('meetings.destroy', $meeting)"
