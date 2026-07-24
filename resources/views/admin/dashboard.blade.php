@@ -11,7 +11,7 @@
             <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-paper-200 dark:divide-ink-700">
-                        <thead class="bg-paper-200 dark:bg-ink-900">
+                        <thead class="bg-paper-200 dark:bg-ink-700">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('組織名') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('契約状況') }}</th>

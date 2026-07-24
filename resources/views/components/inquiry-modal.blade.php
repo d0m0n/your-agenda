@@ -15,7 +15,7 @@
 
         <div>
             <x-input-label for="inquiry_category" :value="__('種類')" />
-            <select id="inquiry_category" name="category" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400">
+            <select id="inquiry_category" name="category" class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400">
                 @foreach (\App\Enums\InquiryCategory::cases() as $category)
                     <option value="{{ $category->value }}" @selected(old('category') === $category->value)>{{ $category->label() }}</option>
                 @endforeach
@@ -32,7 +32,7 @@
         <div>
             <x-input-label for="inquiry_body" :value="__('内容')" />
             <textarea id="inquiry_body" name="body" rows="5" required
-                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400">{{ old('body') }}</textarea>
+                class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400">{{ old('body') }}</textarea>
             <x-input-error :messages="$errors->get('body')" class="mt-2" />
         </div>
 

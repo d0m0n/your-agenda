@@ -176,7 +176,7 @@
                         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('次第の一括ダウンロード') }}</h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('全会議の次第とZip議案をまとめてダウンロードします。解約時のデータ持ち出しにも利用できます。') }}</p>
                     </div>
-                    <a href="{{ route('settings.export') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-leather-400 focus:ring-offset-2 transition shrink-0">
+                    <a href="{{ route('settings.export') }}" class="inline-flex items-center px-4 py-2 bg-ink-800 dark:bg-brass-400 border border-transparent rounded-md font-semibold text-xs text-white dark:text-ink-900 uppercase tracking-widest hover:bg-ink-700 dark:hover:bg-brass-300 focus:outline-none focus:ring-2 focus:ring-leather-400 focus:ring-offset-2 dark:focus:ring-offset-ink-800 transition shrink-0">
                         {{ __('ダウンロード') }}
                     </a>
                 </div>

@@ -46,7 +46,7 @@
     <div class="sm:col-span-2">
         <x-input-label for="social_event_info" :value="__('懇親会・2次会情報')" />
         <textarea id="social_event_info" name="social_event_info" rows="3"
-            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400"
+            class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400"
             placeholder="{{ __('例: 懇親会 19:30〜 会費3,000円 / 2次会 未定') }}">{{ $value('social_event_info') }}</textarea>
         <x-input-error :messages="$errors->get('social_event_info')" class="mt-2" />
     </div>
@@ -54,7 +54,7 @@
     <div class="sm:col-span-2">
         <x-input-label for="recommended_hotel_info" :value="__('推奨ホテル情報')" />
         <textarea id="recommended_hotel_info" name="recommended_hotel_info" rows="3"
-            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400">{{ $value('recommended_hotel_info') }}</textarea>
+            class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400">{{ $value('recommended_hotel_info') }}</textarea>
         <x-input-error :messages="$errors->get('recommended_hotel_info')" class="mt-2" />
     </div>
 
@@ -73,7 +73,7 @@
     <div class="sm:col-span-2">
         <x-input-label for="memo" :value="__('メモ')" />
         <textarea id="memo" name="memo" rows="4"
-            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400">{{ $value('memo') }}</textarea>
+            class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm focus:border-leather-400 focus:ring-leather-400">{{ $value('memo') }}</textarea>
         <x-input-error :messages="$errors->get('memo')" class="mt-2" />
     </div>
 

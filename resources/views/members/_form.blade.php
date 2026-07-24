@@ -31,7 +31,7 @@
 
     <div>
         <x-input-label for="position_id" :value="__('役職')" />
-        <select id="position_id" name="position_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+        <select id="position_id" name="position_id" class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm">
             <option value="">{{ __('未設定') }}</option>
             @foreach ($positions as $position)
                 <option value="{{ $position->id }}" @selected(old('position_id', $m?->position_id) == $position->id)>{{ $position->name }}</option>
@@ -42,7 +42,7 @@
 
     <div>
         <x-input-label for="department_id" :value="__('所属部署')" />
-        <select id="department_id" name="department_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+        <select id="department_id" name="department_id" class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm">
             <option value="">{{ __('未設定') }}</option>
             @foreach ($departments as $department)
                 <option value="{{ $department->id }}" @selected(old('department_id', $m?->department_id) == $department->id)>{{ $department->name }}</option>
@@ -61,7 +61,7 @@
     <div>
         <x-input-label for="gender" :value="__('性別')" />
         @php $gender = old('gender', $m?->gender); @endphp
-        <select id="gender" name="gender" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+        <select id="gender" name="gender" class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm">
             <option value="">{{ __('未設定') }}</option>
             <option value="male" @selected($gender === 'male')>{{ __('男性') }}</option>
             <option value="female" @selected($gender === 'female')>{{ __('女性') }}</option>

@@ -28,7 +28,7 @@
 
                 <div>
                     <x-input-label for="filter_status" :value="__('状態')" />
-                    <select id="filter_status" name="status" class="mt-1 block border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm text-sm">
+                    <select id="filter_status" name="status" class="mt-1 block border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm text-sm">
                         <option value="" @selected(($filters['status'] ?? '') === '')>{{ __('すべて') }}</option>
                         <option value="unhandled" @selected(($filters['status'] ?? '') === 'unhandled')>{{ __('未対応') }}</option>
                         <option value="handled" @selected(($filters['status'] ?? '') === 'handled')>{{ __('対応済み') }}</option>
@@ -37,7 +37,7 @@
 
                 <div>
                     <x-input-label for="filter_category" :value="__('種類')" />
-                    <select id="filter_category" name="category" class="mt-1 block border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm text-sm">
+                    <select id="filter_category" name="category" class="mt-1 block border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm text-sm">
                         <option value="" @selected(($filters['category'] ?? '') === '')>{{ __('すべて') }}</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->value }}" @selected(($filters['category'] ?? '') === $category->value)>{{ $category->label() }}</option>

@@ -3,7 +3,7 @@
 @endphp
 
 <x-input-label :value="__('議案データのリンク')" />
-<select name="agenda_link" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+<select name="agenda_link" class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm">
     <option value="">{{ __('なし') }}</option>
     @if ($sites->isNotEmpty())
         <optgroup label="{{ __('議案ファイル(この会議)') }}">

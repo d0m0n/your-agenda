@@ -114,7 +114,7 @@
                     <form method="GET" action="{{ route('meetings.agenda', $meeting) }}" class="flex flex-wrap items-end gap-3 mb-4">
                         <div class="flex-1 min-w-[12rem]">
                             <x-input-label for="copy_from" :value="__('コピー元の会議')" />
-                            <select id="copy_from" name="copy_from" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+                            <select id="copy_from" name="copy_from" class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm">
                                 <option value="">{{ __('選択してください') }}</option>
                                 @foreach ($pastMeetings as $pastMeeting)
                                     <option value="{{ $pastMeeting->id }}" @selected($copySourceMeeting?->id === $pastMeeting->id)>

@@ -15,7 +15,7 @@
         <button type="button" class="text-xs text-leather-500 dark:text-leather-300 hover:underline"
             x-show="mode === 'manual'" @click="mode = 'member'; assigneeName = ''">{{ __('名簿から選ぶ') }}</button>
     </div>
-    <select name="member_id" x-show="mode === 'member'" x-model="memberId" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm">
+    <select name="member_id" x-show="mode === 'member'" x-model="memberId" class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm">
         <option value="">{{ __('未定') }}</option>
         @foreach ($members as $member)
             <option value="{{ $member->id }}">{{ $member->nameWithPosition() }}</option>
@@ -23,5 +23,5 @@
     </select>
     <input type="text" name="assignee_name" x-show="mode === 'manual'" x-model="assigneeName"
         placeholder="{{ __('担当者名を入力') }}"
-        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md shadow-sm" />
+        class="mt-1 block w-full border-gray-300 dark:border-ink-600 dark:bg-ink-900 dark:text-ink-100 rounded-md shadow-sm" />
 </div>

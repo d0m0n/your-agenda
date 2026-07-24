@@ -4,7 +4,7 @@
             <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
                 {{ __('公開サイト一覧') }}
             </h2>
-            <a href="{{ route('sites.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-leather-400 focus:ring-offset-2 transition">
+            <a href="{{ route('sites.create') }}" class="inline-flex items-center px-4 py-2 bg-ink-800 dark:bg-brass-400 border border-transparent rounded-md font-semibold text-xs text-white dark:text-ink-900 uppercase tracking-widest hover:bg-ink-700 dark:hover:bg-brass-300 focus:outline-none focus:ring-2 focus:ring-leather-400 focus:ring-offset-2 dark:focus:ring-offset-ink-800 transition">
                 {{ __('新規アップロード') }}
             </a>
         </div>
@@ -16,7 +16,7 @@
             <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-paper-200 dark:divide-ink-700">
-                        <thead class="bg-paper-200 dark:bg-ink-900">
+                        <thead class="bg-paper-200 dark:bg-ink-700">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('タイトル') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('公開URL') }}</th>
