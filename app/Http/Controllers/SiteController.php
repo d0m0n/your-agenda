@@ -24,6 +24,19 @@ class SiteController extends Controller
         return view('sites.index', ['sites' => $sites]);
     }
 
+    /**
+     * 議案ファイルの実体はWebサーバーが直接配信する静的ファイル(public
+     * ディスク)のため、Laravelのルート/ミドルウェアを経由しない。この
+     * 「開く入口」だけをルート(subscribedミドルウェア付き)でラップし、
+     * 未契約組織はここでペイウォールへ弾かれるようにする。Siteは
+     * BelongsToOrganizationのグローバルスコープを持つため、暗黙の
+     * ルートモデルバインディングだけで他組織のsiteは自動的に404になる。
+     */
+    public function open(Site $site): RedirectResponse
+    {
+        return redirect()->to($site->publicUrl());
+    }
+
     public function create(): View
     {
         return view('sites.create');

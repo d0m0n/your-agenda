@@ -18,13 +18,39 @@
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                         <dt class="text-gray-500 dark:text-gray-400">{{ __('契約ステータス') }}</dt>
-                        <dd class="text-gray-900 dark:text-gray-100">{{ $organization->plan_status ?? '-' }}</dd>
+                        <dd class="text-gray-900 dark:text-gray-100">{{ $organization->subscriptionStatusLabel() }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-500 dark:text-gray-400">{{ __('契約日') }}</dt>
                         <dd class="text-gray-900 dark:text-gray-100">{{ $organization->contracted_at?->format('Y-m-d') ?? '-' }}</dd>
                     </div>
+                    <div>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('トライアル終了日') }}</dt>
+                        <dd class="text-gray-900 dark:text-gray-100">{{ $organization->trial_ends_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500 dark:text-gray-400">Stripe Customer ID</dt>
+                        <dd class="text-gray-900 dark:text-gray-100 font-mono text-xs">{{ $organization->stripe_id ?? '-' }}</dd>
+                    </div>
                 </dl>
+
+                <div class="mt-6 pt-4 border-t border-paper-200 dark:border-ink-700 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('無償提供モード') }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('有効にすると、この組織は課金なしで全機能を利用できます。') }}
+                        </p>
+                    </div>
+                    <form method="POST" action="{{ route('admin.organizations.toggle-free-access', $organization) }}">
+                        @csrf
+                        @method('PATCH')
+                        @if ($organization->free_access_enabled)
+                            <x-secondary-button type="submit">{{ __('無効にする') }}</x-secondary-button>
+                        @else
+                            <x-primary-button type="submit">{{ __('有効にする') }}</x-primary-button>
+                        @endif
+                    </form>
+                </div>
             </div>
 
             <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">

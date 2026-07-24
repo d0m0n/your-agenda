@@ -13,6 +13,7 @@
 - ログイン画面・ヘッダー・LPにサービス名を表示する
 
 ## 現在の進捗
+- 実装の推奨順序 1〜8 まですべて完了(詳細は下記「実装の推奨順序」参照)
 - 実装の推奨順序 1〜4 まで完了:
   1. organizations / role / マルチテナント基盤
   2. メンバー管理 + 誕生日抽出(CSV一括登録・エクスポート込み)
@@ -83,7 +84,25 @@
   - オブザーブユーザーは自分自身のプロフィール編集画面(Breeze標準の
     `/profile`)にアクセスできないようにルート・ナビ両方でガード
     (`can:manage`ミドルウェア配下に移動)
-- 8(課金)は未着手
+- 上記に加え、進捗ログ未記載のまま以下も実装済み(さらに別セッションで追加):
+  - 管理者パネル(`/admin`)へのBasic認証によるアクセス制限
+    (`ADMIN_BASIC_AUTH_USERNAME`/`PASSWORD`、両方設定時のみ有効。
+    `admin.basic_auth`ミドルウェア、`auth`より先に実行されるよう
+    優先度リストに追加)
+  - super_adminアカウントの二段階認証(TOTP、pragmarx/google2fa)と
+    ログイン失敗10回でのアカウントロック(30分、自動解除)。初回ログイン時に
+    QRコードでのセットアップを強制し、リカバリーコードを1回だけ表示する。
+    `php artisan admin:reset-two-factor {email}`で紛失時にリセット可能
+  - 一般/オブザーブユーザー向けの「お問い合わせ」機能(問い合わせ・不具合
+    報告・機能要望の3種、ナビ右側のアイコンからモーダルで送信)と、
+    管理者パネルでの一覧・フィルタ(状態/種類/組織/キーワード)・
+    対応済みトグル(`inquiries`テーブル、`Inquiry`モデル)
+  - ブランドマーク(`x-brand-mark`)を、次第の書類としおりをかたどった
+    アイコンに変更(`currentColor`で利用箇所ごとのブランドカラーに追従)
+  - LP・登録画面から「青年会議所」表記を削除し、「会議運営」という
+    汎用的な表現に統一(特定団体名を出さない方針)
+- 8(課金)完了: Stripe + Laravel Cashierによる月額課金と、14日間の
+  無料トライアル(カード登録不要)を実装。詳細は下記「契約・課金」参照
 
 ## 開発環境
 - Docker + Laravel Sail
@@ -148,7 +167,15 @@
 
 ## データ構造(実装済み)
 - organizations: name, header_image_path, icon_image_path,
-  google_calendar_id, contracted_at, plan_status,
+  google_calendar_id, contracted_at,
+  stripe_id, pm_type, pm_last_four(Laravel Cashierの`Billable`トレイトが
+  管理する顧客ID・支払い方法情報。Cashierの標準マイグレーションを
+  usersではなくorganizationsに向けて発行している),
+  trial_ends_at(nullable datetime, 14日間無料トライアルの終了日時。
+  組織登録時にセットする。カード登録不要のトライアルのため、Stripe側には
+  サブスクリプションを作らずCashierの`onGenericTrial()`で判定する。
+  詳細は下記「契約・課金」参照。旧`plan_status`カラムは廃止し、
+  `Organization::subscriptionStatusLabel()`で都度導出する形に統一した),
   show_meetings_pane, show_calendar_pane, show_birthday_pane,
   show_materials_pane(ダッシュボード各ペインの表示オンオフ),
   invitation_pdf_template, invitation_email_template,
@@ -333,8 +360,9 @@
 ### ランディングページ(LP・未ログイン公開ページ、`/lp`)
 - ターゲット: JCメンバー(委員長・幹事クラス)
 - コンセプト: 「毎月タバコ1箱分我慢すれば、委員会運営が楽になる」
-- 料金: 月額タバコ1箱分の価格帯を訴求軸にしつつ、具体額は未確定のため
-  プレースホルダー表記(差し替え前提と明記)
+- 料金: 月額タバコ1箱分の価格帯を訴求軸に、具体額(月額600円・税込)を
+  表示(`config('billing.monthly_price_yen')`)。14日間の無料トライアル
+  (カード登録不要)も明記している
 - ヒーロー画像・各機能紹介の画面キャプチャは、実画面に差し替えやすい
   プレースホルダー(`x-image-placeholder`/`x-screenshot-placeholder`)
 - CTAは`/register`(組織登録フロー)へ誘導する
@@ -342,11 +370,74 @@
   (LP自体は`/`を差し替えず、`/lp`で個別に公開する方針)
 
 ## 契約・課金
-- 1組織 = 1契約。月額課金、基本的に1年間単位の運用を想定
-- 決済手段は未確定(Stripe + Laravel Cashier を第一候補として設計する。
-  実装前にユーザーに確認すること)
-- 解約時: その年度に作成した次第・議案を一括ダウンロードできる機能を提供
-  (基本設定の一括ダウンロードと共通の仕組みでよい)
+- 1組織 = 1契約。月額600円(税込)、Stripe + Laravel Cashierで実装済み
+- Cashierの`Billable`トレイトは`User`ではなく`Organization`モデルに付与
+  (1組織=1契約のため、Stripeの顧客は組織単位)。
+  `Cashier::useCustomerModel(Organization::class)`を`AppServiceProvider`
+  で指定している
+- **14日間の無料トライアル**: 組織登録時にカード情報の入力は求めない。
+  `RegisteredUserController`が`organizations.trial_ends_at`に
+  `now()->addDays(config('billing.trial_days'))`をセットするのみで、
+  Stripe側にはサブスクリプションを作らない(Cashierの
+  `newSubscription()->trialDays()`は使わず、`onGenericTrial()`
+  ——trial_ends_atがサブスクリプション無しでも未来日時かどうかだけを見る
+  ——をそのまま使う)
+- **トライアル終了後のアクセス制御**: `App\Http\Middleware\
+  EnsureOrganizationHasAccess`(エイリアス`subscribed`)が、一般/
+  オブザーブユーザー向けの保護ルート(`routes/web.php`)に適用されている。
+  `Organization::hasActiveAccess()`(トライアル中 or 有効な
+  サブスクリプションあり)がfalseならペイウォール(`/billing`、
+  `billing.paywall`)へリダイレクトする。super_adminは対象外
+  (`routes/admin.php`には適用しない)
+- **支払い方法**: Stripe Checkout(ホスト型決済ページ)にリダイレクトする
+  方式。カード情報は自社サーバーを経由しない。支払い操作(`billing.checkout`、
+  POST)は一般ユーザーのみ(`can:manage`)。支払い完了後はStripeの
+  Webhook(`/stripe/webhook`、Cashier標準の`WebhookController`、
+  CSRF検証は`bootstrap/app.php`で除外)がサブスクリプションを同期する
+- **解約後は次第の閲覧専用モードになる**: トライアル終了・未払い状態
+  (`hasActiveAccess()`がfalse)でも、`meetings.index`/`meetings.show`
+  (次第の一覧・閲覧)だけは`subscribed`ミドルウェアの対象外にしており
+  引き続き閲覧できる。新規作成・編集・削除(`meetings.create`等)は
+  引き続き`can:manage`+`subscribed`でブロックされる
+- **次第にリンクされた議案データは開けなくなる**: 議案ファイル(sites)は
+  Zip展開後、Webサーバーが`public/storage`経由で直接配信する静的ファイル
+  でありLaravelのルート/ミドルウェアを経由しないため、「開く入口」だけを
+  `SiteController::open`(ルート名`sites.open`、`subscribed`ミドルウェア
+  付き)でラップし、`AgendaItem::linkUrl()`はここを経由するURLを返す
+  ようにしている。未契約時はここで`billing.paywall`へリダイレクトされる
+  (フォルダ内のCSS/画像等の付随アセット自体は技術的には静的配信のまま
+  だが、入口である`gian.htm`等を開けなければ実用上は同じ効果になる、
+  というトレードオフを採用している)。`materials.download`は元々
+  `subscribed`ミドルウェア配下のため変更不要。`resources/views/meetings/
+  show.blade.php`では、リンクをクリックしてからペイウォールに弾かれる
+  体験を避けるため、未契約時はそもそもリンクにせず鍵アイコン付きの
+  案内テキストとして表示する
+- **公開共有リンクも未契約なら閲覧不可**: 発行元組織が未契約の場合、
+  `PublicMeetingController::show()`は次第本体の代わりに専用の利用不可
+  ビュー(`meetings/public-unavailable.blade.php`)を返す。資料・議案
+  ファイルの公開ダウンロード(`public.meetings.materials.download`、
+  新設`public.meetings.sites.open`)も同様に404にする
+- **解約後もデータ持ち出し可能**: `/settings/export`(次第の一括
+  ダウンロード)は`subscribed`ミドルウェアの対象外にしている。トライアル
+  終了・未払い状態でもこれまでのデータをダウンロードできる
+- **無償提供モード**: super_adminが管理者パネル(組織詳細画面)から、
+  特定組織に対して課金なしで全機能を使わせる「無償提供モード」を
+  オン/オフできる(`organizations.free_access_enabled`、
+  `AdminOrganizationController::toggleFreeAccess`)。
+  `Organization::hasActiveAccess()`はこのフラグが立っていれば
+  トライアル・サブスクリプション状態に関わらずtrueを返す
+- **常設の再課金導線**: `layouts.app`のView composerが
+  `organizationHasActiveAccess`を共有し、アクセス制限中は
+  `layouts/_access-blocked-banner.blade.php`がどのページにも(ペイウォール
+  画面自体を除き)表示され、`/billing`への導線を常に提供する
+- 旧`organizations.plan_status`カラムは廃止(実質未使用だった上、
+  Cashierのサブスクリプション状態と二重管理になり食い違いの元になるため)。
+  契約状態の表示は`Organization::subscriptionStatusLabel()`が
+  無償提供/トライアル/サブスクリプション状態から都度導出する
+- 未実装: Stripe側での複数プラン対応、管理者パネルからの契約ステータス
+  手動変更(無償提供モードのオン/オフは実装済み)、組織の完全削除
+  (退会処理)。詳細はREADME.mdの「課金・トライアル」セクション参照
+  (テストモードでのセットアップ手順を含む)
 
 ## 次第の一括ダウンロード
 - 組織の meetings + agenda_items + 紐付くsites(Zip議案)をまとめて
@@ -376,17 +467,19 @@
   共通(Breezeのlogin)だが、ログイン後は layouts/admin.blade.php という
   専用レイアウト(通常ナビとは別、組織アイコン等に依存しない)を使う
 - ルートは routes/admin.php、prefix('admin')・name('admin.')・
-  middleware(['auth', 'can:super-admin']) でグループ化
+  middleware(['admin.basic_auth', 'auth', 'can:super-admin']) でグループ化
 - 提供機能:
-  - 組織一覧(契約ステータス・契約日・ユーザー数・データ使用量)
-  - 組織詳細: 契約状況の確認、ユーザー一覧(一般/オブザーブ)、
-    一般ユーザーごとの割り当て容量(GB)の変更、アカウント削除
+  - 組織一覧(契約ステータス・契約日・ユーザー数・データ使用量・
+    お問い合わせ件数)
+  - 組織詳細: 契約状況(トライアル/契約中/無償提供中の別、トライアル
+    終了日、Stripe Customer ID)の確認、ユーザー一覧(一般/オブザーブ)、
+    一般ユーザーごとの割り当て容量(GB)の変更、アカウント削除、
+    「無償提供モード」のオン/オフ切り替え
   - 「アップロード済みデータを削除」: その組織のmaterials/sites/
     各種画像を全て削除して使用量をゼロに戻す(app/Services/
     OrganizationDataPurgeServiceが担当)。会議・メンバー等のレコード
     自体は削除しない点が組織削除とは異なる
-- 契約ステータス(plan_status)自体の変更・組織削除・課金操作は
-  未実装(Step8の決済手段確定後にあわせて設計する)
+- 未実装: Stripe側での複数プラン対応、組織の完全削除(退会処理)
 
 ## セキュリティ要件(必ず守ること)
 - Zip Slip対策: エントリ名に「..」や先頭「/」を含む場合は拒否
@@ -434,4 +527,4 @@
 5. 資料置き場 ✅
 6. 基本設定(ヘッダー画像・組織情報・一括ダウンロード) ✅
 7. LP + 組織登録フロー ✅
-8. 課金(決済手段確定後) — 次はこれ
+8. 課金(Stripe + Laravel Cashier、14日間無料トライアル) ✅

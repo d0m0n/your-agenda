@@ -50,6 +50,7 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6 gap-2">
+                @include('layouts._trial-status-badge')
                 @include('layouts._storage-usage-badge')
                 <button type="button" x-data x-on:click="$dispatch('open-modal', 'inquiry-form')"
                     class="inline-flex items-center justify-center h-9 w-9 rounded-full text-gray-500 dark:text-paper-100/70 hover:text-gray-700 dark:hover:text-paper-100 hover:bg-gray-100 dark:hover:bg-ink-800 focus:outline-none transition"
@@ -156,8 +157,9 @@
                 </div>
             </div>
 
-            @if (($storageUsagePercent ?? 0) >= 80)
-                <div class="px-4 mt-3">
+            @if (($storageUsagePercent ?? 0) >= 80 || (($trialDaysRemaining ?? null) !== null && $trialDaysRemaining <= 3))
+                <div class="px-4 mt-3 flex flex-wrap gap-2">
+                    @include('layouts._trial-status-badge')
                     @include('layouts._storage-usage-badge')
                 </div>
             @endif

@@ -24,6 +24,7 @@
 
         <div class="min-h-screen bg-paper-100 dark:bg-night print:bg-white">
             @include('layouts.navigation')
+            @include('layouts._access-blocked-banner')
 
             <!-- Page Heading -->
             @isset($header)

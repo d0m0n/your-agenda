@@ -259,7 +259,10 @@
             <div class="mt-10 bg-paper-50 dark:bg-ink-800 border border-paper-200 dark:border-ink-700 rounded-xl shadow-md p-8 sm:p-10">
                 <p class="text-xs text-ink-400 dark:text-paper-100/40">1組織あたり</p>
                 <p class="mt-2 font-serif text-4xl font-bold text-ink-800 dark:text-paper-100">
-                    &yen; <span class="text-leather-500 dark:text-leather-300">--,---</span> <span class="text-base font-normal text-ink-500 dark:text-paper-100/60">/ 月(税別・価格は現在調整中です)</span>
+                    &yen; <span class="text-leather-500 dark:text-leather-300">{{ number_format(config('billing.monthly_price_yen')) }}</span> <span class="text-base font-normal text-ink-500 dark:text-paper-100/60">/ 月(税込)</span>
+                </p>
+                <p class="mt-2 text-xs text-leather-500 dark:text-leather-300 font-medium">
+                    まずは14日間、無料でお試しいただけます(クレジットカード登録不要)
                 </p>
                 <ul class="mt-6 text-sm text-ink-600 dark:text-paper-100/70 space-y-2 text-left max-w-sm mx-auto">
                     <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">✓</span>メンバー・会議・次第の管理を無制限に利用</li>
@@ -307,6 +310,7 @@
 
             <div class="mt-10 space-y-3">
                 @foreach ([
+                    ['q' => '無料お試し期間はありますか?', 'a' => '登録から14日間、クレジットカードのご登録なしですべての機能をお試しいただけます。14日を過ぎるとお支払い情報のご登録が必要になります。'],
                     ['q' => '複数の委員会や部会でも使えますか?', 'a' => '組織単位でのご契約となります。委員会・部会ごとにご利用いただく場合は、それぞれ組織登録をお願いしております。'],
                     ['q' => 'セキュリティは大丈夫ですか?', 'a' => '組織ごとにデータを完全に分離しており、他組織のデータには一切アクセスできない設計になっています。'],
                     ['q' => '解約したらデータはどうなりますか?', 'a' => '解約前に、その年度に作成した次第・議案を一括でダウンロードいただけます。データを手元に残したまま解約できます。'],

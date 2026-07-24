@@ -43,6 +43,17 @@ class AdminOrganizationController extends Controller
         return redirect()->route('admin.organizations.show', $organization)->with('status', "{$user->name} の割り当て容量を更新しました。");
     }
 
+    public function toggleFreeAccess(Organization $organization): RedirectResponse
+    {
+        $organization->update(['free_access_enabled' => ! $organization->free_access_enabled]);
+
+        $message = $organization->free_access_enabled
+            ? '無償提供モードを有効にしました。'
+            : '無償提供モードを無効にしました。';
+
+        return redirect()->route('admin.organizations.show', $organization)->with('status', $message);
+    }
+
     public function destroyData(Organization $organization, OrganizationDataPurgeService $purger): RedirectResponse
     {
         $purger->purgeUploadedFiles($organization);

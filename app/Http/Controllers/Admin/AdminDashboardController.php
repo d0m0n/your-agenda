@@ -15,10 +15,13 @@ class AdminDashboardController extends Controller
         // inquiriesはBelongsToOrganizationのグローバルスコープを持つため、
         // 素のwithCountだと管理者自身(organization_id=null)でフィルタされ
         // 常に0件になってしまう。withoutGlobalScopeで組織を横断して集計する。
+        // subscriptionStatusLabel()がCashierのsubscribed()/onGenericTrial()を
+        // 呼ぶ際にN+1にならないよう、subscriptionsをeager loadしておく。
         $organizations = Organization::withCount([
             'users',
             'inquiries' => fn ($query) => $query->withoutGlobalScope(OrganizationScope::class),
         ])
+            ->with('subscriptions')
             ->orderByDesc('contracted_at')
             ->paginate(20);
 

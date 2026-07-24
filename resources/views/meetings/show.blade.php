@@ -98,14 +98,27 @@
 
                 {{-- 次第本体 --}}
                 <div class="px-6 py-6 sm:px-10">
+                    @php
+                        // 解約・トライアル終了後は次第の閲覧自体は可能だが、リンク先の
+                        // 議案データ(sites/materials)は開けない。ルート側(sites.open/
+                        // materials.download)でも確実にブロックされるが、クリックして
+                        // からペイウォールに弾かれる体験を避けるため、ここでもリンクを
+                        // 出し分ける。
+                        $hasActiveAccess = $meeting->organization->hasActiveAccess();
+                    @endphp
                     <ol class="space-y-4">
                         @forelse ($meeting->topLevelAgendaItems as $index => $item)
                             <li class="border-b border-paper-200 dark:border-ink-700 pb-4 last:border-b-0 last:pb-0">
                                 <div class="flex items-center justify-between gap-4">
                                     <p class="text-sm font-medium text-ink-800 dark:text-paper-100">
                                         <span class="font-serif text-leather-500 dark:text-leather-300">{{ $index + 1 }}.</span>
-                                        @if ($item->linkUrl())
+                                        @if ($item->linkUrl() && $hasActiveAccess)
                                             <a href="{{ $item->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-leather-500 dark:text-leather-300 hover:underline">{{ $item->title }}</a>
+                                        @elseif ($item->linkUrl())
+                                            <span class="text-gray-400 dark:text-gray-500" title="{{ __('お支払い情報の登録後に閲覧できます') }}">
+                                                {{ $item->title }}
+                                                <svg class="inline h-3.5 w-3.5 align-text-top" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
+                                            </span>
                                         @else
                                             {{ $item->title }}
                                         @endif
@@ -121,8 +134,13 @@
                                             <li class="flex items-center justify-between gap-4">
                                                 <p class="text-sm text-ink-700 dark:text-paper-200">
                                                     <span class="font-serif text-leather-500 dark:text-leather-300">{{ sprintf('%02d', $childIndex + 1) }}.</span>
-                                                    @if ($child->linkUrl())
+                                                    @if ($child->linkUrl() && $hasActiveAccess)
                                                         <a href="{{ $child->linkUrl() }}" target="_blank" rel="noopener noreferrer" class="text-leather-500 dark:text-leather-300 hover:underline">{{ $child->title }}</a>
+                                                    @elseif ($child->linkUrl())
+                                                        <span class="text-gray-400 dark:text-gray-500" title="{{ __('お支払い情報の登録後に閲覧できます') }}">
+                                                            {{ $child->title }}
+                                                            <svg class="inline h-3.5 w-3.5 align-text-top" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
+                                                        </span>
                                                     @else
                                                         {{ $child->title }}
                                                     @endif

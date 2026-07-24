@@ -78,15 +78,18 @@ class AgendaItem extends Model
     }
 
     /**
-     * URL for the linked agenda data: a meeting-scoped site (Zip/PDF/image)
-     * opens its public storage URL directly, while an organization-wide
-     * material goes through the authenticated download route (materials
-     * aren't stored on the public disk).
+     * URL for the linked agenda data. Both site and material links go
+     * through an authenticated, subscription-gated route: a site's actual
+     * file is a static asset on the public disk (no Laravel route/middleware
+     * involved), so sites.open exists purely to wrap "opening" it behind
+     * the subscribed middleware (see SiteController::open) before
+     * redirecting to the real static URL. Materials already go through
+     * materials.download, which is subscription-gated too.
      */
     public function linkUrl(): ?string
     {
         if ($this->site) {
-            return $this->site->publicUrl();
+            return route('sites.open', $this->site);
         }
 
         if ($this->material) {
@@ -97,17 +100,24 @@ class AgendaItem extends Model
     }
 
     /**
-     * linkUrl()の非ログイン公開版。site側は元々公開ディスク上のURLのため
-     * そのまま使えるが、material側はログイン必須の通常ルートではなく、
-     * この会議のpublic_tokenに紐づく公開ダウンロードルートを使う。
+     * linkUrl()の非ログイン公開版。site・material両方とも、この会議の
+     * public_tokenに紐づく公開ゲートルートを経由させる(発行元組織が
+     * 未契約の場合はいずれも閲覧不可にするため)。
      */
     public function publicLinkUrl(): ?string
     {
-        if ($this->site) {
-            return $this->site->publicUrl();
+        if (! $this->meeting->public_token) {
+            return null;
         }
 
-        if ($this->material && $this->meeting->public_token) {
+        if ($this->site) {
+            return route('public.meetings.sites.open', [
+                'meeting' => $this->meeting->public_token,
+                'site' => $this->site,
+            ]);
+        }
+
+        if ($this->material) {
             return route('public.meetings.materials.download', [
                 'meeting' => $this->meeting->public_token,
                 'material' => $this->material,

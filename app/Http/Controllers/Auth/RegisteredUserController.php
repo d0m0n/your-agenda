@@ -46,6 +46,13 @@ class RegisteredUserController extends Controller
                 'name' => $validated['organization_name'],
             ]);
 
+            // カード情報の入力は求めず、登録から14日間は無料で利用できる。
+            // trial_ends_atを過ぎるとEnsureOrganizationHasAccessミドルウェアが
+            // ペイウォール(billing.paywall)へ誘導する。
+            $organization->forceFill([
+                'trial_ends_at' => now()->addDays(config('billing.trial_days')),
+            ])->save();
+
             return User::create([
                 'organization_id' => $organization->id,
                 'role' => UserRole::General,

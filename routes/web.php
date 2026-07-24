@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgendaItemController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\InquiryController;
@@ -27,16 +28,27 @@ Route::get('/', function () {
 
 Route::get('/lp', fn () => view('welcome'))->name('lp');
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified', 'subscribed'])->name('dashboard');
 
+// 14日間の無料トライアル終了後(またはサブスクリプション未契約時)のペイウォール。
+// subscribedミドルウェアの対象外にする(対象にすると無限リダイレクトになる)。
 Route::middleware('auth')->group(function () {
+    Route::get('/billing', [BillingController::class, 'show'])->name('billing.paywall');
+    Route::get('/billing/success', [BillingController::class, 'success'])->name('billing.success');
+});
+
+// 支払い操作(Stripe Checkoutの開始)は一般ユーザーのみ行える。
+Route::middleware(['auth', 'can:manage'])->group(function () {
+    Route::post('/billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
+});
+
+Route::middleware(['auth', 'subscribed'])->group(function () {
     // 資料の閲覧・ダウンロードはobserverも可能なため、管理系(can:manage)グループの外に置く
     Route::get('/materials', [MaterialController::class, 'index'])->name('materials.index');
     Route::get('/materials/{material}/download', [MaterialController::class, 'download'])->name('materials.download');
 
-    // 会議一覧・メンバー一覧の閲覧もobserverに開放する(作成・編集・削除・CSV入出力は
+    // メンバー一覧の閲覧もobserverに開放する(作成・編集・削除・CSV入出力は
     // 引き続き can:manage 側のみ。ビュー側で @can('manage') により操作系UIを隠す)
-    Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
     Route::get('/members', [MemberController::class, 'index'])->name('members.index');
 
     // 問い合わせ・不具合報告・機能要望の送信フォーム。一般/オブザーブ両方が
@@ -44,7 +56,25 @@ Route::middleware('auth')->group(function () {
     Route::post('/inquiries', [InquiryController::class, 'store'])->name('inquiries.store');
 });
 
+// 会議一覧は、解約・トライアル終了後も次第を閲覧し続けられるようにする
+// (新規作成・編集・削除は引き続きcan:manage+subscribedグループ側でブロックされる)
+// ため、subscribedミドルウェアを外している。
+Route::middleware('auth')->group(function () {
+    Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+
+    // 議案ファイル(sites)は展開後の中身をWebサーバーが直接配信する静的ファイルのため
+    // ルート/ミドルウェアを経由しない。「開く入口」だけをここでラップし、
+    // subscribedミドルウェアで未契約時はペイウォールへリダイレクトさせる。
+    Route::middleware('subscribed')->get('/sites/{site}/open', [SiteController::class, 'open'])->name('sites.open');
+});
+
+// 解約・トライアル終了後もデータを持ち出せるよう、一括ダウンロードだけは
+// subscribedミドルウェアの対象外にする(CLAUDE.mdの解約時データ持ち出し要件)。
 Route::middleware(['auth', 'can:manage'])->group(function () {
+    Route::get('/settings/export', [OrganizationSettingsController::class, 'export'])->name('settings.export');
+});
+
+Route::middleware(['auth', 'can:manage', 'subscribed'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -107,7 +137,8 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
 
     Route::get('/settings', [OrganizationSettingsController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [OrganizationSettingsController::class, 'update'])->name('settings.update');
-    Route::get('/settings/export', [OrganizationSettingsController::class, 'export'])->name('settings.export');
+    // settings.export(次第の一括ダウンロード)はsubscribedミドルウェア対象外の
+    // 別グループに切り出し済み(上部参照。解約・トライアル終了後もデータを持ち出せるように)。
 
     Route::put('/settings/invitation-templates', [OrganizationInvitationTemplateController::class, 'update'])->name('settings.invitation-templates.update');
     Route::delete('/settings/invitation-templates/{type}', [OrganizationInvitationTemplateController::class, 'reset'])->name('settings.invitation-templates.reset');
@@ -120,17 +151,32 @@ Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::delete('/observers/{observer}', [ObserverUserController::class, 'destroy'])->name('observers.destroy');
 });
 
-// 会議画面はobserverも閲覧できるため、管理系(can:manage)グループの外に置く。
+// 会議詳細(次第)はobserverも閲覧できるうえ、解約・トライアル終了後も
+// 閲覧だけは可能にするため、subscribedミドルウェアを外している
+// (次第にリンクされた議案データ自体はsites.open/materials.download側でブロックされる)。
 // /meetings/create 等の固定セグメントより後に登録し、{meeting}に吸収されないようにする。
 Route::middleware('auth')->group(function () {
     Route::get('/meetings/{meeting}', [MeetingController::class, 'show'])->name('meetings.show');
+});
+
+// メンバー詳細はobserverも閲覧できるため、管理系(can:manage)グループの外に置く。
+// 会議一覧・メンバー一覧の並びに合わせて今回のスコープでは引き続きsubscribed対象。
+Route::middleware(['auth', 'subscribed'])->group(function () {
     Route::get('/members/{member}', [MemberController::class, 'show'])->name('members.show');
 });
 
 // 次第の外部共有用リンク。ログイン不要でアクセスできる(public_tokenが
-// 十分に推測困難なUUIDのため)。{meeting}はpublic_tokenで解決する。
+// 十分に推測困難なUUIDのため)。{meeting}はpublic_tokenで解決する。発行元組織が
+// 未契約(トライアル終了・無償提供なし)の場合は、次第本体・議案ファイル・資料の
+// いずれも閲覧不可にする(PublicMeetingController参照)。
 Route::get('/s/meetings/{meeting:public_token}', [PublicMeetingController::class, 'show'])->name('public.meetings.show');
 Route::get('/s/meetings/{meeting:public_token}/materials/{material}', [PublicMeetingController::class, 'downloadMaterial'])->name('public.meetings.materials.download');
+Route::get('/s/meetings/{meeting:public_token}/sites/{site}', [PublicMeetingController::class, 'openSite'])->name('public.meetings.sites.open');
+
+// StripeからのWebhook。認証もsubscribedチェックも行わない
+// (Cashier標準のWebhookControllerが署名検証を行う)。
+Route::post('/stripe/webhook', [\Laravel\Cashier\Http\Controllers\WebhookController::class, 'handleWebhook'])
+    ->name('cashier.webhook');
 
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

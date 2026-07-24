@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $organization = Organization::create([
             'name' => 'サンプル青年会議所',
         ]);
+        $organization->forceFill(['trial_ends_at' => now()->addDays(14)])->save();
 
         User::factory()->create([
             'organization_id' => $organization->id,

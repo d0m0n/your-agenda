@@ -14,6 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin.basic_auth' => \App\Http\Middleware\AdminBasicAuth::class,
+            'subscribed' => \App\Http\Middleware\EnsureOrganizationHasAccess::class,
+        ]);
+
+        // StripeからのWebhookはCookie/セッションを持たないためCSRFトークンを
+        // 送れない。Cashier標準のWebhookControllerが署名(STRIPE_WEBHOOK_SECRET)
+        // を検証するため、CSRF検証は不要かつ邪魔になる。
+        $middleware->validateCsrfTokens(except: [
+            'stripe/webhook',
         ]);
 
         // セッション認証(auth)より先にBasic認証を実行させる。
