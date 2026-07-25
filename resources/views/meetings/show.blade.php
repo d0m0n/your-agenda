@@ -108,7 +108,7 @@
                     @endphp
                     <ol class="space-y-4">
                         @forelse ($meeting->topLevelAgendaItems as $index => $item)
-                            <li class="border-b border-paper-200 dark:border-ink-700 pb-4 last:border-b-0 last:pb-0">
+                            <li class="border-b border-paper-200/60 dark:border-ink-700/60 pb-4 last:border-b-0 last:pb-0">
                                 <div class="flex items-center justify-between gap-4">
                                     <p class="text-sm font-medium text-ink-800 dark:text-paper-100">
                                         <span class="font-serif text-leather-500 dark:text-leather-300">{{ $index + 1 }}.</span>

@@ -105,22 +105,24 @@
     ];
 @endphp
 
-<div class="bg-paper-50 dark:bg-ink-800 border border-paper-200 dark:border-ink-700 rounded-lg p-6">
-    <p class="text-sm text-ink-600 dark:text-paper-100/70 leading-relaxed">
-        {{ __('一般ユーザー向けに、各画面の使い方をまとめています。目次から知りたい項目に移動できます。') }}
-    </p>
-    <nav class="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-sm">
-        @foreach ($sections as $section)
-            <a href="#{{ $section['id'] }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ $section['title'] }}</a>
-        @endforeach
-    </nav>
-</div>
+<div class="bg-paper-50 dark:bg-ink-800 border border-paper-200 dark:border-ink-700 rounded-lg overflow-hidden divide-y divide-paper-200 dark:divide-ink-700">
+    <div class="px-6 py-6">
+        <p class="text-sm text-ink-600 dark:text-paper-100/70 leading-relaxed">
+            {{ __('一般ユーザー向けに、各画面の使い方をまとめています。目次から知りたい項目に移動できます。') }}
+        </p>
+        <nav class="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-sm">
+            @foreach ($sections as $section)
+                <a href="#{{ $section['id'] }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ $section['title'] }}</a>
+            @endforeach
+        </nav>
+    </div>
 
-@foreach ($sections as $section)
-    <section id="{{ $section['id'] }}" class="scroll-mt-20 bg-paper-50 dark:bg-ink-800 border border-paper-200 dark:border-ink-700 rounded-lg p-6">
-        <h3 class="font-serif text-lg font-semibold text-ink-800 dark:text-paper-100">{{ $section['title'] }}</h3>
-        <div class="mt-3 text-sm text-ink-600 dark:text-paper-100/70 leading-relaxed space-y-2">
-            {!! $section['body'] !!}
-        </div>
-    </section>
-@endforeach
+    @foreach ($sections as $section)
+        <section id="{{ $section['id'] }}" class="scroll-mt-20 px-6 py-6">
+            <h3 class="font-serif text-lg font-semibold text-ink-800 dark:text-paper-100">{{ $section['title'] }}</h3>
+            <div class="mt-3 text-sm text-ink-600 dark:text-paper-100/70 leading-relaxed space-y-2">
+                {!! $section['body'] !!}
+            </div>
+        </section>
+    @endforeach
+</div>
