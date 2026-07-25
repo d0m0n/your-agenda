@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -85,10 +86,12 @@ class Organization extends Model
      * メールアドレス。組織にはログインユーザーのようなemailカラムが無いため、
      * 基本設定画面で任意設定できる`billing_email`をここで返す
      * (Stripeからの領収書・請求書メール等の送付先になる)。
+     * 未設定の場合は、その組織の一般ユーザーのログイン用メールアドレスを
+     * 代わりに使う(請求先が別にある組織だけ`billing_email`を設定すればよい)。
      */
     public function stripeEmail(): ?string
     {
-        return $this->billing_email;
+        return $this->billing_email ?: $this->users()->where('role', UserRole::General)->value('email');
     }
 
     /**

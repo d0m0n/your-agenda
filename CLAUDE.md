@@ -203,8 +203,10 @@
 - organizations: name, billing_email(nullable, 任意設定の請求先メール
   アドレス。組織にはログインユーザーのようなemailカラムが無いため新設した。
   `Organization::stripeEmail()`でCashierに返し、Stripeの顧客情報
-  (領収書・請求書メールの送付先)に同期する。基本設定画面で変更すると、
-  既にStripe顧客が存在する組織(`hasStripeId()`)は
+  (領収書・請求書メールの送付先)に同期する。未設定の場合は、その組織の
+  一般ユーザーのログイン用メールアドレスにフォールバックする(請求先が
+  別にある組織だけ`billing_email`を設定すればよい)。基本設定画面で
+  変更すると、既にStripe顧客が存在する組織(`hasStripeId()`)は
   `syncStripeCustomerDetails()`で即座にStripe側にも反映する。
   Stripe API呼び出しが失敗しても設定保存自体は失敗させない
   (`OrganizationSettingsController::update()`でtry/catchしreport()のみ)),

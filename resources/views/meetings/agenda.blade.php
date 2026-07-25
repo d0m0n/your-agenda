@@ -123,7 +123,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <x-secondary-button>{{ __('次第を表示') }}</x-secondary-button>
+                        <x-secondary-button type="submit">{{ __('次第を表示') }}</x-secondary-button>
                     </form>
 
                     @if ($copySourceMeeting)

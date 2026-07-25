@@ -60,6 +60,14 @@ class OrganizationBillingEmailTest extends TestCase
         $this->assertSame('billing@example.com', $organization->stripeEmail());
     }
 
+    public function test_stripe_email_falls_back_to_the_general_users_login_email_when_unset(): void
+    {
+        [$organization, $general] = $this->createTenant();
+
+        $this->assertNull($organization->billing_email);
+        $this->assertSame($general->email, $organization->stripeEmail());
+    }
+
     public function test_settings_update_does_not_attempt_to_sync_stripe_when_organization_has_no_stripe_id(): void
     {
         [$organization, $general] = $this->createTenant();

@@ -31,7 +31,7 @@
                     </p>
                 @else
                     <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('Stripeのお支払い管理ページが開きます。カード情報は当サービスのサーバーには保存されません。') }}
+                        {{ __('お支払い管理ページが開きます。カード情報は当サービスのサーバーには保存されません。') }}
                     </p>
                 @endunless
             </div>
@@ -79,7 +79,7 @@
                     <div>
                         <x-input-label for="billing_email" :value="__('請求先メールアドレス')" />
                         <x-text-input id="billing_email" name="billing_email" type="email" class="mt-1 block w-full" :value="old('billing_email', $organization->billing_email)" />
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('Stripeからの領収書・請求書メールの送付先として使われます(設定は任意です)。') }}</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('領収書・請求書メールの送付先です。未設定の場合はログイン用メールアドレスが使われます。請求先が別の場合のみ入力してください。') }}</p>
                         <x-input-error :messages="$errors->get('billing_email')" class="mt-2" />
                     </div>
 
