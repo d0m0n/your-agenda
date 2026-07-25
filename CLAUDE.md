@@ -306,6 +306,8 @@
 4. メンバー管理(members の CRUD、誕生日登録)
 5. 資料管理(資料置き場にアップするデータの管理画面)
 6. 基本設定
+   - お支払い管理(現在の契約状況表示、Stripeカスタマーポータルへの
+     導線。下記「契約・課金」参照)
    - ダッシュボードの組織ヘッダー画像の設定
    - 組織情報の編集
    - GoogleカレンダーIDの設定(独立したメニュー項目ではなく基本設定に統合)
@@ -313,8 +315,8 @@
    - 案内文のデフォルトテンプレート編集(下記「案内文作成」参照)
    - 次第の一括ダウンロード機能(下記参照)
    - データ使用量の表示(下記「ストレージ容量」参照)
-   - (画面上の表示順は上記の並びのとおり。オブザーブユーザー管理の
-     カードを案内文のデフォルトより上に配置している)
+   - (画面上の表示順は上記の並びのとおり。お支払い管理を最上部に、
+     オブザーブユーザー管理を案内文のデフォルトより上に配置している)
 - オブザーブユーザーには上記の管理系メニューを一切表示しない(Blade側の
   @can だけでなく、ルート側でも必ずミドルウェア/Gateでガードする)。
   ただし「会議一覧」「メンバー一覧」は閲覧専用として例外的に表示する
@@ -451,6 +453,49 @@
   POST)は一般ユーザーのみ(`can:manage`)。支払い完了後はStripeの
   Webhook(`/stripe/webhook`、Cashier標準の`WebhookController`、
   CSRF検証は`bootstrap/app.php`で除外)がサブスクリプションを同期する
+- **決済完了直後の反映待ち画面**: Webhookでのサブスクリプション反映は
+  非同期(数秒遅れる、あるいはローカル開発で`stripe listen`を起動し忘れて
+  いると届かないことすらある。実際にサンドボックスで、Webhookが届かず
+  「無料お試し期間が終了しました」画面に押し戻される不具合が発生した)。
+  対策は二段構え:
+  1. `checkout()`のsuccess_urlに`?session_id={CHECKOUT_SESSION_ID}`
+     (Stripeが実URLに置換するプレースホルダー)を付与し、`billing.success`
+     到着時に`BillingController::syncSubscriptionFromCheckoutSession()`が
+     Webhookを待たずCheckout Session APIから直接サブスクリプションを
+     同期する(`WebhookController::handleCustomerSubscriptionCreated()`
+     相当の処理を能動的に行う保険。`updateOrCreate`なので後から本来の
+     Webhookが届いても安全に上書きされるだけ)。session_idは利用者が
+     改変できるクエリ文字列のため、取得したセッションの顧客IDがこの
+     組織の`stripe_id`と一致する場合のみ同期する(他組織のセッションIDを
+     渡されても反映されないようにするガード)
+  2. それでも反映が間に合わない場合の保険として、`billing.success`は
+     即座に`/dashboard`へ飛ばさず`resources/views/billing/
+     processing.blade.php`という中間画面を挟み、`billing.status`
+     (`hasActiveAccess()`をJSONで返すだけのポーリング用エンドポイント)を
+     1.5秒間隔・最大20回ポーリングして有効化を確認してからリダイレクトする。
+     タイムアウト時は「もう一度確認する」リンクを出す
+- **ペイウォールに弾かれた元の画面へ戻す**: `EnsureOrganizationHasAccess`
+  がGETリクエストをブロックする際、Laravel標準の`url.intended`
+  セッションキー(認証リダイレクトと同じ仕組み)に行き先を保存する。
+  `BillingController::success`が`session()->pull('url.intended', ...)`
+  で読み出し、支払い完了後は元々開こうとしていた画面(無ければ
+  ダッシュボード)へ遷移する
+- **お支払い管理(基本設定画面)**: 一度でも決済に進んだことがある組織
+  (`organizations.stripe_id`が設定済み)には、基本設定画面に現在の契約
+  状況(`subscriptionStatusLabel()`)とStripeカスタマーポータルへの
+  ボタンを表示する(`billing.portal`、POST、`can:manage`)。ポータルでは
+  カード変更・請求書確認・解約がセルフサービスで行える。`stripe_id`が
+  無い組織(決済に一度も進んでいない)にはボタンの代わりに案内文を表示する
+- **トライアル終了間近のリマインドメール**: トライアル終了の3日前に、
+  対象組織の一般ユーザー全員へリマインドメールを送る
+  (`App\Console\Commands\SendTrialEndingReminders`、
+  `trials:send-ending-reminders`、`routes/console.php`で毎日9時に
+  スケジュール実行。本番の`schedule:run`cronにそのまま乗るため追加の
+  cron設定は不要)。`organizations.trial_ending_reminder_sent_at`で
+  同一トライアルへの重複送信を防ぐ。無償提供モードの組織や、トライアル
+  終了前に前倒しで契約済みの組織には送らない。本番でキューワーカーの
+  常駐を前提にできない(さくらのレンタルサーバーの制約)ため、
+  `App\Mail\TrialEndingSoonMail`はqueue化せず同期送信する
 - **解約後は次第の閲覧専用モードになる**: トライアル終了・未払い状態
   (`hasActiveAccess()`がfalse)でも、`meetings.index`/`meetings.show`
   (次第の一覧・閲覧)だけは`subscribed`ミドルウェアの対象外にしており

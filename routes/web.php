@@ -18,6 +18,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicMeetingController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Cashier\Http\Controllers\WebhookController;
 
 Route::get('/', function () {
     if (! auth()->check()) {
@@ -36,11 +37,13 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['au
 Route::middleware('auth')->group(function () {
     Route::get('/billing', [BillingController::class, 'show'])->name('billing.paywall');
     Route::get('/billing/success', [BillingController::class, 'success'])->name('billing.success');
+    Route::get('/billing/status', [BillingController::class, 'status'])->name('billing.status');
 });
 
-// 支払い操作(Stripe Checkoutの開始)は一般ユーザーのみ行える。
+// 支払い操作(Stripe Checkoutの開始・カスタマーポータルの利用)は一般ユーザーのみ行える。
 Route::middleware(['auth', 'can:manage'])->group(function () {
     Route::post('/billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
+    Route::post('/billing/portal', [BillingController::class, 'portal'])->name('billing.portal');
 });
 
 Route::middleware(['auth', 'subscribed'])->group(function () {
@@ -182,7 +185,7 @@ Route::get('/s/meetings/{meeting:public_token}/sites/{site}', [PublicMeetingCont
 
 // StripeからのWebhook。認証もsubscribedチェックも行わない
 // (Cashier標準のWebhookControllerが署名検証を行う)。
-Route::post('/stripe/webhook', [\Laravel\Cashier\Http\Controllers\WebhookController::class, 'handleWebhook'])
+Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])
     ->name('cashier.webhook');
 
 require __DIR__.'/auth.php';

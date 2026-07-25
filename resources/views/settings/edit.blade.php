@@ -8,6 +8,34 @@
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('お支払い管理') }}</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('現在の契約状況') }}: {{ $organization->subscriptionStatusLabel() }}</p>
+                    </div>
+
+                    @if ($organization->stripe_id)
+                        <form method="POST" action="{{ route('billing.portal') }}">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-ink-800 dark:bg-brass-400 border border-transparent rounded-md font-semibold text-xs text-white dark:text-ink-900 uppercase tracking-widest hover:bg-ink-700 dark:hover:bg-brass-300 focus:outline-none focus:ring-2 focus:ring-leather-400 focus:ring-offset-2 dark:focus:ring-offset-ink-800 transition shrink-0">
+                                {{ __('お支払い方法の変更・請求書の確認') }}
+                            </button>
+                        </form>
+                    @endif
+                </div>
+
+                @unless ($organization->stripe_id)
+                    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                        {{ __('お支払い情報を一度ご登録いただくと、こちらからお支払い方法の変更・請求書の確認・解約ができるようになります。') }}
+                    </p>
+                @else
+                    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                        {{ __('Stripeのお支払い管理ページが開きます。カード情報は当サービスのサーバーには保存されません。') }}
+                    </p>
+                @endunless
+            </div>
+
             @php
                 $usagePercent = $quotaBytes > 0 ? min(100, (int) round($usedBytes / $quotaBytes * 100)) : 0;
                 $usageColor = match (true) {

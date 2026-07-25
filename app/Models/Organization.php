@@ -23,6 +23,7 @@ class Organization extends Model
         return [
             'contracted_at' => 'date',
             'trial_ends_at' => 'datetime',
+            'trial_ending_reminder_sent_at' => 'datetime',
             'show_meetings_pane' => 'boolean',
             'show_calendar_pane' => 'boolean',
             'show_birthday_pane' => 'boolean',

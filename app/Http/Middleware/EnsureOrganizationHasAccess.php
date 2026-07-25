@@ -26,6 +26,13 @@ class EnsureOrganizationHasAccess
             return $next($request);
         }
 
+        // 支払い完了後に元いた画面へ戻せるよう、GETリクエストのみ行き先を
+        // 覚えておく(Laravelの認証リダイレクトと同じurl.intendedキーを使う。
+        // BillingController::successがredirect()->intended()で読み出す)。
+        if ($request->isMethod('get')) {
+            $request->session()->put('url.intended', $request->fullUrl());
+        }
+
         return redirect()->route('billing.paywall');
     }
 }

@@ -98,6 +98,45 @@ class BillingTest extends TestCase
         $this->actingAs($observer)->post(route('billing.checkout'))->assertForbidden();
     }
 
+    /**
+     * Stripe Checkoutは「このお客様はすでに契約中か」を見てくれないため、
+     * ガード無しで連打すると同じ組織に並行したサブスクリプションが
+     * 複数作られてしまう(実際にサンドボックスで発生した)。
+     */
+    public function test_already_subscribed_organization_cannot_start_a_second_checkout(): void
+    {
+        $organization = Organization::factory()->create();
+        $general = User::factory()->for($organization, 'organization')->create();
+        $organization->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_existing123',
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_test',
+            'quantity' => 1,
+        ]);
+
+        $this->actingAs($general)->post(route('billing.checkout'))
+            ->assertRedirect(route('settings.edit'));
+
+        $this->assertSame(1, $organization->subscriptions()->count());
+    }
+
+    public function test_already_subscribed_organization_is_sent_to_settings_instead_of_the_paywall(): void
+    {
+        $organization = Organization::factory()->create();
+        $general = User::factory()->for($organization, 'organization')->create();
+        $organization->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_existing456',
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_test',
+            'quantity' => 1,
+        ]);
+
+        $this->actingAs($general)->get(route('billing.paywall'))
+            ->assertRedirect(route('settings.edit'));
+    }
+
     public function test_super_admin_is_unaffected_by_any_organizations_trial_state(): void
     {
         $admin = User::factory()->create([
