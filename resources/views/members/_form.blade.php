@@ -3,9 +3,13 @@
     $value = fn (string $field) => old($field, $m?->{$field});
 @endphp
 
+<p class="text-xs text-gray-500 dark:text-gray-400">
+    <span class="text-red-600 dark:text-red-400">*</span> {{ __('は必須項目です。') }}
+</p>
+
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
     <div class="sm:col-span-2">
-        <x-input-label for="name" :value="__('氏名')" />
+        <x-input-label for="name" :value="__('氏名')" required />
         <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="$value('name')" required autofocus />
         <x-input-error :messages="$errors->get('name')" class="mt-2" />
     </div>
@@ -23,9 +27,9 @@
     </div>
 
     <div>
-        <x-input-label for="serial_number" :value="__('通し番号')" />
+        <x-input-label for="serial_number" :value="__('通し番号')" required />
         <x-text-input id="serial_number" name="serial_number" type="number" min="1" class="mt-1 block w-full"
-            :value="old('serial_number', $m?->serial_number ?? $nextSerialNumber)" />
+            :value="old('serial_number', $m?->serial_number ?? $nextSerialNumber)" required />
         <x-input-error :messages="$errors->get('serial_number')" class="mt-2" />
     </div>
 

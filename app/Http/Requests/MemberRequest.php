@@ -34,7 +34,7 @@ class MemberRequest extends FormRequest
                 Rule::exists('departments', 'id')->where('organization_id', $this->user()->organization_id),
             ],
             'serial_number' => [
-                'nullable', 'integer', 'min:1',
+                'required', 'integer', 'min:1',
                 Rule::unique('members', 'serial_number')
                     ->where('organization_id', $this->user()->organization_id)
                     ->ignore($member),
@@ -63,6 +63,7 @@ class MemberRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'serial_number.required' => '通し番号を入力してください。',
             'serial_number.unique' => 'この通し番号は既に使用されています。',
             'serial_number.min' => '通し番号は1以上の数字で入力してください。',
         ];

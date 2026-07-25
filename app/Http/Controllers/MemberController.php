@@ -19,7 +19,7 @@ class MemberController extends Controller
 
     public function index(Request $request): View
     {
-        $sort = $request->get('sort', 'name');
+        $sort = $request->get('sort', 'serial_number');
         if (! in_array($sort, self::SORTABLE_COLUMNS, true)) {
             $sort = 'name';
         }
@@ -90,7 +90,9 @@ class MemberController extends Controller
 
         return view('members.edit', [
             'member' => $member, 'positions' => $positions, 'departments' => $departments,
-            'nextSerialNumber' => null,
+            // 通し番号が必須項目のため、CSV登録等でまだ未設定のメンバーを
+            // 編集する場合は、次に空いている番号をあらかじめ提案しておく。
+            'nextSerialNumber' => $member->serial_number ?? $this->nextAvailableSerialNumber(),
         ]);
     }
 

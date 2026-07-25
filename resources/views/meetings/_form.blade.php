@@ -3,9 +3,13 @@
     $value = fn (string $field) => old($field, $m?->{$field});
 @endphp
 
+<p class="text-xs text-gray-500 dark:text-gray-400">
+    <span class="text-red-600 dark:text-red-400">*</span> {{ __('は必須項目です。') }}
+</p>
+
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
     <div class="sm:col-span-2">
-        <x-input-label for="name" :value="__('会議名')" />
+        <x-input-label for="name" :value="__('会議名')" required />
         <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="$value('name')" required autofocus />
         <x-input-error :messages="$errors->get('name')" class="mt-2" />
     </div>

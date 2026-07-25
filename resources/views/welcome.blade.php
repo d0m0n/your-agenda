@@ -49,7 +49,7 @@
         {{-- ヒーロー --}}
         <section class="relative isolate overflow-hidden flex items-center min-h-[560px] sm:min-h-[620px] lg:min-h-[720px]">
             <div class="absolute inset-0">
-                <x-image-placeholder label="メインビジュアル画像" fill />
+                <img src="{{ asset('images/lp/hero.jpg') }}" alt="" class="h-full w-full object-cover" loading="eager" fetchpriority="high">
                 <div class="absolute inset-0 bg-gradient-to-t from-ink-900/90 via-ink-900/55 to-ink-900/20"></div>
             </div>
 
@@ -139,7 +139,7 @@
             {{-- 機能1: 次第管理 --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="order-2 lg:order-1">
-                    <x-screenshot-placeholder label="次第(会議)画面のスクリーンショット" url="your-agenda.example/meetings/1" />
+                    <x-screenshot-placeholder label="次第(会議)画面のスクリーンショット" url="your-agenda.example/meetings/1" src="{{ asset('images/lp/agenda-screenshot.png') }}" />
                 </div>
                 <div class="order-1 lg:order-2">
                     <p class="text-xs font-medium tracking-[0.2em] text-leather-500 dark:text-leather-300 uppercase">次第管理</p>
@@ -173,14 +173,14 @@
                     </ul>
                 </div>
                 <div>
-                    <x-screenshot-placeholder label="ダッシュボード画面のスクリーンショット" url="your-agenda.example/dashboard" />
+                    <x-screenshot-placeholder label="ダッシュボード画面のスクリーンショット" url="your-agenda.example/dashboard" src="{{ asset('images/lp/dashboard-screenshot.png') }}" />
                 </div>
             </div>
 
             {{-- 機能3: メンバー管理 --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="order-2 lg:order-1">
-                    <x-screenshot-placeholder label="メンバープロフィール画面のスクリーンショット" url="your-agenda.example/members/1" />
+                    <x-screenshot-placeholder label="メンバー一覧画面のスクリーンショット" url="your-agenda.example/members" src="{{ asset('images/lp/members-screenshot.png') }}" />
                 </div>
                 <div class="order-1 lg:order-2">
                     <p class="text-xs font-medium tracking-[0.2em] text-leather-500 dark:text-leather-300 uppercase">メンバー管理</p>
@@ -197,23 +197,23 @@
                 </div>
             </div>
 
-            {{-- 機能4: 資料・議案ファイル共有 --}}
+            {{-- 機能4: 外部共有リンク・資料共有 --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <p class="text-xs font-medium tracking-[0.2em] text-leather-500 dark:text-leather-300 uppercase">資料の共有</p>
-                    <h3 class="mt-2 font-serif text-2xl font-bold text-ink-800 dark:text-paper-100">リンクひとつで、資料の共有が完了</h3>
+                    <p class="text-xs font-medium tracking-[0.2em] text-leather-500 dark:text-leather-300 uppercase">外部共有</p>
+                    <h3 class="mt-2 font-serif text-2xl font-bold text-ink-800 dark:text-paper-100">リンクひとつで、外部の人にも次第を共有</h3>
                     <p class="mt-4 text-sm leading-relaxed text-ink-600 dark:text-paper-100/70">
-                        資料のファイルをアップロードするだけで、共有用のリンクが作られます。
-                        メールやLINEにリンクを貼るだけで、メンバー全員が同じ資料を開けます。
+                        次第ごとに、ログイン不要で閲覧できる公開リンクを発行できます。
+                        取引先や外部のゲストにも、URLを送るだけで次第を確認してもらえます。
                     </p>
                     <ul class="mt-4 space-y-2 text-sm text-ink-600 dark:text-paper-100/70">
-                        <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">・</span>組織内で共有できる「資料置き場」も完備</li>
-                        <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">・</span>アップロード済みファイルは中身だけ差し替え可能</li>
-                        <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">・</span>次第は会議ごとに個別ダウンロードでき、インターネットがつながらない会場でも安心</li>
+                        <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">・</span>公開リンクはいつでも再発行・無効化できる</li>
+                        <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">・</span>Wi-Fi情報やメモなど、内部向けの情報は公開リンクに表示されない</li>
+                        <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">・</span>組織内で共有できる「資料置き場」も完備、次第は会議ごとに個別ダウンロードも可能</li>
                     </ul>
                 </div>
                 <div>
-                    <x-screenshot-placeholder label="資料置き場画面のスクリーンショット" url="your-agenda.example/materials" />
+                    <x-screenshot-placeholder label="次第の外部共有リンクのスクリーンショット" url="your-agenda.example/meetings/1" src="{{ asset('images/lp/public-link-screenshot.png') }}" />
                 </div>
             </div>
         </section>
@@ -263,7 +263,7 @@
                 </p>
                 <ul class="mt-6 text-sm text-ink-600 dark:text-paper-100/70 space-y-2 text-left max-w-sm mx-auto">
                     <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">✓</span>メンバー・会議・次第の管理を無制限に利用</li>
-                    <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">✓</span>登録する人ひとりあたり2GBの保存容量</li>
+                    <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">✓</span>2GBの保存容量</li>
                     <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">✓</span>見るだけのメンバーも追加できる</li>
                     <li class="flex items-start gap-2"><span class="text-leather-500 dark:text-leather-300 mt-0.5">✓</span>解約時のデータ一括ダウンロードに対応</li>
                 </ul>
@@ -310,9 +310,8 @@
                     ['q' => '無料お試し期間はありますか?', 'a' => '登録から14日間、クレジットカードのご登録なしですべての機能をお試しいただけます。14日を過ぎるとお支払い情報のご登録が必要になります。'],
                     ['q' => '複数のグループや部署でも使えますか?', 'a' => '組織単位でのご契約となります。グループ・部署ごとにご利用いただく場合は、それぞれ組織登録をお願いしております。'],
                     ['q' => 'セキュリティは大丈夫ですか?', 'a' => '組織ごとにデータを完全に分離しており、他組織のデータには一切アクセスできない設計になっています。'],
-                    ['q' => '解約したらデータはどうなりますか?', 'a' => '解約前に、その年度に作成した次第・議案を一括でダウンロードいただけます。データを手元に残したまま解約できます。'],
-                    ['q' => '導入にどれくらい時間がかかりますか?', 'a' => '組織登録は数分で完了します。メンバー登録も表計算ソフトのデータからまとめて登録できるので、既存の名簿からすぐに移行できます。'],
-                    ['q' => 'パソコンが苦手でも使えますか?', 'a' => '紙の次第や名刺に近い見た目にしているので、普段の資料と同じ感覚でご利用いただけます。'],
+                    ['q' => '解約したらデータはどうなりますか?', 'a' => '解約前に、作成した次第・議案を一括でダウンロードいただけます。データを手元に残したまま解約できます。'],
+                    ['q' => '導入にどれくらい時間がかかりますか?', 'a' => '組織登録は数分で完了します。メンバー登録もCSVデータでまとめて登録できるので、既存の名簿からすぐに移行できます。'],
                 ] as $item)
                     <details class="group bg-paper-50 dark:bg-ink-800 border border-paper-200 dark:border-ink-700 rounded-lg px-5 py-4">
                         <summary class="flex items-center justify-between cursor-pointer list-none font-medium text-sm text-ink-800 dark:text-paper-100">
@@ -345,15 +344,7 @@
 
         {{-- フッター --}}
         <footer class="bg-paper-100 dark:bg-night">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <a href="{{ url('/lp') }}" class="flex items-center gap-2">
-                    <x-brand-mark class="h-6 w-6 text-leather-400" />
-                    <span class="font-serif font-semibold text-ink-800 dark:text-paper-100">あなた(の)次第</span>
-                </a>
-                <div class="flex items-center gap-6 text-sm text-ink-500 dark:text-paper-100/50">
-                    <a href="{{ route('login') }}" class="hover:text-leather-500 dark:hover:text-leather-300 transition-colors">ログイン</a>
-                    <a href="mailto:info@example.com" class="hover:text-leather-500 dark:hover:text-leather-300 transition-colors">お問い合わせ</a>
-                </div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex justify-center">
                 <p class="text-xs text-ink-400 dark:text-paper-100/40">&copy; {{ date('Y') }} あなた(の)次第</p>
             </div>
         </footer>

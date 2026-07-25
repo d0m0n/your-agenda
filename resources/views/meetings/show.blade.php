@@ -17,6 +17,9 @@
                     <a href="{{ route('meetings.edit', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">
                         {{ __('会議情報を編集') }}
                     </a>
+                    <a href="{{ route('meetings.export', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">
+                        {{ __('ダウンロード') }}
+                    </a>
                 @endcan
             </div>
         </div>
