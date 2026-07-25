@@ -90,6 +90,50 @@ class BillingTest extends TestCase
         $this->actingAs($general)->get(route('settings.export'))->assertOk();
     }
 
+    /**
+     * 未契約(トライアル終了)状態でも、困っていることを問い合わせられる
+     * 必要があるため、inquiries.storeはsubscribedミドルウェアの対象外にして
+     * いる。以前は対象内になっており、送信するとフォームの中身が何も
+     * 案内されないままペイウォールへ差し戻され、問い合わせ自体が保存
+     * されない不具合があった。
+     */
+    public function test_general_user_of_expired_trial_organization_can_still_submit_an_inquiry(): void
+    {
+        $organization = Organization::factory()->expiredTrial()->create();
+        $general = User::factory()->for($organization, 'organization')->create();
+
+        $response = $this->actingAs($general)->post(route('inquiries.store'), [
+            'category' => 'inquiry',
+            'subject' => '未契約状態からの問い合わせ',
+            'body' => '本文です。',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('status');
+        $this->assertDatabaseHas('inquiries', [
+            'organization_id' => $organization->id,
+            'subject' => '未契約状態からの問い合わせ',
+        ]);
+    }
+
+    public function test_observer_of_expired_trial_organization_can_still_submit_an_inquiry(): void
+    {
+        $organization = Organization::factory()->expiredTrial()->create();
+        $observer = User::factory()->for($organization, 'organization')->observer()->create();
+
+        $response = $this->actingAs($observer)->post(route('inquiries.store'), [
+            'category' => 'bug',
+            'subject' => 'オブザーブからの不具合報告',
+            'body' => '本文です。',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('inquiries', [
+            'organization_id' => $organization->id,
+            'subject' => 'オブザーブからの不具合報告',
+        ]);
+    }
+
     public function test_observer_cannot_start_checkout(): void
     {
         $organization = Organization::factory()->expiredTrial()->create();

@@ -54,10 +54,6 @@ Route::middleware(['auth', 'subscribed'])->group(function () {
     // メンバー一覧の閲覧もobserverに開放する(作成・編集・削除・CSV入出力は
     // 引き続き can:manage 側のみ。ビュー側で @can('manage') により操作系UIを隠す)
     Route::get('/members', [MemberController::class, 'index'])->name('members.index');
-
-    // 問い合わせ・不具合報告・機能要望の送信フォーム。一般/オブザーブ両方が
-    // 送信できるため can:manage の外に置く(super_adminはInquiryRequestで拒否)。
-    Route::post('/inquiries', [InquiryController::class, 'store'])->name('inquiries.store');
 });
 
 // 会議一覧は、解約・トライアル終了後も次第を閲覧し続けられるようにする
@@ -70,6 +66,14 @@ Route::middleware('auth')->group(function () {
     // 読めるよう can:manage・subscribed のどちらも外している(HelpController側で
     // ロールに応じて表示するセクションを切り替える)。
     Route::get('/help', [HelpController::class, 'index'])->name('help.index');
+
+    // 問い合わせ・不具合報告・機能要望の送信フォーム。一般/オブザーブ両方が
+    // 送信できるため can:manage の外に置く(super_adminはInquiryRequestで拒否)。
+    // 未契約状態でも「困っているから問い合わせたい」を送れる必要があるため
+    // subscribedミドルウェアも外している(以前はsubscribedグループ内にあり、
+    // 未契約時にフォームを送信すると何の案内もなくペイウォールへ差し戻されて
+    // 問い合わせ自体が失敗する不具合があった)。
+    Route::post('/inquiries', [InquiryController::class, 'store'])->name('inquiries.store');
 
     // 議案ファイル(sites)は展開後の中身をWebサーバーが直接配信する静的ファイルのため
     // ルート/ミドルウェアを経由しない。「開く入口」だけをここでラップし、
