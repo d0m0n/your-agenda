@@ -30,6 +30,12 @@ Route::get('/', function () {
 
 Route::get('/lp', fn () => view('welcome'))->name('lp');
 
+Route::get('/sitemap.xml', function () {
+    return response()
+        ->view('sitemap', ['url' => url('/lp')])
+        ->header('Content-Type', 'text/xml');
+})->name('sitemap');
+
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified', 'subscribed'])->name('dashboard');
 
 // 14日間の無料トライアル終了後(またはサブスクリプション未契約時)のペイウォール。

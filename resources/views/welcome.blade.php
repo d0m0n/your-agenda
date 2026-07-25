@@ -7,8 +7,29 @@
         @include('layouts.theme-init')
         @include('layouts._favicon')
 
-        <title>{{ config('app.name') }} | 議題はあなた次第。会議の準備がもっと楽になる</title>
-        <meta name="description" content="会議の日程や資料、メンバーの連絡先がバラバラで困っていませんか。ぜんぶひとつにまとめて、毎月タバコ1箱分の負担で楽になるサービス「あなた(の)次第」。">
+        @php
+            $ogTitle = config('app.name').' | 議題はあなた次第。会議の準備がもっと楽になる';
+            $ogDescription = '会議の日程や資料、メンバーの連絡先がバラバラで困っていませんか。ぜんぶひとつにまとめて、毎月タバコ1箱分の負担で楽になるサービス「あなた(の)次第」。';
+            $ogUrl = url('/lp');
+            $ogImage = asset('images/lp/hero.jpg');
+        @endphp
+
+        <title>{{ $ogTitle }}</title>
+        <meta name="description" content="{{ $ogDescription }}">
+        <link rel="canonical" href="{{ $ogUrl }}">
+
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="{{ config('app.name') }}">
+        <meta property="og:title" content="{{ $ogTitle }}">
+        <meta property="og:description" content="{{ $ogDescription }}">
+        <meta property="og:url" content="{{ $ogUrl }}">
+        <meta property="og:image" content="{{ $ogImage }}">
+        <meta property="og:locale" content="ja_JP">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $ogTitle }}">
+        <meta name="twitter:description" content="{{ $ogDescription }}">
+        <meta name="twitter:image" content="{{ $ogImage }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +38,30 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <script type="application/ld+json">
+            {!! json_encode([
+                '@'.'context' => 'https://schema.org',
+                '@type' => 'SoftwareApplication',
+                'name' => config('app.name'),
+                'applicationCategory' => 'BusinessApplication',
+                'operatingSystem' => 'Web',
+                'url' => $ogUrl,
+                'description' => $ogDescription,
+                'offers' => [
+                    '@type' => 'Offer',
+                    'price' => (string) config('billing.monthly_price_yen'),
+                    'priceCurrency' => 'JPY',
+                    'priceSpecification' => [
+                        '@type' => 'UnitPriceSpecification',
+                        'price' => (string) config('billing.monthly_price_yen'),
+                        'priceCurrency' => 'JPY',
+                        'billingIncrement' => 1,
+                        'unitCode' => 'MON',
+                    ],
+                ],
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        </script>
     </head>
     <body class="font-sans antialiased bg-paper-100 dark:bg-night text-ink-800 dark:text-paper-100">
 

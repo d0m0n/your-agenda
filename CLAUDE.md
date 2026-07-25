@@ -439,6 +439,22 @@
 - CTAは`/register`(組織登録フロー)へ誘導する
 - 未ログイン時に`/`へアクセスすると引き続き`/login`へ自動リダイレクトする
   (LP自体は`/`を差し替えず、`/lp`で個別に公開する方針)
+- **SEO**: `/lp`にOGP(`og:title`/`og:description`/`og:image`/`og:url`)・
+  Twitter Card(`summary_large_image`)・`canonical`・JSON-LD
+  (`SoftwareApplication`、料金は`config('billing.monthly_price_yen')`から
+  生成)を設定している。og:imageはヒーロー画像(`public/images/lp/hero.jpg`)
+  を流用。JSON-LDの`@context`キーは`'@'.'context'`という文字列結合で
+  書く必要がある(Laravelの`Context`機能用Blade標準ディレクティブ`@context`
+  と衝突し、`'@context' => '...'`とそのまま書くと文字列内であっても
+  Blade側に構文としてマッチしてコンパイルが壊れるため)。
+  `/sitemap.xml`(`routes/web.php`の`sitemap`ルート、`resources/views/
+  sitemap.blade.php`)は`url('/lp')`から動的にURLを生成する(本番URLが
+  独自ドメイン設定前後で変わる想定のため、`public/`直下に静的ファイルとしては
+  置いていない)。`public/robots.txt`はSitemapディレクティブでこれを指す
+  (robots.txt自体は静的ファイルなので、独自ドメイン設定時はここだけ
+  手動で書き換えが必要)。次第の外部公開共有リンク(`/s/meetings/{token}`)
+  および利用不可ページには元から`<meta name="robots" content="noindex">`
+  が設定済み
 
 ## 契約・課金
 - 1組織 = 1契約。月額600円(税込)、Stripe + Laravel Cashierで実装済み
