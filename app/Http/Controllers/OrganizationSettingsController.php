@@ -10,6 +10,7 @@ use App\Services\StorageUsageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class OrganizationSettingsController extends Controller
 {
@@ -54,6 +55,17 @@ class OrganizationSettingsController extends Controller
         }
 
         $organization->update($data);
+
+        // Stripeに顧客レコードが存在する場合、組織名・請求先メールアドレスの
+        // 変更をStripe側にも反映する(領収書・請求書メールの送付先として使われる)。
+        // Stripe側の障害等で失敗しても、ここまでの設定保存自体は失わせない。
+        if ($organization->hasStripeId()) {
+            try {
+                $organization->syncStripeCustomerDetails();
+            } catch (Throwable $e) {
+                report($e);
+            }
+        }
 
         return redirect()->route('settings.edit')->with('status', '組織情報を更新しました。');
     }

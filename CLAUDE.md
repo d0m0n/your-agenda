@@ -200,7 +200,15 @@
   ->withoutGlobalScope(OrganizationScope::class) を使って組織を横断する
 
 ## データ構造(実装済み)
-- organizations: name, header_image_path, icon_image_path,
+- organizations: name, billing_email(nullable, 任意設定の請求先メール
+  アドレス。組織にはログインユーザーのようなemailカラムが無いため新設した。
+  `Organization::stripeEmail()`でCashierに返し、Stripeの顧客情報
+  (領収書・請求書メールの送付先)に同期する。基本設定画面で変更すると、
+  既にStripe顧客が存在する組織(`hasStripeId()`)は
+  `syncStripeCustomerDetails()`で即座にStripe側にも反映する。
+  Stripe API呼び出しが失敗しても設定保存自体は失敗させない
+  (`OrganizationSettingsController::update()`でtry/catchしreport()のみ)),
+  header_image_path, icon_image_path,
   google_calendar_id, contracted_at,
   stripe_id, pm_type, pm_last_four(Laravel Cashierの`Billable`トレイトが
   管理する顧客ID・支払い方法情報。Cashierの標準マイグレーションを
@@ -309,7 +317,7 @@
    - お支払い管理(現在の契約状況表示、Stripeカスタマーポータルへの
      導線。下記「契約・課金」参照)
    - ダッシュボードの組織ヘッダー画像の設定
-   - 組織情報の編集
+   - 組織情報の編集(組織名は必須、請求先メールアドレスは任意設定)
    - GoogleカレンダーIDの設定(独立したメニュー項目ではなく基本設定に統合)
    - オブザーブユーザー管理への導線
    - 案内文のデフォルトテンプレート編集(下記「案内文作成」参照)

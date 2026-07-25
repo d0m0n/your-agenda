@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Cashier\Billable;
 
 #[Fillable([
-    'name', 'header_image_path', 'icon_image_path', 'google_calendar_id', 'contracted_at',
+    'name', 'billing_email', 'header_image_path', 'icon_image_path', 'google_calendar_id', 'contracted_at',
     'show_meetings_pane', 'show_calendar_pane', 'show_birthday_pane', 'show_materials_pane',
     'invitation_pdf_template', 'invitation_email_template', 'invitation_line_template',
     'free_access_enabled',
@@ -78,6 +78,17 @@ class Organization extends Model
         }
 
         return __('未契約');
+    }
+
+    /**
+     * Cashierが顧客情報の作成・同期(syncStripeCustomerDetails)に使う
+     * メールアドレス。組織にはログインユーザーのようなemailカラムが無いため、
+     * 基本設定画面で任意設定できる`billing_email`をここで返す
+     * (Stripeからの領収書・請求書メール等の送付先になる)。
+     */
+    public function stripeEmail(): ?string
+    {
+        return $this->billing_email;
     }
 
     /**

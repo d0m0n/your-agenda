@@ -63,14 +63,24 @@
 
             <div class="bg-paper-50 dark:bg-ink-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ __('組織情報') }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    <span class="text-red-600 dark:text-red-400">*</span> {{ __('は必須項目です。') }}
+                </p>
                 <form method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
                     @method('PUT')
 
                     <div>
-                        <x-input-label for="name" :value="__('組織名')" />
+                        <x-input-label for="name" :value="__('組織名')" required />
                         <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $organization->name)" required />
                         <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="billing_email" :value="__('請求先メールアドレス')" />
+                        <x-text-input id="billing_email" name="billing_email" type="email" class="mt-1 block w-full" :value="old('billing_email', $organization->billing_email)" />
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('Stripeからの領収書・請求書メールの送付先として使われます(設定は任意です)。') }}</p>
+                        <x-input-error :messages="$errors->get('billing_email')" class="mt-2" />
                     </div>
 
                     <div>
