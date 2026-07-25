@@ -21,7 +21,7 @@
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
                 <a href="{{ url('/lp') }}" class="flex items-center gap-2">
                     <x-brand-mark class="h-6 w-6 text-leather-400" />
-                    <span class="font-serif font-semibold text-sm text-ink-800 dark:text-paper-100">あなた次第</span>
+                    <span class="font-serif font-semibold text-sm text-ink-800 dark:text-paper-100">あなた(の)次第</span>
                 </a>
             </div>
         </header>

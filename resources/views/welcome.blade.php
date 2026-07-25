@@ -8,7 +8,7 @@
         @include('layouts._favicon')
 
         <title>{{ config('app.name') }} | 議題はあなた次第。会議の準備がもっと楽になる</title>
-        <meta name="description" content="会議の日程や資料、メンバーの連絡先がバラバラで困っていませんか。ぜんぶひとつにまとめて、毎月タバコ1箱分の負担で楽になるサービス「あなた次第」。">
+        <meta name="description" content="会議の日程や資料、メンバーの連絡先がバラバラで困っていませんか。ぜんぶひとつにまとめて、毎月タバコ1箱分の負担で楽になるサービス「あなた(の)次第」。">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +25,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <a href="{{ url('/lp') }}" class="flex items-center gap-2">
                     <x-brand-mark class="h-7 w-7 text-leather-400 shrink-0" />
-                    <span class="font-serif font-semibold text-lg text-ink-800 dark:text-paper-100">あなた次第</span>
+                    <span class="font-serif font-semibold text-lg text-ink-800 dark:text-paper-100">あなた(の)次第</span>
                 </a>
 
                 <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-ink-600 dark:text-paper-100/70">
@@ -65,7 +65,7 @@
                     <p class="mt-6 text-base leading-relaxed text-paper-100/85 max-w-lg">
                         会議の日程、次第(進行表)、メンバーの連絡先、資料が、
                         Excelやメール、LINEに散らばっていませんか。
-                        「あなた次第」なら、ぜんぶひとつの場所にまとまります。
+                        「あなた(の)次第」なら、ぜんぶひとつの場所にまとまります。
                     </p>
                     <div class="mt-8 flex flex-wrap items-center gap-4">
                         <a href="{{ route('register') }}" class="inline-flex items-center px-6 py-3 rounded-md bg-leather-500 hover:bg-leather-600 text-white font-semibold shadow-md transition-colors">
@@ -132,7 +132,7 @@
             <div class="text-center max-w-2xl mx-auto">
                 <p class="text-xs font-medium tracking-[0.2em] text-leather-500 dark:text-leather-300 uppercase">Features</p>
                 <h2 class="mt-3 font-serif text-2xl sm:text-3xl font-bold text-ink-800 dark:text-paper-100">
-                    実際の画面で見る、「あなた次第」でできること
+                    「あなた(の)次第」でできること
                 </h2>
             </div>
 
@@ -348,13 +348,13 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <a href="{{ url('/lp') }}" class="flex items-center gap-2">
                     <x-brand-mark class="h-6 w-6 text-leather-400" />
-                    <span class="font-serif font-semibold text-ink-800 dark:text-paper-100">あなた次第</span>
+                    <span class="font-serif font-semibold text-ink-800 dark:text-paper-100">あなた(の)次第</span>
                 </a>
                 <div class="flex items-center gap-6 text-sm text-ink-500 dark:text-paper-100/50">
                     <a href="{{ route('login') }}" class="hover:text-leather-500 dark:hover:text-leather-300 transition-colors">ログイン</a>
                     <a href="mailto:info@example.com" class="hover:text-leather-500 dark:hover:text-leather-300 transition-colors">お問い合わせ</a>
                 </div>
-                <p class="text-xs text-ink-400 dark:text-paper-100/40">&copy; {{ date('Y') }} あなた次第</p>
+                <p class="text-xs text-ink-400 dark:text-paper-100/40">&copy; {{ date('Y') }} あなた(の)次第</p>
             </div>
         </footer>
     </body>

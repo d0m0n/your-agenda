@@ -21,7 +21,7 @@ class DashboardOnboardingTest extends TestCase
         $response = $this->actingAs($user)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertSee('ようこそ、「あなた次第」へ');
+        $response->assertSee('ようこそ、「あなた(の)次第」へ');
         $response->assertSee(route('members.create'), false);
         $response->assertSee(route('meetings.create'), false);
     }
@@ -35,7 +35,7 @@ class DashboardOnboardingTest extends TestCase
         $response = $this->actingAs($user)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertDontSee('ようこそ、「あなた次第」へ');
+        $response->assertDontSee('ようこそ、「あなた(の)次第」へ');
     }
 
     public function test_onboarding_card_is_hidden_once_a_meeting_exists(): void
@@ -47,7 +47,7 @@ class DashboardOnboardingTest extends TestCase
         $response = $this->actingAs($user)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertDontSee('ようこそ、「あなた次第」へ');
+        $response->assertDontSee('ようこそ、「あなた(の)次第」へ');
     }
 
     public function test_observer_never_sees_the_onboarding_card(): void
@@ -58,6 +58,6 @@ class DashboardOnboardingTest extends TestCase
         $response = $this->actingAs($observer)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertDontSee('ようこそ、「あなた次第」へ');
+        $response->assertDontSee('ようこそ、「あなた(の)次第」へ');
     }
 }

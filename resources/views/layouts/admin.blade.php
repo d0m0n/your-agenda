@@ -26,7 +26,7 @@
                         <div class="flex items-center gap-8">
                             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 font-serif font-semibold text-paper-100">
                                 <x-brand-mark class="h-6 w-6 text-brass-300" />
-                                {{ __('あなた次第 管理者パネル') }}
+                                {{ __('あなた(の)次第 管理者パネル') }}
                             </a>
                             <a href="{{ route('admin.dashboard') }}" class="text-sm text-paper-100/70 hover:text-paper-100">{{ __('組織一覧') }}</a>
                             <a href="{{ route('admin.inquiries.index') }}" class="inline-flex items-center gap-1.5 text-sm text-paper-100/70 hover:text-paper-100">

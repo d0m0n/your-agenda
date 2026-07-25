@@ -36,7 +36,7 @@
             @can('manage')
                 @if ($isNewOrganization)
                     <div class="rounded-lg border border-dashed border-leather-300 dark:border-leather-600 bg-leather-50 dark:bg-leather-700/10 p-6">
-                        <h3 class="font-serif text-lg font-semibold text-ink-800 dark:text-paper-100">{{ __('ようこそ、「あなた次第」へ') }}</h3>
+                        <h3 class="font-serif text-lg font-semibold text-ink-800 dark:text-paper-100">{{ __('ようこそ、「あなた(の)次第」へ') }}</h3>
                         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ __('まずは以下から始めてみましょう。') }}</p>
                         <ol class="mt-4 space-y-3">
                             <li class="flex items-center gap-3">

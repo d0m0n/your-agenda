@@ -25,7 +25,7 @@
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
                 <a href="{{ url('/lp') }}" class="flex items-center gap-2">
                     <x-brand-mark class="h-6 w-6 text-leather-400" />
-                    <span class="font-serif font-semibold text-sm text-ink-800 dark:text-paper-100">あなた次第</span>
+                    <span class="font-serif font-semibold text-sm text-ink-800 dark:text-paper-100">あなた(の)次第</span>
                 </a>
                 <button type="button" onclick="window.print()" class="text-sm text-leather-500 dark:text-leather-300 hover:underline">
                     {{ __('印刷') }}
@@ -106,7 +106,7 @@
 
                 <p class="print-hidden mt-6 text-center text-xs text-ink-400 dark:text-paper-100/40">
                     この次第は
-                    <a href="{{ url('/lp') }}" class="text-leather-500 dark:text-leather-300 hover:underline">あなた次第</a>
+                    <a href="{{ url('/lp') }}" class="text-leather-500 dark:text-leather-300 hover:underline">あなた(の)次第</a>
                     で作成・共有されています。
                 </p>
             </div>
