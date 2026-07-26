@@ -47,6 +47,18 @@ return [
             'report' => false,
         ],
 
+        // spatie/laravel-backup(config/backup.php)の保存先専用ディスク。
+        // 'local'ディスク(storage/app/private)をバックアップ対象にも
+        // 含めているため、保存先を同じ場所にすると生成したzipが次回の
+        // バックアップに再帰的に取り込まれてしまう。それを避けるため、
+        // storage/app配下だが'local'/'public'とは別のディレクトリに分離する。
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('app/backups'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

@@ -26,14 +26,17 @@ return [
             'files' => [
                 /*
                  * アプリのソースコードはgitで管理されているため対象外にし、
-                 * git管理外のアップロード済みデータ(議案ファイル・資料・
-                 * ヘッダー画像・顔写真等、storage/app/public配下)だけを
-                 * バックアップ対象にする。.envはシークレットを含むため
-                 * バックアップzipには含めない(サーバー移行時は別途安全な
-                 * 方法で控えておくこと)。
+                 * git管理外のアップロード済みデータだけをバックアップ対象にする。
+                 * - storage/app/public: 議案ファイル(sites)・ヘッダー画像・顔写真等
+                 * - storage/app/private: 資料置き場(materials)。'local'ディスクの
+                 *   ルートで、資料ファイルはここに保存される(publicディスクでは
+                 *   ないので、上のpublicだけでは資料が漏れてしまう)
+                 * .envはシークレットを含むためバックアップzipには含めない
+                 * (サーバー移行時は別途安全な方法で控えておくこと)。
                  */
                 'include' => [
                     storage_path('app/public'),
+                    storage_path('app/private'),
                 ],
 
                 /*
@@ -167,10 +170,14 @@ return [
             'filename_prefix' => '',
 
             /*
-             * The disk names on which the backups will be stored.
+             * バックアップzipの保存先ディスク。'local'(storage/app/private)は
+             * 上のsource.files.includeにも含めているため、そこに保存すると
+             * 生成したzipが次回のバックアップに再帰的に取り込まれてしまう。
+             * 専用の'backups'ディスク(storage/app/backups、
+             * config/filesystems.php参照)に分離している。
              */
             'disks' => [
-                'local',
+                'backups',
             ],
 
             /*
@@ -310,7 +317,7 @@ return [
             // このバックアップを見つけられず、正しく作成されていても
             // 「異常」として通知されてしまう。
             'name' => env('BACKUP_ARCHIVE_NAME', 'your-agenda'),
-            'disks' => ['local'],
+            'disks' => ['backups'],
             'health_checks' => [
                 MaximumAgeInDays::class => 1,
                 MaximumStorageInMegabytes::class => 5000,

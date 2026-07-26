@@ -691,9 +691,17 @@
 - 未実装: Stripe側での複数プラン対応、組織の完全削除(退会処理)
 
 ## バックアップ
-- `spatie/laravel-backup`を導入し、DB(mysqldump)とアップロード済みデータ
-  (`storage/app/public`配下。議案ファイル・資料・各種画像)を1つのzipに
-  まとめて日次でバックアップする(`config/backup.php`)
+- `spatie/laravel-backup`を導入し、DB(mysqldump)とアップロード済みデータを
+  1つのzipにまとめて日次でバックアップする(`config/backup.php`)
+- バックアップ対象は`storage/app/public`(議案ファイル・ヘッダー画像・
+  顔写真等)と`storage/app/private`(資料置き場=materials。'local'ディスクの
+  ルートで、資料ファイルはpublicディスクではなくここに保存されるため、
+  publicだけを対象にすると資料が漏れる。実際に一度この漏れが発生し、
+  修正した経緯がある)の両方
+- バックアップzipの保存先は専用の`backups`ディスク(`storage/app/backups`、
+  `config/filesystems.php`)。`local`ディスク(`storage/app/private`)を
+  バックアップ対象にも含めているため、保存先を同じ場所にすると生成したzipが
+  次回のバックアップに再帰的に取り込まれてしまうため分離している
 - バックアップの保存先フォルダ名(`config('backup.backup.name')`)は
   `BACKUP_ARCHIVE_NAME`(デフォルト`your-agenda`)という英数字固定値にしている。
   APP_NAME(「あなた(の)次第」)をそのまま使うと、FileZilla等のSFTP
@@ -710,20 +718,20 @@
     合計5GBを超えたら古いものから削除。`config('backup.cleanup')`)
   - `backup:monitor` 毎日04:00 -- 直近のバックアップが1日以内に作成されて
     いるか、合計容量が5000MBを超えていないかを確認
-- 保存先はLaravelの`local`ディスク(`storage/app/private/`)。
-  `public/storage`シンボリックリンクの外にあるため、Web経由では
-  アクセスできない(セキュリティ要件の一部)
+- 保存先の`storage/app/backups/`は`public/storage`シンボリックリンクの
+  外にあるため、Web経由ではアクセスできない(セキュリティ要件の一部)
 - バックアップ失敗時・異常検知時は`config('backup.notifications.mail.to')`
   (`.env`の`BACKUP_NOTIFICATION_EMAIL`。未設定なら`LEGAL_CONTACT_EMAIL`を
   流用)へメール通知される
 - **これはサーバー内バックアップに過ぎず、サーバー自体の障害には対応できない。
   必ずサーバー外(ローカルMac等)へ定期的に引き揚げること**。例:
   ```
-  rsync -avz -e ssh user@your-agenda.jp:~/your-agenda/storage/app/private/ ~/backups/your-agenda/
+  rsync -avz -e ssh user@your-agenda.jp:~/your-agenda/storage/app/backups/ ~/backups/your-agenda/
   ```
   さくらの「バックアップ&ステージング」機能(有料オプション)を併用しても良い。
   復元手順(zipを展開し、`mysql < *.sql`でDBを戻し、
-  `storage/app/public`配下にファイルを配置し直す)は一度リハーサルしておくと安心
+  `storage/app/public`・`storage/app/private`配下にファイルを配置し直す)は
+  一度リハーサルしておくと安心
 - `mysqldump`コマンドがサーバー上のPATHに存在している必要がある
   (さくらのレンタルサーバーではMySQL関連コマンドが標準で使えるはずだが、
   本番で`php artisan backup:run`を手動実行して疎通確認しておくこと)
