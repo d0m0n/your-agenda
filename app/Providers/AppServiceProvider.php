@@ -32,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage', fn (User $user) => $user->isGeneral());
         Gate::define('super-admin', fn (User $user) => $user->isSuperAdmin());
 
+        // プラスプラン限定機能用。将来ルート・Blade側で
+        // can:plus / @can('plus') として参照する(実装済みのプラス限定機能は
+        // まだ無いが、管理者パネルでplanを切り替えられる状態は準備済み)。
+        Gate::define('plus', fn (User $user) => $user->organization?->hasPlusAccess() ?? false);
+
         // 「1組織=1契約」のため、Stripeの顧客(Billable)はUserではなくOrganization。
         Cashier::useCustomerModel(Organization::class);
 

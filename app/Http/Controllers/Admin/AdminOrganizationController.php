@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\OrganizationPlan;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
@@ -10,6 +11,7 @@ use App\Services\OrganizationDataPurgeService;
 use App\Services\StorageUsageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -52,6 +54,17 @@ class AdminOrganizationController extends Controller
             : '無償提供モードを無効にしました。';
 
         return redirect()->route('admin.organizations.show', $organization)->with('status', $message);
+    }
+
+    public function updatePlan(Request $request, Organization $organization): RedirectResponse
+    {
+        $data = $request->validate([
+            'plan' => ['required', Rule::enum(OrganizationPlan::class)],
+        ]);
+
+        $organization->update($data);
+
+        return redirect()->route('admin.organizations.show', $organization)->with('status', "プランを「{$organization->plan->label()}」に変更しました。");
     }
 
     public function destroyData(Organization $organization, OrganizationDataPurgeService $purger): RedirectResponse

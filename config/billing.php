@@ -13,4 +13,10 @@ return [
 
     // LP・ペイウォール画面での表示用(Stripe側の実際の価格設定とは独立した表示専用の値)。
     'monthly_price_yen' => 600,
+
+    // プラスプラン(スタンダードの上位プラン)の表示用月額。金額・機能とも
+    // 未確定のため、Stripe側の価格連携はまだ行わず、管理者パネルからの
+    // 手動切り替え(organizations.plan)のみで運用する。金額が決まり次第、
+    // monthly_price_id/monthly_price_yenと同様の項目を追加して自己サービス化する想定。
+    'plus_price_yen' => null,
 ];

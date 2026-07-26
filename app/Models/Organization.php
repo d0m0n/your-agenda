@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrganizationPlan;
 use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Laravel\Cashier\Billable;
     'name', 'billing_email', 'header_image_path', 'icon_image_path', 'google_calendar_id', 'contracted_at',
     'show_meetings_pane', 'show_calendar_pane', 'show_birthday_pane', 'show_materials_pane',
     'invitation_pdf_template', 'invitation_email_template', 'invitation_line_template',
-    'free_access_enabled',
+    'free_access_enabled', 'plan',
 ])]
 class Organization extends Model
 {
@@ -30,6 +31,7 @@ class Organization extends Model
             'show_birthday_pane' => 'boolean',
             'show_materials_pane' => 'boolean',
             'free_access_enabled' => 'boolean',
+            'plan' => OrganizationPlan::class,
         ];
     }
 
@@ -42,6 +44,18 @@ class Organization extends Model
     public function hasActiveAccess(): bool
     {
         return $this->free_access_enabled || $this->onGenericTrial() || $this->subscribed('default');
+    }
+
+    /**
+     * プラス限定機能を利用できるかどうか。管理者パネルでplanをプラスに
+     * 切り替えた組織に加え、無償提供モードの組織・トライアル中の組織は
+     * 全機能を試せる方針のためtrueを返す(hasActiveAccess()と同様、
+     * トライアル終了後は自動的にfalseへ戻る)。プラス限定のルート・機能は
+     * Gate('plus')経由でこれを参照する。
+     */
+    public function hasPlusAccess(): bool
+    {
+        return $this->free_access_enabled || $this->onGenericTrial() || $this->plan === OrganizationPlan::Plus;
     }
 
     /**

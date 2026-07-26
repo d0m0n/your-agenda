@@ -13,6 +13,7 @@
                     <div>
                         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('お支払い管理') }}</h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('現在の契約状況') }}: {{ $organization->subscriptionStatusLabel() }}</p>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('現在のプラン') }}: {{ $organization->plan->label() }}</p>
                     </div>
 
                     @if ($organization->stripe_id)

@@ -210,6 +210,11 @@
   `syncStripeCustomerDetails()`で即座にStripe側にも反映する。
   Stripe API呼び出しが失敗しても設定保存自体は失敗させない
   (`OrganizationSettingsController::update()`でtry/catchしreport()のみ)),
+  plan(`App\Enums\OrganizationPlan`にキャスト。standard/plusの2値、
+  デフォルトstandard。プラス限定機能を将来追加するための準備で、
+  プラスの金額・機能はまだ未確定のため、Stripe側の価格連携は行わず
+  管理者パネルからの手動切り替えのみで運用する。詳細は下記
+  「プラン(スタンダード/プラス)」参照),
   header_image_path, icon_image_path,
   google_calendar_id, contracted_at,
   stripe_id, pm_type, pm_last_four(Laravel Cashierの`Billable`トレイトが
@@ -456,6 +461,29 @@
   および利用不可ページには元から`<meta name="robots" content="noindex">`
   が設定済み
 
+## プラン(スタンダード/プラス)
+- 現行の月額600円プランを「スタンダード」とし、将来的にスタンダードの
+  上位プランとして「プラス」を追加できるよう、機能・金額が未確定な段階で
+  仕組みだけ準備してある(実装済みのプラス限定機能はまだ無い)
+- `organizations.plan`(`App\Enums\OrganizationPlan`、standard/plus、
+  デフォルトstandard)で組織ごとのプランを保持する
+- `Organization::hasPlusAccess()`がプラス機能を使えるかどうかを判定する。
+  planがplusの場合に加えて、無償提供モード(`free_access_enabled`)中・
+  トライアル中(`onGenericTrial()`)の組織もtrueを返す(トライアル中は
+  プラス限定機能も含めて全機能を試せる方針のため)
+- `Gate::define('plus', ...)`(`AppServiceProvider`)を用意済み。将来
+  プラス限定のルート・画面を作る際は、既存の`can:manage`/`can:super-admin`
+  と同様に`Route::middleware(['auth', 'can:plus'])`や`@can('plus')`で
+  ガードする
+- プランの切り替えは管理者パネル(組織詳細画面)からの手動操作のみ
+  (`AdminOrganizationController::updatePlan()`、`free_access_enabled`の
+  トグルと同じ方式)。プラスの金額・機能が決まり次第、Stripe側にプラス用の
+  価格を作成し、`config('billing.plus_price_yen')`や
+  `STRIPE_PRICE_ID_PLUS`相当の設定、チェックアウト画面でのプラン選択
+  UIを追加して自己サービス化する想定(未実装)
+- 一般ユーザーの基本設定画面(お支払い管理カード)、管理者パネルの組織詳細
+  画面それぞれで現在のプランを表示する
+
 ## 契約・課金
 - 1組織 = 1契約。月額600円(税込)、Stripe + Laravel Cashierで実装済み
 - Cashierの`Billable`トレイトは`User`ではなく`Organization`モデルに付与
@@ -570,9 +598,12 @@
   Cashierのサブスクリプション状態と二重管理になり食い違いの元になるため)。
   契約状態の表示は`Organization::subscriptionStatusLabel()`が
   無償提供/トライアル/サブスクリプション状態から都度導出する
-- 未実装: Stripe側での複数プラン対応、管理者パネルからの契約ステータス
-  手動変更(無償提供モードのオン/オフは実装済み)、組織の完全削除
-  (退会処理)。詳細はREADME.mdの「課金・トライアル」セクション参照
+- 未実装: Stripe側での複数プラン対応(スタンダード/プラスの区分自体は
+  `organizations.plan`として準備済み。詳細は上記「プラン(スタンダード/
+  プラス)」参照。Stripeの価格連携・チェックアウトでのプラン選択が未実装)、
+  管理者パネルからの契約ステータス手動変更(無償提供モードのオン/オフは
+  実装済み)、組織の完全削除(退会処理)。詳細はREADME.mdの
+  「課金・トライアル」セクション参照
   (テストモードでのセットアップ手順を含む)
 
 ## 次第の一括ダウンロード・個別ダウンロード
@@ -621,7 +652,8 @@
   - 組織詳細: 契約状況(トライアル/契約中/無償提供中の別、トライアル
     終了日、Stripe Customer ID)の確認、ユーザー一覧(一般/オブザーブ)、
     一般ユーザーごとの割り当て容量(GB)の変更、アカウント削除、
-    「無償提供モード」のオン/オフ切り替え
+    「無償提供モード」のオン/オフ切り替え、プラン(スタンダード/プラス)の
+    手動切り替え
   - 「アップロード済みデータを削除」: その組織のmaterials/sites/
     各種画像を全て削除して使用量をゼロに戻す(app/Services/
     OrganizationDataPurgeServiceが担当)。会議・メンバー等のレコード

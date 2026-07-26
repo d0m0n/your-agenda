@@ -36,9 +36,28 @@
 
                 <div class="mt-6 pt-4 border-t border-paper-200 dark:border-ink-700 flex items-center justify-between">
                     <div>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('プラン') }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('プラス限定機能はまだ実装されていません(準備段階の切り替えです)。') }}
+                        </p>
+                    </div>
+                    <form method="POST" action="{{ route('admin.organizations.update-plan', $organization) }}" class="flex items-center gap-2">
+                        @csrf
+                        @method('PATCH')
+                        <select name="plan" class="rounded-md border-gray-300 dark:border-ink-600 dark:bg-ink-900 text-sm text-gray-900 dark:text-gray-100 focus:border-leather-400 focus:ring-leather-400">
+                            @foreach (\App\Enums\OrganizationPlan::cases() as $plan)
+                                <option value="{{ $plan->value }}" @selected($organization->plan === $plan)>{{ $plan->label() }}</option>
+                            @endforeach
+                        </select>
+                        <x-secondary-button type="submit">{{ __('変更する') }}</x-secondary-button>
+                    </form>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-paper-200 dark:border-ink-700 flex items-center justify-between">
+                    <div>
                         <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('無償提供モード') }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('有効にすると、この組織は課金なしで全機能を利用できます。') }}
+                            {{ __('有効にすると、この組織は課金なしで全機能(プラン限定機能を含む)を利用できます。') }}
                         </p>
                     </div>
                     <form method="POST" action="{{ route('admin.organizations.toggle-free-access', $organization) }}">

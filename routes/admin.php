@@ -13,6 +13,7 @@ Route::middleware(['admin.basic_auth', 'auth', 'can:super-admin'])->prefix('admi
     Route::put('/organizations/{organization}/users/{user}/quota', [AdminOrganizationController::class, 'updateQuota'])->name('organizations.users.update-quota');
     Route::delete('/organizations/{organization}/users/{user}', [AdminOrganizationController::class, 'destroyUser'])->name('organizations.users.destroy');
     Route::patch('/organizations/{organization}/free-access', [AdminOrganizationController::class, 'toggleFreeAccess'])->name('organizations.toggle-free-access');
+    Route::patch('/organizations/{organization}/plan', [AdminOrganizationController::class, 'updatePlan'])->name('organizations.update-plan');
 
     Route::get('/inquiries', [AdminInquiryController::class, 'index'])->name('inquiries.index');
     Route::patch('/inquiries/{inquiry}/toggle-handled', [AdminInquiryController::class, 'toggleHandled'])->name('inquiries.toggle-handled');
