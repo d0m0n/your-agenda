@@ -15,10 +15,12 @@ return [
 
     'backup' => [
         /*
-         * The name of this application. You can use this name to monitor
-         * the backups.
+         * バックアップzipの保存先フォルダ名になる。APP_NAME(「あなた(の)次第」)を
+         * そのまま使うと、rsync/scp/SFTPクライアント(FileZilla等)によっては
+         * 日本語フォルダ名が文字化けし、ディレクトリに入れなくなることがある
+         * ため、英数字のみの固定値にしている。
          */
-        'name' => env('APP_NAME', 'laravel-backup'),
+        'name' => env('BACKUP_ARCHIVE_NAME', 'your-agenda'),
 
         'source' => [
             'files' => [
@@ -304,7 +306,10 @@ return [
      */
     'monitor_backups' => [
         [
-            'name' => env('APP_NAME', 'laravel-backup'),
+            // backup.name(上記)と必ず一致させること。ずれるとbackup:monitorが
+            // このバックアップを見つけられず、正しく作成されていても
+            // 「異常」として通知されてしまう。
+            'name' => env('BACKUP_ARCHIVE_NAME', 'your-agenda'),
             'disks' => ['local'],
             'health_checks' => [
                 MaximumAgeInDays::class => 1,

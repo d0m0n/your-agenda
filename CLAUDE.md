@@ -694,6 +694,13 @@
 - `spatie/laravel-backup`を導入し、DB(mysqldump)とアップロード済みデータ
   (`storage/app/public`配下。議案ファイル・資料・各種画像)を1つのzipに
   まとめて日次でバックアップする(`config/backup.php`)
+- バックアップの保存先フォルダ名(`config('backup.backup.name')`)は
+  `BACKUP_ARCHIVE_NAME`(デフォルト`your-agenda`)という英数字固定値にしている。
+  APP_NAME(「あなた(の)次第」)をそのまま使うと、FileZilla等のSFTP
+  クライアントで日本語フォルダ名が文字化けし、ディレクトリに入れなくなる
+  不具合が実際に発生したため(本番環境で確認済み)。`monitor_backups`側の
+  `name`も必ず同じ値に揃えること(ずれると正常なバックアップが「見つからない」
+  として異常通知されてしまう)
 - Laravelスケジューラ(`routes/console.php`)に登録済みで、本番のcron
   (`php artisan schedule:run`、CLAUDE.mdの「本番環境の制約」参照)に
   自動的に乗る。**新たにcron設定を追加する必要はない**
