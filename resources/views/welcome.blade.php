@@ -184,7 +184,7 @@
             {{-- 機能1: 次第管理 --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="order-2 lg:order-1">
-                    <x-screenshot-placeholder label="次第(会議)画面のスクリーンショット" url="your-agenda.example/meetings/1" src="{{ asset('images/lp/agenda-screenshot.png') }}" />
+                    <x-screenshot-placeholder label="次第(会議)画面のスクリーンショット" url="your-agenda/meetings/1" src="{{ asset('images/lp/agenda-screenshot.png') }}" />
                 </div>
                 <div class="order-1 lg:order-2">
                     <p class="text-xs font-medium tracking-[0.2em] text-leather-500 dark:text-leather-300 uppercase">次第管理</p>
@@ -218,14 +218,14 @@
                     </ul>
                 </div>
                 <div>
-                    <x-screenshot-placeholder label="ダッシュボード画面のスクリーンショット" url="your-agenda.example/dashboard" src="{{ asset('images/lp/dashboard-screenshot.png') }}" />
+                    <x-screenshot-placeholder label="ダッシュボード画面のスクリーンショット" url="your-agenda/dashboard" src="{{ asset('images/lp/dashboard-screenshot.png') }}" />
                 </div>
             </div>
 
             {{-- 機能3: メンバー管理 --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="order-2 lg:order-1">
-                    <x-screenshot-placeholder label="メンバー一覧画面のスクリーンショット" url="your-agenda.example/members" src="{{ asset('images/lp/members-screenshot.png') }}" />
+                    <x-screenshot-placeholder label="メンバー一覧画面のスクリーンショット" url="your-agenda/members" src="{{ asset('images/lp/members-screenshot.png') }}" />
                 </div>
                 <div class="order-1 lg:order-2">
                     <p class="text-xs font-medium tracking-[0.2em] text-leather-500 dark:text-leather-300 uppercase">メンバー管理</p>
@@ -258,7 +258,7 @@
                     </ul>
                 </div>
                 <div>
-                    <x-screenshot-placeholder label="次第の外部共有リンクのスクリーンショット" url="your-agenda.example/meetings/1" src="{{ asset('images/lp/public-link-screenshot.png') }}" />
+                    <x-screenshot-placeholder label="次第の外部共有リンクのスクリーンショット" url="your-agenda/meetings/1" src="{{ asset('images/lp/public-link-screenshot.png') }}" />
                 </div>
             </div>
         </section>
