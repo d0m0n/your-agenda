@@ -19,4 +19,10 @@ return [
     // 手動切り替え(organizations.plan)のみで運用する。金額が決まり次第、
     // monthly_price_id/monthly_price_yenと同様の項目を追加して自己サービス化する想定。
     'plus_price_yen' => null,
+
+    // トライアル終了・解約等でhasActiveAccess()がfalseになってから、
+    // 再契約が無いまま組織を自動的に完全削除するまでの猶予日数。
+    // organizations.access_lost_atからの経過日数で判定する
+    // (ProcessOrganizationRetentionコマンド、毎日実行)。
+    'deletion_grace_period_days' => env('DELETION_GRACE_PERIOD_DAYS', 90),
 ];

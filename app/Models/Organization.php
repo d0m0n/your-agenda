@@ -26,6 +26,7 @@ class Organization extends Model
             'contracted_at' => 'date',
             'trial_ends_at' => 'datetime',
             'trial_ending_reminder_sent_at' => 'datetime',
+            'access_lost_at' => 'datetime',
             'show_meetings_pane' => 'boolean',
             'show_calendar_pane' => 'boolean',
             'show_birthday_pane' => 'boolean',
@@ -56,6 +57,22 @@ class Organization extends Model
     public function hasPlusAccess(): bool
     {
         return $this->free_access_enabled || $this->onGenericTrial() || $this->plan === OrganizationPlan::Plus;
+    }
+
+    /**
+     * access_lost_at(アクセス権を失った日時)からの猶予期間
+     * (config('billing.deletion_grace_period_days'))が過ぎ、
+     * まだアクセスが回復していない(=まだhasActiveAccess()がfalseの)
+     * 組織かどうか。ProcessOrganizationRetentionコマンドが、これがtrueの
+     * 組織を自動的に完全削除する。
+     */
+    public function isPastDeletionGracePeriod(): bool
+    {
+        if (! $this->access_lost_at || $this->hasActiveAccess()) {
+            return false;
+        }
+
+        return $this->access_lost_at->addDays((int) config('billing.deletion_grace_period_days'))->isPast();
     }
 
     /**

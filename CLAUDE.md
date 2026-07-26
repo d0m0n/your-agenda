@@ -640,20 +640,44 @@
   管理者パネルからの契約ステータス手動変更(無償提供モードのオン/オフは
   実装済み)。詳細はREADME.mdの「課金・トライアル」セクション参照
   (テストモードでのセットアップ手順を含む)
-- **退会処理(組織の完全削除)**: UI経由の操作経路はなく、
-  `php artisan organizations:delete {organization_id}`をサーバー上で実行する
-  運用(super_adminアカウント作成等と同じ方針。本人確認はSSHアクセス権限に
-  委ねる)。`--force`を付けない場合は組織名の入力による確認を挟む
-  (取り消せない操作のため)。Stripeサブスクリプションを即時解約した上で、
-  組織・ユーザー・メンバー・会議・次第・役職・部署・お問い合わせ・
-  アップロード済みファイルを削除する(meetings/members/positions/
-  departments/sites/users/inquiriesの各テーブルがorganization_idに
-  cascadeOnDeleteを設定しているため、Organizationレコードの削除だけで
-  連鎖的に消える。実ファイルはDBカスケードの対象外のため
-  `OrganizationDataPurgeService`で別途削除し、Cashierの`subscriptions`
-  テーブルは外部キー制約が無いため個別に削除している)。Stripe側の顧客情報
+- **退会処理(組織の完全削除)**: 2通りの削除経路がある。実際の削除処理
+  (Stripeサブスクリプションの即時解約→`OrganizationDataPurgeService`で
+  アップロード済みファイルを削除→Cashierの`subscriptions`テーブルの行を
+  削除(organization_idに外部キー制約が無いためOrganization削除時に
+  連鎖しない)→Organizationレコードを削除)は`App\Services\
+  OrganizationDeleter`に共通化してあり、以下どちらの経路からもここを通る。
+  組織・ユーザー・メンバー・会議・次第・役職・部署・お問い合わせは、
+  meetings/members/positions/departments/sites/users/inquiriesの各
+  テーブルがorganization_idにcascadeOnDeleteを設定しているため、
+  Organizationレコードの削除だけで連鎖的に消える。Stripe側の顧客情報
   そのもの(領収書・請求書等の会計記録)は税法上の保存義務との兼ね合いから
   あえて残す(完全に消したい場合は別途Stripeダッシュボードから手動対応)
+  1. **手動削除(即時の退会依頼)**: `php artisan organizations:delete
+     {organization_id}`をサーバー上で実行する(UI経由の操作経路はなく、
+     super_adminアカウント作成等と同じ方針。本人確認はSSHアクセス権限に
+     委ねる)。`--force`を付けない場合は組織名の入力による確認を挟む
+  2. **猶予期間経過後の自動削除**: トライアル終了・解約で
+     `hasActiveAccess()`がfalseになった時点から
+     `config('billing.deletion_grace_period_days')`(`.env`の
+     `DELETION_GRACE_PERIOD_DAYS`、デフォルト90日)が経過しても再契約が
+     無い場合、自動的に完全削除される。日次バッチ
+     `organizations:process-retention`(`routes/console.php`、毎日06:00)
+     が担当し、次の3つを行う:
+     - アクセスを新たに失った組織: `organizations.access_lost_at`に記録し、
+       一般ユーザー全員へ削除予定日を知らせるメールを送る
+       (`App\Mail\AccountScheduledForDeletion`)
+     - 再契約等でアクセスが回復した組織: `access_lost_at`をnullに戻し、
+       削除予定を解除する
+     - 猶予期間が過ぎてもアクセスが回復していない組織:
+       `OrganizationDeleter`で自動削除し、運営者へ通知する
+       (`App\Mail\OrganizationAutomaticallyDeleted`、宛先は
+       `config('error_alerts.mail_to')`と共通)
+     - 無償提供モード(`free_access_enabled`)の組織は`hasActiveAccess()`が
+       常にtrueになるため対象外(特別扱いのロジックは不要)
+     - この設計を選んだ理由: 解約即削除だと、委員会組織にありがちな
+       季節性の活動休止・カード更新忘れ・担当者交代による決済失敗だけで
+       意図せずデータが消えてしまうリスクがあるため、猶予期間を設けた
+       (経緯は本セッションのやり取り参照)
 
 ## 次第の一括ダウンロード・個別ダウンロード
 - 組織の meetings + agenda_items + 紐付くsites(Zip議案)をまとめて
