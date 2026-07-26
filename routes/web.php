@@ -30,6 +30,10 @@ Route::get('/', function () {
 
 Route::get('/lp', fn () => view('welcome'))->name('lp');
 
+Route::get('/legal/tokushoho', fn () => view('legal.tokushoho'))->name('legal.tokushoho');
+Route::get('/legal/terms', fn () => view('legal.terms'))->name('legal.terms');
+Route::get('/legal/privacy', fn () => view('legal.privacy'))->name('legal.privacy');
+
 Route::get('/sitemap.xml', function () {
     return response()
         ->view('sitemap', ['url' => url('/lp')])

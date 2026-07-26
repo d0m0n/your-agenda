@@ -61,10 +61,16 @@
             </div>
 
             {{-- フォームパネル --}}
-            <div class="flex items-center justify-center px-6 py-12 sm:px-12 lg:px-16">
+            <div class="flex flex-col items-center justify-center px-6 py-12 sm:px-12 lg:px-16">
                 <div class="w-full max-w-sm">
                     {{ $slot }}
                 </div>
+
+                <nav class="mt-10 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-ink-400 dark:text-paper-100/50">
+                    <a href="{{ route('legal.tokushoho') }}" class="hover:text-leather-500 dark:hover:text-leather-300 transition-colors">特定商取引法に基づく表記</a>
+                    <a href="{{ route('legal.terms') }}" class="hover:text-leather-500 dark:hover:text-leather-300 transition-colors">利用規約</a>
+                    <a href="{{ route('legal.privacy') }}" class="hover:text-leather-500 dark:hover:text-leather-300 transition-colors">プライバシーポリシー</a>
+                </nav>
             </div>
         </div>
     </body>

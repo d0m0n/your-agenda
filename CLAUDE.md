@@ -461,6 +461,36 @@
   および利用不可ページには元から`<meta name="robots" content="noindex">`
   が設定済み
 
+## 法務ページ(特商法表記・利用規約・プライバシーポリシー)
+- `/legal/tokushoho`(特定商取引法に基づく表記)・`/legal/terms`(利用規約)・
+  `/legal/privacy`(プライバシーポリシー)の3ページを用意している
+  (`resources/views/legal/`、専用レイアウト`<x-legal-layout>` ==
+  `App\View\Components\LegalLayout` → `layouts/legal.blade.php`)
+- **公開前に必ず内容を確認・差し替えること**。事業者名・運営者名・
+  連絡先メールアドレスは`config('legal.*')`(`.env`の`LEGAL_OPERATOR_NAME`/
+  `LEGAL_OPERATOR_REPRESENTATIVE`/`LEGAL_CONTACT_EMAIL`)から生成する。
+  未設定時は「［...を入力してください］」という形のプレースホルダー文言が入り、
+  該当箇所は`.legal-content .legal-placeholder`(黄色background)で
+  視覚的に強調表示される(各ビューの`$isPlaceholder`クロージャが
+  ブラケット文字「［」の有無で判定)
+  - `LEGAL_OPERATOR_NAME`は現在「プラン・ディー」(個人事業主の屋号)。
+    特定商取引法上、個人事業主が屋号を使う場合は運営者の本名(個人名)の
+    併記が原則必要なため、`LEGAL_OPERATOR_REPRESENTATIVE`に本名を
+    設定すること(未設定の間は「運営者」欄がプレースホルダー表示のまま)
+  - 所在地・電話番号は、個人事業主向けの「請求があれば遅滞なく開示する」
+    旨の文言(`config('legal.disclose_address_on_request')`、デフォルト
+    true)で代替する方針を採用した。実際の住所・電話番号を表記したい場合は
+    `LEGAL_DISCLOSE_ADDRESS_ON_REQUEST=false`にし、`LEGAL_ADDRESS`/
+    `LEGAL_PHONE`を設定する。この特例の適用可否は消費者庁のガイドライン確認、
+    または行政書士等への確認を推奨(このプロジェクトのCLAUDE.mdでは判断しない)
+  - 利用規約・プライバシーポリシーの本文も雛形(下書き)であり、特に
+    利用規約の免責事項は公開前に内容の妥当性を確認すること
+- LP(`welcome.blade.php`)・ログイン/登録画面共通レイアウト
+  (`layouts/guest.blade.php`)のフッターに3ページへのリンクを設置
+- `/register`に「利用規約とプライバシーポリシーに同意する」チェックボックスを
+  必須化(`RegisteredUserController`のバリデーションに`'terms' => ['accepted']`
+  を追加。DBには保存しない、送信時点の同意確認のみ)
+
 ## プラン(スタンダード/プラス)
 - 現行の月額600円プランを「スタンダード」とし、将来的にスタンダードの
   上位プランとして「プラス」を追加できるよう、機能・金額が未確定な段階で

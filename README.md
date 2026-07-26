@@ -462,6 +462,14 @@ Stripe(Laravel Cashier)を使った月額課金と、14日間の無料トライ�
    書いても反映されません)。
 4. **Laravelスケジューラ用のcron**: サーバーのコントロールパネルから
    `php artisan schedule:run` を毎分(または最短間隔)で登録してください。
+5. **法務ページの内容確認は本番公開前の必須作業**: `/legal/tokushoho`
+   (特定商取引法に基づく表記)・`/legal/terms`(利用規約)・
+   `/legal/privacy`(プライバシーポリシー)は雛形が実装済みだが、
+   `.env` の `LEGAL_OPERATOR_NAME`/`LEGAL_ADDRESS`/`LEGAL_PHONE`/
+   `LEGAL_CONTACT_EMAIL` を実際の内容に差し替えるまでプレースホルダーの
+   ままになる(CLAUDE.mdの「法務ページ」参照)。Stripe本番アカウントの
+   有効化審査で特定商取引法ページのURL提出を求められるため、Stripe決済を
+   本番稼働させる前に必ず対応すること。
 
 ## 未実装の機能
 

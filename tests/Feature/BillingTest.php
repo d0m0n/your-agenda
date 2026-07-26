@@ -25,6 +25,7 @@ class BillingTest extends TestCase
             'email' => 'trial@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'terms' => '1',
         ]);
 
         $organization = Organization::where('name', 'トライアル組織')->firstOrFail();

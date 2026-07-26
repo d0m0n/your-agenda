@@ -301,7 +301,7 @@
             <div class="mt-10 bg-paper-50 dark:bg-ink-800 border border-paper-200 dark:border-ink-700 rounded-xl shadow-md p-8 sm:p-10">
                 <p class="text-xs text-ink-400 dark:text-paper-100/40">1組織あたり</p>
                 <p class="mt-2 font-serif text-4xl font-bold text-ink-800 dark:text-paper-100">
-                    &yen; <span class="text-leather-500 dark:text-leather-300">{{ number_format(config('billing.monthly_price_yen')) }}</span> <span class="text-base font-normal text-ink-500 dark:text-paper-100/60">/ 月(税込)</span>
+                    &yen; <span class="text-leather-500 dark:text-leather-300">{{ number_format(config('billing.monthly_price_yen')) }}</span> <span class="text-base font-normal text-ink-400 dark:text-paper-100/60">/ 月(税込)</span>
                 </p>
                 <p class="mt-2 text-xs text-leather-500 dark:text-leather-300 font-medium">
                     まずは14日間、無料でお試しいただけます(クレジットカード登録不要)
@@ -389,7 +389,12 @@
 
         {{-- フッター --}}
         <footer class="bg-paper-100 dark:bg-night">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex justify-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col items-center gap-3">
+                <nav class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-ink-400 dark:text-paper-100/60">
+                    <a href="{{ route('legal.tokushoho') }}" class="hover:text-leather-500 dark:hover:text-leather-300 transition-colors">特定商取引法に基づく表記</a>
+                    <a href="{{ route('legal.terms') }}" class="hover:text-leather-500 dark:hover:text-leather-300 transition-colors">利用規約</a>
+                    <a href="{{ route('legal.privacy') }}" class="hover:text-leather-500 dark:hover:text-leather-300 transition-colors">プライバシーポリシー</a>
+                </nav>
                 <p class="text-xs text-ink-400 dark:text-paper-100/40">&copy; {{ date('Y') }} あなた(の)次第</p>
             </div>
         </footer>

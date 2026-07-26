@@ -166,6 +166,7 @@ return [
         'password' => 'パスワード',
         'password_confirmation' => 'パスワード(確認用)',
         'current_password' => '現在のパスワード',
+        'terms' => '利用規約とプライバシーポリシーへの同意',
     ],
 
 ];

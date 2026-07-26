@@ -46,6 +46,21 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        <!-- Terms Agreement -->
+        <div class="mt-4">
+            <label for="terms" class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <input id="terms" type="checkbox" name="terms" value="1" required
+                    class="mt-0.5 rounded border-gray-300 dark:border-ink-600 dark:bg-ink-900 text-leather-500 shadow-sm focus:ring-leather-400">
+                <span>
+                    <a href="{{ route('legal.terms') }}" target="_blank" rel="noopener" class="underline hover:text-gray-900 dark:hover:text-gray-100">{{ __('利用規約') }}</a>
+                    と
+                    <a href="{{ route('legal.privacy') }}" target="_blank" rel="noopener" class="underline hover:text-gray-900 dark:hover:text-gray-100">{{ __('プライバシーポリシー') }}</a>
+                    {{ __('に同意する') }}
+                </span>
+            </label>
+            <x-input-error :messages="$errors->get('terms')" class="mt-2" />
+        </div>
+
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-leather-400 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
                 {{ __('すでにアカウントをお持ちの方はこちら') }}

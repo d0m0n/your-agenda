@@ -25,6 +25,7 @@ class RegistrationTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'terms' => '1',
         ]);
 
         $this->assertAuthenticated();
@@ -52,6 +53,21 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'test@example.com']);
     }
 
+    public function test_registration_requires_agreeing_to_the_terms(): void
+    {
+        $response = $this->post('/register', [
+            'organization_name' => 'テスト青年会議所',
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertSessionHasErrors('terms');
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => 'test@example.com']);
+    }
+
     public function test_each_registration_creates_its_own_organization(): void
     {
         $this->post('/register', [
@@ -60,6 +76,7 @@ class RegistrationTest extends TestCase
             'email' => 'a@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'terms' => '1',
         ]);
 
         // register は guest ミドルウェア配下のため、ログイン中は次の登録に進めない。
@@ -71,6 +88,7 @@ class RegistrationTest extends TestCase
             'email' => 'b@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'terms' => '1',
         ]);
 
         $userA = User::where('email', 'a@example.com')->firstOrFail();

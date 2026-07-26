@@ -114,3 +114,49 @@
         break-after: avoid;
     }
 }
+
+/*
+ * 特商法表記・利用規約・プライバシーポリシー用の読みやすさ優先スタイル。
+ * @tailwindcss/typography(prose)は導入していないため、見出し・段落・
+ * リストの余白をここで最低限そろえる。
+ */
+.legal-content h2 {
+    @apply mt-10 font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 first:mt-0;
+}
+
+.legal-content h3 {
+    @apply mt-6 text-base font-semibold text-ink-700 dark:text-paper-100/90;
+}
+
+.legal-content p {
+    @apply mt-3 text-sm leading-relaxed text-ink-600 dark:text-paper-100/70;
+}
+
+.legal-content ul,
+.legal-content ol {
+    @apply mt-3 ml-5 space-y-1.5 text-sm leading-relaxed text-ink-600 dark:text-paper-100/70;
+}
+
+.legal-content ul {
+    @apply list-disc;
+}
+
+.legal-content ol {
+    @apply list-decimal;
+}
+
+.legal-content dl {
+    @apply mt-3 divide-y divide-paper-200 dark:divide-ink-700 border-y border-paper-200 dark:border-ink-700;
+}
+
+.legal-content dt {
+    @apply pt-3 text-xs font-medium text-ink-400 dark:text-paper-100/50;
+}
+
+.legal-content dd {
+    @apply pb-3 text-sm text-ink-700 dark:text-paper-100/80;
+}
+
+.legal-content .legal-placeholder {
+    @apply rounded bg-amber-100 px-1 py-0.5 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300;
+}
