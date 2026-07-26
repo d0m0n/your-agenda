@@ -465,11 +465,19 @@ Stripe(Laravel Cashier)を使った月額課金と、14日間の無料トライ�
 5. **法務ページの内容確認は本番公開前の必須作業**: `/legal/tokushoho`
    (特定商取引法に基づく表記)・`/legal/terms`(利用規約)・
    `/legal/privacy`(プライバシーポリシー)は雛形が実装済みだが、
-   `.env` の `LEGAL_OPERATOR_NAME`/`LEGAL_ADDRESS`/`LEGAL_PHONE`/
+   `.env` の `LEGAL_OPERATOR_NAME`/`LEGAL_OPERATOR_REPRESENTATIVE`/
    `LEGAL_CONTACT_EMAIL` を実際の内容に差し替えるまでプレースホルダーの
    ままになる(CLAUDE.mdの「法務ページ」参照)。Stripe本番アカウントの
    有効化審査で特定商取引法ページのURL提出を求められるため、Stripe決済を
    本番稼働させる前に必ず対応すること。
+6. **バックアップの動作確認とサーバー外への退避**: `spatie/laravel-backup`
+   による日次バックアップは`schedule:run`のcronに自動的に乗るが、
+   `mysqldump`コマンドがサーバー上で使えるかは一度
+   `php artisan backup:run`を手動実行して確認すること。バックアップは
+   `storage/app/private/`に保存されるだけでサーバー外には出ないため、
+   ローカルMac等からの定期的な`rsync`/`scp`引き揚げ、または「バックアップ&
+   ステージング」等のさくらの機能を別途設定すること(CLAUDE.mdの
+   「バックアップ」参照)。
 
 ## 未実装の機能
 

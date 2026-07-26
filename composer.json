@@ -12,7 +12,8 @@
         "laravel/cashier": "^16.6",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
-        "pragmarx/google2fa": "^9.0"
+        "pragmarx/google2fa": "^9.0",
+        "spatie/laravel-backup": "^10.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

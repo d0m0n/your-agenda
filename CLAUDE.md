@@ -690,6 +690,37 @@
     自体は削除しない点が組織削除とは異なる
 - 未実装: Stripe側での複数プラン対応、組織の完全削除(退会処理)
 
+## バックアップ
+- `spatie/laravel-backup`を導入し、DB(mysqldump)とアップロード済みデータ
+  (`storage/app/public`配下。議案ファイル・資料・各種画像)を1つのzipに
+  まとめて日次でバックアップする(`config/backup.php`)
+- Laravelスケジューラ(`routes/console.php`)に登録済みで、本番のcron
+  (`php artisan schedule:run`、CLAUDE.mdの「本番環境の制約」参照)に
+  自動的に乗る。**新たにcron設定を追加する必要はない**
+  - `backup:run` 毎日03:00 -- バックアップ作成
+  - `backup:clean` 毎日03:30 -- 保持ポリシーに従い古いバックアップを削除
+    (7日間は全件保持→16日間は日次→8週間は週次→4か月は月次→2年は年次、
+    合計5GBを超えたら古いものから削除。`config('backup.cleanup')`)
+  - `backup:monitor` 毎日04:00 -- 直近のバックアップが1日以内に作成されて
+    いるか、合計容量が5000MBを超えていないかを確認
+- 保存先はLaravelの`local`ディスク(`storage/app/private/`)。
+  `public/storage`シンボリックリンクの外にあるため、Web経由では
+  アクセスできない(セキュリティ要件の一部)
+- バックアップ失敗時・異常検知時は`config('backup.notifications.mail.to')`
+  (`.env`の`BACKUP_NOTIFICATION_EMAIL`。未設定なら`LEGAL_CONTACT_EMAIL`を
+  流用)へメール通知される
+- **これはサーバー内バックアップに過ぎず、サーバー自体の障害には対応できない。
+  必ずサーバー外(ローカルMac等)へ定期的に引き揚げること**。例:
+  ```
+  rsync -avz -e ssh user@your-agenda.jp:~/your-agenda/storage/app/private/ ~/backups/your-agenda/
+  ```
+  さくらの「バックアップ&ステージング」機能(有料オプション)を併用しても良い。
+  復元手順(zipを展開し、`mysql < *.sql`でDBを戻し、
+  `storage/app/public`配下にファイルを配置し直す)は一度リハーサルしておくと安心
+- `mysqldump`コマンドがサーバー上のPATHに存在している必要がある
+  (さくらのレンタルサーバーではMySQL関連コマンドが標準で使えるはずだが、
+  本番で`php artisan backup:run`を手動実行して疎通確認しておくこと)
+
 ## セキュリティ要件(必ず守ること)
 - Zip Slip対策: エントリ名に「..」や先頭「/」を含む場合は拒否
 - Zip爆弾対策: 展開後合計200MB以下、ファイル数1000以下
