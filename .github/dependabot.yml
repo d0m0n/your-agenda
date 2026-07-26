@@ -1,0 +1,36 @@
+version: 2
+updates:
+  # PHP(Composer)の依存パッケージ。脆弱性のあるバージョンが見つかった場合、
+  # 自動でPRを作成する(composer.phar audit による月次手動確認の補完)。
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # フロントエンド(npm)の依存パッケージ。
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actionsのワークフローで使っているアクション自体のバージョンも
+  # 対象にしておく(将来ワークフローを追加した場合に備えて)。
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"

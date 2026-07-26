@@ -108,7 +108,13 @@
   - 一般/オブザーブユーザー向けの「お問い合わせ」機能(問い合わせ・不具合
     報告・機能要望の3種、ナビ右側のアイコンからモーダルで送信)と、
     管理者パネルでの一覧・フィルタ(状態/種類/組織/キーワード)・
-    対応済みトグル(`inquiries`テーブル、`Inquiry`モデル)
+    対応済みトグル(`inquiries`テーブル、`Inquiry`モデル)。送信時、
+    管理者パネルを定期的に見に行かなくても新着に気づけるよう運営者へ
+    メール通知する(`InquiryController::store()`→`App\Mail\
+    NewInquiryReceived`)。通知先は`.env`の`INQUIRY_NOTIFICATION_EMAIL`
+    (未設定なら`ERROR_ALERT_EMAIL`→`BACKUP_NOTIFICATION_EMAIL`→
+    `LEGAL_CONTACT_EMAIL`の順にフォールバック、`config/inquiry.php`)。
+    宛先が無い場合は何もしない
   - ブランドマーク(`x-brand-mark`)を、次第の書類としおりをかたどった
     アイコンに変更(`currentColor`で利用箇所ごとのブランドカラーに追従)
   - LP・登録画面から「青年会議所」表記を削除し、「会議運営」という
@@ -632,9 +638,22 @@
   `organizations.plan`として準備済み。詳細は上記「プラン(スタンダード/
   プラス)」参照。Stripeの価格連携・チェックアウトでのプラン選択が未実装)、
   管理者パネルからの契約ステータス手動変更(無償提供モードのオン/オフは
-  実装済み)、組織の完全削除(退会処理)。詳細はREADME.mdの
-  「課金・トライアル」セクション参照
+  実装済み)。詳細はREADME.mdの「課金・トライアル」セクション参照
   (テストモードでのセットアップ手順を含む)
+- **退会処理(組織の完全削除)**: UI経由の操作経路はなく、
+  `php artisan organizations:delete {organization_id}`をサーバー上で実行する
+  運用(super_adminアカウント作成等と同じ方針。本人確認はSSHアクセス権限に
+  委ねる)。`--force`を付けない場合は組織名の入力による確認を挟む
+  (取り消せない操作のため)。Stripeサブスクリプションを即時解約した上で、
+  組織・ユーザー・メンバー・会議・次第・役職・部署・お問い合わせ・
+  アップロード済みファイルを削除する(meetings/members/positions/
+  departments/sites/users/inquiriesの各テーブルがorganization_idに
+  cascadeOnDeleteを設定しているため、Organizationレコードの削除だけで
+  連鎖的に消える。実ファイルはDBカスケードの対象外のため
+  `OrganizationDataPurgeService`で別途削除し、Cashierの`subscriptions`
+  テーブルは外部キー制約が無いため個別に削除している)。Stripe側の顧客情報
+  そのもの(領収書・請求書等の会計記録)は税法上の保存義務との兼ね合いから
+  あえて残す(完全に消したい場合は別途Stripeダッシュボードから手動対応)
 
 ## 次第の一括ダウンロード・個別ダウンロード
 - 組織の meetings + agenda_items + 紐付くsites(Zip議案)をまとめて
@@ -688,7 +707,10 @@
     各種画像を全て削除して使用量をゼロに戻す(app/Services/
     OrganizationDataPurgeServiceが担当)。会議・メンバー等のレコード
     自体は削除しない点が組織削除とは異なる
-- 未実装: Stripe側での複数プラン対応、組織の完全削除(退会処理)
+- 組織の完全削除(退会処理)は管理者パネルからは行えず、
+  `php artisan organizations:delete`をサーバー上で実行する運用。詳細は
+  上記「契約・課金」の「退会処理(組織の完全削除)」参照
+- 未実装: Stripe側での複数プラン対応
 
 ## バックアップ
 - `spatie/laravel-backup`を導入し、DB(mysqldump)とアップロード済みデータを
@@ -762,6 +784,26 @@
 - メール本文にはスタックトレース全体を含めない(例外クラス・メッセージ・
   発生箇所・URL・日時のみ)。メールはサーバーログより保護が弱いため、
   詳細調査は`storage/logs/laravel.log`を見る前提
+
+## 運用体制(ひとり運用向け)
+バックアップ・エラー検知(上記)以外の、外部サービス設定・運用習慣でカバー
+している項目。コードでの実装は無いため、ここに手順・方針だけ記録しておく。
+- **死活監視**: UptimeRobot(無料)で`https://your-agenda.jp/up`
+  (Laravel標準のヘルスチェックルート。`bootstrap/app.php`の
+  `health: '/up'`で有効化されている)を5分間隔で監視し、応答が無くなったら
+  メール通知する設定にしている。`/login`ではなく`/up`を監視対象にしている
+  のは、DBセッション等を経由せず軽量に生死判定できるため
+- **Stripe Webhookの失敗通知**: Stripeダッシュボード(ワークベンチ→
+  Webhooks→該当エンドポイント)側の設定で、配信失敗時にメール通知が届く
+  ようにしている
+- **月次メンテ習慣**: 毎月1回、`composer.phar audit`(本番サーバー上)で
+  既知の脆弱性がある依存パッケージを確認し、必要ならローカルで
+  `sail composer update`→テスト→デプロイする。これを補完する形で
+  Dependabot(`.github/dependabot.yml`)を導入済み。composer/npm/
+  github-actionsの各エコシステムを毎週月曜に確認し、更新があれば自動でPRを
+  作成する(minor/patchはグループ化して1つのPRにまとめ、通知過多を防ぐ)。
+  GitHub側でSecurity機能内の「Dependabot alerts」も有効化しておくと、
+  週次のPRを待たず脆弱性が公表され次第すぐ気づける
 
 ## セキュリティ要件(必ず守ること)
 - Zip Slip対策: エントリ名に「..」や先頭「/」を含む場合は拒否

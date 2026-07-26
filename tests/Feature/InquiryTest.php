@@ -3,8 +3,9 @@
 namespace Tests\Feature;
 
 use App\Enums\InquiryCategory;
-use App\Models\Inquiry;
+use App\Mail\NewInquiryReceived;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\Concerns\CreatesTenants;
 use Tests\TestCase;
 
@@ -61,6 +62,41 @@ class InquiryTest extends TestCase
 
         $response->assertSessionHasErrors(['category', 'subject', 'body']);
         $this->assertDatabaseCount('inquiries', 0);
+    }
+
+    public function test_submitting_an_inquiry_notifies_the_configured_recipient(): void
+    {
+        Mail::fake();
+        config(['inquiry.notify_email' => 'admin@example.com']);
+
+        [, $general] = $this->createTenant();
+
+        $this->actingAs($general)->post(route('inquiries.store'), [
+            'category' => InquiryCategory::Inquiry->value,
+            'subject' => '料金について',
+            'body' => 'プラン変更について教えてください。',
+        ]);
+
+        Mail::assertSent(NewInquiryReceived::class, function ($mail) {
+            return $mail->hasTo('admin@example.com')
+                && $mail->inquiry->subject === '料金について';
+        });
+    }
+
+    public function test_submitting_an_inquiry_does_not_notify_when_no_recipient_is_configured(): void
+    {
+        Mail::fake();
+        config(['inquiry.notify_email' => null]);
+
+        [, $general] = $this->createTenant();
+
+        $this->actingAs($general)->post(route('inquiries.store'), [
+            'category' => InquiryCategory::Inquiry->value,
+            'subject' => '料金について',
+            'body' => 'プラン変更について教えてください。',
+        ]);
+
+        Mail::assertNothingSent();
     }
 
     public function test_inquiry_icon_opens_form_for_general_and_observer(): void
