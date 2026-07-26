@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
-            {{ __('取扱説明書') }}
+            {{ __('利用ガイド') }}
         </h2>
     </x-slot>
 
