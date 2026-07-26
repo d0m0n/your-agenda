@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Middleware\AdminBasicAuth;
+use App\Http\Middleware\EnsureOrganizationHasAccess;
+use App\Services\ErrorAlertMailer;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,8 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin.basic_auth' => \App\Http\Middleware\AdminBasicAuth::class,
-            'subscribed' => \App\Http\Middleware\EnsureOrganizationHasAccess::class,
+            'admin.basic_auth' => AdminBasicAuth::class,
+            'subscribed' => EnsureOrganizationHasAccess::class,
         ]);
 
         // StripeからのWebhookはCookie/セッションを持たないためCSRFトークンを
@@ -31,12 +35,19 @@ return Application::configure(basePath: dirname(__DIR__))
         // 必要がある。実クラスを指定すると一致せず、優先度リストの末尾=
         // 最低優先度に追加されてしまい、authより後に実行されてしまう)
         $middleware->prependToPriorityList(
-            before: \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
-            prepend: \App\Http\Middleware\AdminBasicAuth::class,
+            before: AuthenticatesRequests::class,
+            prepend: AdminBasicAuth::class,
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        // 本番で未知の500系エラーが発生した際、運営者へメールで知らせる
+        // (ErrorAlertMailer参照)。falseを返さないため、通常のログ出力
+        // (storage/logs/laravel.log)は今まで通り行われる。
+        $exceptions->report(function (Throwable $e): void {
+            app(ErrorAlertMailer::class)->notifyIfNeeded($e);
+        });
     })->create();

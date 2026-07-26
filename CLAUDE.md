@@ -735,6 +735,33 @@
 - `mysqldump`コマンドがサーバー上のPATHに存在している必要がある
   (さくらのレンタルサーバーではMySQL関連コマンドが標準で使えるはずだが、
   本番で`php artisan backup:run`を手動実行して疎通確認しておくこと)
+- ローカルMacから自動で引き揚げたい場合は、SSH鍵認証(`ssh-copy-id`)+
+  `~/.ssh/config`のHostエイリアス+launchd(またはcrontab)でスケジュール
+  実行する。実際に本番でSSH鍵認証・rsync・launchdの一連の動作を確認済み
+
+## エラー検知(ひとり運用向けの簡易アラート)
+- 本番で未知の500系エラーが発生した際、運営者へメールで知らせる仕組みを
+  用意している(Sentry等の外部サービスは使わず、既存のMail基盤で完結)
+- `bootstrap/app.php`の`withExceptions()`が例外発生のたびに
+  `App\Services\ErrorAlertMailer::notifyIfNeeded()`を呼ぶ
+  (`$exceptions->report(...)`。falseを返さないため、通常の
+  `storage/logs/laravel.log`への記録は今まで通り行われる)
+- 通知するのは本番環境(`APP_ENV=production`)かつ「想定外」の例外のみ。
+  以下は通知しない(日常的なユーザー操作で普通に起こり得るため):
+  - `ValidationException`・`AuthenticationException`・
+    `AuthorizationException`・`ModelNotFoundException`・
+    `TokenMismatchException`(CSRF切れ)
+  - `HttpExceptionInterface`を実装する例外のうちステータスコードが
+    500未満のもの(404, 419, 429等)
+- 同一エラー(例外クラス+発生ファイル+行)の通知は、`ERROR_ALERT_THROTTLE_MINUTES`
+  (デフォルト60分)の間は1通に絞る(`Cache`ドライバはDBベースの
+  `database`を使っているため、Webリクエストをまたいでも正しく機能する)
+- 通知先は`.env`の`ERROR_ALERT_EMAIL`。未設定なら
+  `BACKUP_NOTIFICATION_EMAIL`→`LEGAL_CONTACT_EMAIL`の順にフォールバックする
+  (config/error_alerts.php)
+- メール本文にはスタックトレース全体を含めない(例外クラス・メッセージ・
+  発生箇所・URL・日時のみ)。メールはサーバーログより保護が弱いため、
+  詳細調査は`storage/logs/laravel.log`を見る前提
 
 ## セキュリティ要件(必ず守ること)
 - Zip Slip対策: エントリ名に「..」や先頭「/」を含む場合は拒否
