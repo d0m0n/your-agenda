@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://plan-gs.sakura.ne.jp/your-agenda/sitemap.xml
+Sitemap: https://your-agenda.jp/sitemap.xml
