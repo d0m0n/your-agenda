@@ -36,9 +36,9 @@
                                     <div>
                                         <a href="{{ $site->publicUrl() }}" target="_blank" rel="noopener noreferrer" class="text-leather-500 dark:text-leather-300 hover:underline">{{ $site->title }}</a>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ __('アップロード') }}: {{ $site->created_at->format('Y-m-d H:i') }}
+                                            {{ __('アップロード') }}: {{ $site->created_at->jst()->format('Y-m-d H:i') }}
                                             @unless ($site->updated_at->equalTo($site->created_at))
-                                                ・{{ __('差し替え') }}: {{ $site->updated_at->format('Y-m-d H:i') }}
+                                                ・{{ __('差し替え') }}: {{ $site->updated_at->jst()->format('Y-m-d H:i') }}
                                             @endunless
                                         </p>
                                     </div>

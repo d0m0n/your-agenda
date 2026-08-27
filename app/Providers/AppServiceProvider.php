@@ -7,6 +7,7 @@ use App\Models\Organization;
 use App\Models\Scopes\OrganizationScope;
 use App\Models\User;
 use App\Services\StorageUsageService;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
@@ -29,6 +30,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // config('app.timezone')はUTCのまま(DB保存済みの日時をJSTとして
+        // 誤解釈しないよう変更しない)。画面表示だけJSTにしたい箇所は
+        // ->jst()を挟んでからformat()する(例: $model->created_at->jst()->format(...))。
+        Carbon::macro('jst', function () {
+            /** @var Carbon $this */
+            return $this->copy()->timezone('Asia/Tokyo');
+        });
+
         Gate::define('manage', fn (User $user) => $user->isGeneral());
         Gate::define('super-admin', fn (User $user) => $user->isSuperAdmin());
 

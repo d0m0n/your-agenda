@@ -54,10 +54,10 @@
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $material->title }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $material->user?->name }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $material->created_at->format('Y-m-d H:i') }}
+                                        {{ $material->created_at->jst()->format('Y-m-d H:i') }}
                                         @unless ($material->updated_at->equalTo($material->created_at))
                                             <br>
-                                            <span class="text-xs">{{ __('差し替え') }}: {{ $material->updated_at->format('Y-m-d H:i') }}</span>
+                                            <span class="text-xs">{{ __('差し替え') }}: {{ $material->updated_at->jst()->format('Y-m-d H:i') }}</span>
                                         @endunless
                                     </td>
                                     <td class="px-6 py-3 text-right text-sm">

@@ -78,8 +78,8 @@ class SiteFileReplaceTest extends TestCase
         $response = $this->actingAs($user)->get(route('meetings.agenda', $meeting));
 
         $response->assertOk();
-        $response->assertSee('アップロード: '.$site->created_at->format('Y-m-d H:i'));
-        $response->assertSee('差し替え: '.$site->updated_at->format('Y-m-d H:i'));
+        $response->assertSee('アップロード: '.$site->created_at->jst()->format('Y-m-d H:i'));
+        $response->assertSee('差し替え: '.$site->updated_at->jst()->format('Y-m-d H:i'));
     }
 
     public function test_an_invalid_replacement_file_leaves_the_existing_upload_untouched(): void

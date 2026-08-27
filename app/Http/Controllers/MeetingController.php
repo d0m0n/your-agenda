@@ -156,7 +156,7 @@ class MeetingController extends Controller
     public function export(Meeting $meeting, MeetingArchiveExportService $exporter): BinaryFileResponse
     {
         $zipPath = $exporter->exportMeeting($meeting);
-        $filename = $meeting->name.'_次第_'.now()->format('Ymd').'.zip';
+        $filename = $meeting->name.'_次第_'.now()->jst()->format('Ymd').'.zip';
 
         return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
     }

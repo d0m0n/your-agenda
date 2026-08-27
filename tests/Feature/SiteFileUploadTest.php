@@ -69,7 +69,7 @@ class SiteFileUploadTest extends TestCase
         $response = $this->actingAs($user)->get(route('meetings.agenda', $meeting));
 
         $response->assertOk();
-        $response->assertSee('アップロード: '.$site->created_at->format('Y-m-d H:i'));
+        $response->assertSee('アップロード: '.$site->created_at->jst()->format('Y-m-d H:i'));
         $response->assertDontSee('差し替え:', false);
     }
 

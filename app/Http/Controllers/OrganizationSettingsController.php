@@ -74,7 +74,7 @@ class OrganizationSettingsController extends Controller
     {
         $organization = auth()->user()->organization;
         $zipPath = $exporter->export($organization);
-        $filename = $organization->name.'_次第一括ダウンロード_'.now()->format('Ymd').'.zip';
+        $filename = $organization->name.'_次第一括ダウンロード_'.now()->jst()->format('Ymd').'.zip';
 
         return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
     }

@@ -99,6 +99,6 @@
     </p>
 
     <p class="mt-8 text-xs">
-        制定日: {{ now()->format('Y年n月j日') }}
+        制定日: {{ now()->jst()->format('Y年n月j日') }}
     </p>
 </x-legal-layout>

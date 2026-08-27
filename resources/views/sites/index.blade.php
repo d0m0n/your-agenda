@@ -35,7 +35,7 @@
                                         </a>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $site->user?->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $site->created_at->format('Y-m-d H:i') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $site->created_at->jst()->format('Y-m-d H:i') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                         <x-confirm-delete-button
                                             :id="'delete-site-'.$site->id"

@@ -82,7 +82,7 @@
                                     {{ $inquiry->organization?->name ?? __('(組織削除済み)') }}
                                     /
                                     {{ $inquiry->user?->name ?? __('(ユーザー削除済み)') }}
-                                    ・{{ $inquiry->created_at->format('Y-m-d H:i') }}
+                                    ・{{ $inquiry->created_at->jst()->format('Y-m-d H:i') }}
                                 </p>
                             </div>
 

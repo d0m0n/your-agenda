@@ -26,7 +26,7 @@
                     </div>
                     <div>
                         <dt class="text-gray-500 dark:text-gray-400">{{ __('トライアル終了日') }}</dt>
-                        <dd class="text-gray-900 dark:text-gray-100">{{ $organization->trial_ends_at?->format('Y-m-d H:i') ?? '-' }}</dd>
+                        <dd class="text-gray-900 dark:text-gray-100">{{ $organization->trial_ends_at?->jst()->format('Y-m-d H:i') ?? '-' }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-500 dark:text-gray-400">Stripe Customer ID</dt>

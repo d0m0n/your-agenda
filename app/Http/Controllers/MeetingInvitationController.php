@@ -63,7 +63,7 @@ class MeetingInvitationController extends Controller
             'meeting' => $meeting,
             'body' => $body,
             'mapQrCodeDataUri' => $mapQrCodeDataUri,
-            'issueDate' => now()->format('Y年n月').'吉日',
+            'issueDate' => now()->jst()->format('Y年n月').'吉日',
         ]);
     }
 }

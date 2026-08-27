@@ -26,7 +26,7 @@ class AccountScheduledForDeletion extends Mailable
         return new Envelope(
             subject: __(':name のデータは:dateに削除される予定です', [
                 'name' => $this->organization->name,
-                'date' => $this->deletionDate->format('Y年n月j日'),
+                'date' => $this->deletionDate->jst()->format('Y年n月j日'),
             ]),
         );
     }
