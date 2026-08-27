@@ -72,6 +72,13 @@ class MaterialController extends Controller
 
     public function download(Material $material): StreamedResponse
     {
+        // PDFは新しいタブでそのまま閲覧できるよう、ダウンロード(添付)ではなく
+        // インライン表示で返す。それ以外の形式は従来通りダウンロードさせる
+        // (ブラウザがネイティブに表示できない形式のため)。
+        if (Str::lower(pathinfo($material->original_filename, PATHINFO_EXTENSION)) === 'pdf') {
+            return Storage::disk('local')->response($material->file_path, $material->original_filename);
+        }
+
         return Storage::disk('local')->download($material->file_path, $material->original_filename);
     }
 

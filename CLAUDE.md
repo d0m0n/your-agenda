@@ -317,6 +317,12 @@
     (materials.downloadはidキー)は変わらず、file_path/original_filenameの
     みが更新される。site同様、新ファイルを先に保存してから旧ファイルを
     削除する順序で処理し、失敗時に既存ファイルが消えないようにしている
+  - ダウンロード(`MaterialController::download()`)は、PDFの場合のみ
+    `Content-Disposition: inline`で返す(それ以外の形式は従来通り
+    `attachment`)。次第画面のリンクは`target="_blank"`で新しいタブを
+    開くため、PDFはそのタブでそのまま閲覧できる(以前は形式によらず
+    強制ダウンロードになっていた)。公開共有リンク側の
+    `PublicMeetingController::downloadMaterial()`も同じ方針
 
 ## 画面構成
 

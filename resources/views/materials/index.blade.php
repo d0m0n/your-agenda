@@ -62,7 +62,7 @@
                                     </td>
                                     <td class="px-6 py-3 text-right text-sm">
                                         <div class="flex items-center justify-end gap-3">
-                                            <a href="{{ route('materials.download', $material) }}" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('ダウンロード') }}</a>
+                                            <a href="{{ route('materials.download', $material) }}" target="_blank" rel="noopener noreferrer" class="text-leather-500 dark:text-leather-300 hover:underline">{{ __('ダウンロード') }}</a>
                                             @can('manage')
                                                 <button type="button" @click="replacing = !replacing" class="text-xs text-gray-600 dark:text-gray-400 hover:underline">{{ __('差し替え') }}</button>
                                                 <x-confirm-delete-button
