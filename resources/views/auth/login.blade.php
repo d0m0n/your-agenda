@@ -47,4 +47,10 @@
             {{ __('ログイン') }}
         </x-primary-button>
     </form>
+
+    <p class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+        <a href="{{ route('register') }}" class="text-leather-500 dark:text-leather-200 hover:underline rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-leather-400 dark:focus:ring-offset-ink-900">
+            {{ __('新しくユーザーを作成してはじめる') }}
+        </a>
+    </p>
 </x-guest-layout>
