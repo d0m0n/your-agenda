@@ -35,8 +35,11 @@
                 </p>
 
                 <p class="mt-6 font-serif text-3xl font-bold text-ink-800 dark:text-paper-100">
-                    &yen;{{ number_format(config('billing.monthly_price_yen')) }}
+                    &yen;{{ number_format($organization->plan->priceYen()) }}
                     <span class="text-base font-normal text-ink-500 dark:text-paper-100/60">/ {{ __('月(税込)') }}</span>
+                </p>
+                <p class="mt-1 text-xs text-ink-400 dark:text-paper-100/60">
+                    {{ __(':planプランでのお申し込みになります。', ['plan' => $organization->plan->label()]) }}
                 </p>
 
                 @if ($isGeneral)

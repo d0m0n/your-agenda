@@ -520,28 +520,47 @@
   を追加。DBには保存しない、送信時点の同意確認のみ)
 
 ## プラン(スタンダード/プラス)
-- 現行の月額600円プランを「スタンダード」とし、将来的にスタンダードの
-  上位プランとして「プラス」を追加できるよう、機能・金額が未確定な段階で
-  仕組みだけ準備してある。プラス限定機能の第一号としてAI議事録生成機能
+- 月額600円の「スタンダード」と、その上位プランとして月額1,200円の
+  「プラス」の2プラン。プラス限定機能の第一号としてAI議事録生成機能
   (下記「AI議事録生成」参照)を実装済み
 - `organizations.plan`(`App\Enums\OrganizationPlan`、standard/plus、
-  デフォルトstandard)で組織ごとのプランを保持する
+  デフォルトstandard)で組織ごとのプランを保持する。
+  `OrganizationPlan::priceId()`/`priceYen()`が各プランに対応する
+  StripeのPrice ID(`config('billing.monthly_price_id')`/
+  `config('billing.plus_price_id')`、`.env`の`STRIPE_PRICE_ID_MONTHLY`/
+  `STRIPE_PRICE_ID_PLUS`)と表示用月額を返す
 - `Organization::hasPlusAccess()`がプラス機能を使えるかどうかを判定する。
   planがplusの場合に加えて、無償提供モード(`free_access_enabled`)中・
   トライアル中(`onGenericTrial()`)の組織もtrueを返す(トライアル中は
   プラス限定機能も含めて全機能を試せる方針のため)
-- `Gate::define('plus', ...)`(`AppServiceProvider`)を用意済み。将来
-  プラス限定のルート・画面を作る際は、既存の`can:manage`/`can:super-admin`
-  と同様に`Route::middleware(['auth', 'can:plus'])`や`@can('plus')`で
-  ガードする
-- プランの切り替えは管理者パネル(組織詳細画面)からの手動操作のみ
-  (`AdminOrganizationController::updatePlan()`、`free_access_enabled`の
-  トグルと同じ方式)。プラスの金額・機能が決まり次第、Stripe側にプラス用の
-  価格を作成し、`config('billing.plus_price_yen')`や
-  `STRIPE_PRICE_ID_PLUS`相当の設定、チェックアウト画面でのプラン選択
-  UIを追加して自己サービス化する想定(未実装)
-- 一般ユーザーの基本設定画面(お支払い管理カード)、管理者パネルの組織詳細
-  画面それぞれで現在のプランを表示する
+- `Gate::define('plus', ...)`(`AppServiceProvider`)。プラス限定のルート・
+  画面は既存の`can:manage`/`can:super-admin`と同様に
+  `Route::middleware(['auth', 'can:plus'])`や`@can('plus')`でガードする
+  (`meetings.minutes.*`が実際の利用箇所)
+- **プラン切替はアドオン課金ではなく、1組織=1サブスクリプションのまま
+  Priceそのものを差し替える方式**(スタンダード600円⇔プラス1,200円)。
+  経路は2つ:
+  1. **セルフサービス切替(通常の経路)**: 基本設定画面から
+     `BillingController::updatePlan()`(`PUT /settings/plan`、
+     `can:manage`+`subscribed`)を呼ぶ。既に有効なサブスクリプションが
+     ある組織は`Subscription::swap()`でStripe側のPriceを実際に差し替え、
+     差額はStripeのデフォルト挙動どおり次回請求に反映される(即時請求は
+     しない、`swapAndInvoice()`は使わない)。まだ契約前(トライアル中)の
+     組織はStripeへの通信を行わずローカルの`organizations.plan`のみ
+     更新し、選択は後日`checkout()`を呼んだ時点で反映される
+     (`checkout()`は`$organization->plan->priceId()`を見て契約する)
+  2. **管理者パネルからの手動上書き**: `AdminOrganizationController::
+     updatePlan()`(`free_access_enabled`のトグルと同じ方式)。こちらは
+     `organizations.plan`カラムを書き換えるだけでStripe側の契約価格には
+     一切影響しない(サポート対応等でプラン表示だけを一時的に上書き
+     したい場合の経路。通常運用では1のセルフサービス切替を使う想定)
+- **既知の制約**: `organizations.plan`はStripeの実際の価格から都度導出
+  するのではなくアプリ側で保持するキャッシュ値。1・2以外の経路
+  (Stripeダッシュボード側で直接Priceを変更した場合等)ではここが追従
+  しない(Webhookでの同期は未実装。ひとり運用規模でのリスクは限定的と
+  判断し、あえてシンプルにしている)
+- 一般ユーザーの基本設定画面(お支払い管理カード内のプラン切替UI)、
+  管理者パネルの組織詳細画面それぞれで現在のプランを表示する
 
 ## AI議事録生成(プラスプラン限定)
 - 会議の文字起こしテキストを貼り付けると、次第(agenda_items)の構成・
@@ -715,12 +734,9 @@
   Cashierのサブスクリプション状態と二重管理になり食い違いの元になるため)。
   契約状態の表示は`Organization::subscriptionStatusLabel()`が
   無償提供/トライアル/サブスクリプション状態から都度導出する
-- 未実装: Stripe側での複数プラン対応(スタンダード/プラスの区分自体は
-  `organizations.plan`として準備済み。詳細は上記「プラン(スタンダード/
-  プラス)」参照。Stripeの価格連携・チェックアウトでのプラン選択が未実装)、
-  管理者パネルからの契約ステータス手動変更(無償提供モードのオン/オフは
-  実装済み)。詳細はREADME.mdの「課金・トライアル」セクション参照
-  (テストモードでのセットアップ手順を含む)
+- 未実装: 管理者パネルからの契約ステータス手動変更(無償提供モードの
+  オン/オフは実装済み)。詳細はREADME.mdの「課金・トライアル」セクション
+  参照(テストモードでのセットアップ手順を含む)
 - **退会処理(組織の完全削除)**: 2通りの削除経路がある。実際の削除処理
   (Stripeサブスクリプションの即時解約→`OrganizationDataPurgeService`で
   アップロード済みファイルを削除→Cashierの`subscriptions`テーブルの行を
@@ -815,7 +831,6 @@
 - 組織の完全削除(退会処理)は管理者パネルからは行えず、
   `php artisan organizations:delete`をサーバー上で実行する運用。詳細は
   上記「契約・課金」の「退会処理(組織の完全削除)」参照
-- 未実装: Stripe側での複数プラン対応
 
 ## バックアップ
 - `spatie/laravel-backup`を導入し、DB(mysqldump)とアップロード済みデータを

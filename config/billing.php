@@ -14,11 +14,15 @@ return [
     // LP・ペイウォール画面での表示用(Stripe側の実際の価格設定とは独立した表示専用の値)。
     'monthly_price_yen' => 600,
 
-    // プラスプラン(スタンダードの上位プラン)の表示用月額。金額・機能とも
-    // 未確定のため、Stripe側の価格連携はまだ行わず、管理者パネルからの
-    // 手動切り替え(organizations.plan)のみで運用する。金額が決まり次第、
-    // monthly_price_id/monthly_price_yenと同様の項目を追加して自己サービス化する想定。
-    'plus_price_yen' => null,
+    // Stripeダッシュボードで作成した、プラスプラン用Price ID。スタンダードと
+    // 同じ「組織=1サブスクリプション」のまま、価格だけを月額1,200円のPriceに
+    // 差し替える方式(アドオン courses ではない)。基本設定画面からのセルフ
+    // サービス切替(BillingController::updatePlan())と、プラス選択中にトライアルが
+    // 終了した場合のCheckout(BillingController::checkout())の両方で使う。
+    'plus_price_id' => env('STRIPE_PRICE_ID_PLUS'),
+
+    // LP・基本設定・ペイウォール画面での表示用月額(税込)。
+    'plus_price_yen' => 1200,
 
     // トライアル終了・解約等でhasActiveAccess()がfalseになってから、
     // 再契約が無いまま組織を自動的に完全削除するまでの猶予日数。

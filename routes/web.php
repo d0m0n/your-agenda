@@ -165,6 +165,9 @@ Route::middleware(['auth', 'can:manage', 'subscribed'])->group(function () {
     // settings.export(次第の一括ダウンロード)はsubscribedミドルウェア対象外の
     // 別グループに切り出し済み(上部参照。解約・トライアル終了後もデータを持ち出せるように)。
 
+    // 基本設定画面からのセルフサービスでのプラン切替(スタンダード⇔プラス)。
+    Route::put('/settings/plan', [BillingController::class, 'updatePlan'])->name('billing.plan.update');
+
     Route::put('/settings/invitation-templates', [OrganizationInvitationTemplateController::class, 'update'])->name('settings.invitation-templates.update');
     Route::delete('/settings/invitation-templates/{type}', [OrganizationInvitationTemplateController::class, 'reset'])->name('settings.invitation-templates.reset');
 

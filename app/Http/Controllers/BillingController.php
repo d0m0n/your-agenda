@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrganizationPlan;
 use App\Models\Organization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Laravel\Cashier\Cashier;
 use Laravel\Cashier\Checkout;
@@ -54,7 +56,7 @@ class BillingController extends Controller
                 ->with('status', __('すでにお支払い情報が登録されています。'));
         }
 
-        return $organization->newSubscription('default', config('billing.monthly_price_id'))
+        return $organization->newSubscription('default', $organization->plan->priceId())
             ->checkout([
                 // {CHECKOUT_SESSION_ID}はStripeが実際のセッションIDに置き換える
                 // プレースホルダー文字列(Stripe側の仕様のため、URLエンコードせず
@@ -111,6 +113,52 @@ class BillingController extends Controller
     public function portal(Request $request): RedirectResponse
     {
         return $request->user()->organization->redirectToBillingPortal(route('settings.edit'));
+    }
+
+    /**
+     * 基本設定画面からのセルフサービスでのプラン切替(スタンダード⇔プラス)。
+     * 1組織=1サブスクリプションのまま価格(Price)だけを差し替える方式のため、
+     * アドオンの追加/削除ではなくSubscription::swap()を使う。差額は
+     * Stripe側のデフォルト挙動どおり次回請求に反映される(即時請求はしない)。
+     *
+     * すでに有効なサブスクリプションが無い組織(トライアル中でまだ一度も
+     * 決済していない組織)は、Stripeへの通信を行わずorganizations.planの
+     * 更新のみ行う。この場合の選択は、後日checkout()を呼んだ時点で
+     * 反映される(checkout()はorganization.plan->priceId()を見て契約するため)。
+     */
+    public function updatePlan(Request $request): RedirectResponse
+    {
+        $organization = $request->user()->organization;
+
+        $data = $request->validate([
+            'plan' => ['required', Rule::enum(OrganizationPlan::class)],
+        ]);
+
+        $targetPlan = OrganizationPlan::from($data['plan']);
+
+        if ($targetPlan === $organization->plan) {
+            return redirect()->route('settings.edit')->with('status', "すでに「{$targetPlan->label()}」プランです。");
+        }
+
+        if ($organization->subscribed('default')) {
+            $priceId = $targetPlan->priceId();
+
+            if (! $priceId) {
+                return redirect()->route('settings.edit')->with('error', 'このプランは現在準備中のため切り替えられません。運営者にお問い合わせください。');
+            }
+
+            try {
+                $organization->subscription('default')->swap($priceId);
+            } catch (Throwable $e) {
+                report($e);
+
+                return redirect()->route('settings.edit')->with('error', 'プランの変更に失敗しました。しばらくしてから再度お試しください。');
+            }
+        }
+
+        $organization->update(['plan' => $targetPlan]);
+
+        return redirect()->route('settings.edit')->with('status', "プランを「{$targetPlan->label()}」に変更しました。");
     }
 
     /**

@@ -359,6 +359,12 @@ Stripe(Laravel Cashier)を使った月額課金と、14日間の無料トライ�
   支払い完了後はStripeのWebhookで購読状態が同期されます。
 - **課金主体は組織単位**: Cashierの`Billable`トレイトは`User`ではなく
   `Organization`モデルに付与しています(「1組織=1契約」のため)。
+- **プラン(スタンダード/プラス)**: スタンダード(月額600円)・プラス
+  (月額1,200円、AI議事録生成機能等のプラス限定機能が使えます)の2プラン
+  があります。基本設定画面からセルフサービスで切り替えられ、既に契約中の
+  組織はStripe側のPrice自体をその場で差し替えます(差額は次回請求に反映、
+  即時請求はしません)。1組織=1サブスクリプションのままPriceを差し替える
+  方式のため、アドオン課金ではありません。
 - **無償提供モード**: 管理者パネル(`/admin/organizations/{id}`)から、
   特定組織を課金なしで全機能利用可能にする「無償提供モード」をオン/オフ
   できます。有効な組織は契約ステータスが「無償提供中」と表示されます。
@@ -381,7 +387,8 @@ Stripe(Laravel Cashier)を使った月額課金と、14日間の無料トライ�
 
 1. Stripeのテストアカウントで、商品(例:「あなた(の)次第 月額プラン」)と
    価格(Price)をテストモードで作成します。**JPYは0桁通貨のため、
-   Stripe側のunit_amountは`600`と入力してください**(`60000`ではありません)。
+   Stripe側のunit_amountはスタンダード`600`・プラス`1200`と入力してください**
+   (`60000`/`120000`ではありません)。
 2. `.env`に以下を設定します。
 
    ```bash
@@ -389,6 +396,7 @@ Stripe(Laravel Cashier)を使った月額課金と、14日間の無料トライ�
    STRIPE_SECRET=sk_test_...
    STRIPE_WEBHOOK_SECRET=whsec_...
    STRIPE_PRICE_ID_MONTHLY=price_...
+   STRIPE_PRICE_ID_PLUS=price_...
    CASHIER_CURRENCY=jpy
    CASHIER_CURRENCY_LOCALE=ja
    ```

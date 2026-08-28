@@ -1,8 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
-            {{ __('ダッシュボード') }}
-        </h2>
+        <div class="flex items-center justify-between gap-4">
+            <h2 class="font-serif text-xl font-semibold text-ink-800 dark:text-paper-100 leading-tight">
+                {{ __('ダッシュボード') }}
+            </h2>
+            @include('layouts._plan-badge')
+        </div>
     </x-slot>
 
     @if ($organization->header_image_path)

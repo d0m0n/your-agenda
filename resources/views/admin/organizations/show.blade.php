@@ -38,7 +38,7 @@
                     <div>
                         <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('プラン') }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('プラス限定機能はまだ実装されていません(準備段階の切り替えです)。') }}
+                            {{ __('通常は組織の基本設定画面からセルフサービスで切り替わり、Stripeの契約価格も自動的に変わります。ここでの変更はStripe側の契約価格には反映されません(サポート対応等でこの画面上のプラン表示だけを上書きしたい場合に使用)。') }}
                         </p>
                     </div>
                     <form method="POST" action="{{ route('admin.organizations.update-plan', $organization) }}" class="flex items-center gap-2">

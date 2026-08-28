@@ -13,7 +13,6 @@
                     <div>
                         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('お支払い管理') }}</h3>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('現在の契約状況') }}: {{ $organization->subscriptionStatusLabel() }}</p>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('現在のプラン') }}: {{ $organization->plan->label() }}</p>
                     </div>
 
                     @if ($organization->stripe_id)
@@ -35,6 +34,32 @@
                         {{ __('お支払い管理ページが開きます。カード情報は当サービスのサーバーには保存されません。') }}
                     </p>
                 @endunless
+
+                <div class="mt-4 pt-4 border-t border-paper-200 dark:border-ink-700">
+                    <div class="flex items-center justify-between gap-4 flex-wrap">
+                        <div>
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('プラン') }}</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {{ __('現在') }}: {{ $organization->plan->label() }}(&yen;{{ number_format($organization->plan->priceYen()) }}/{{ __('月・税込') }})
+                            </p>
+                        </div>
+                        <form method="POST" action="{{ route('billing.plan.update') }}" class="flex items-center gap-2">
+                            @csrf
+                            @method('PUT')
+                            <select name="plan" class="rounded-md border-gray-300 dark:border-ink-600 dark:bg-ink-900 text-sm text-gray-900 dark:text-gray-100 focus:border-leather-400 focus:ring-leather-400">
+                                @foreach (\App\Enums\OrganizationPlan::cases() as $plan)
+                                    <option value="{{ $plan->value }}" @selected($organization->plan === $plan)>
+                                        {{ $plan->label() }}(&yen;{{ number_format($plan->priceYen()) }}/{{ __('月') }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <x-secondary-button type="submit">{{ __('変更する') }}</x-secondary-button>
+                        </form>
+                    </div>
+                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        {{ __('プラスプランでは、次第・議案・資料の内容と会議の文字起こしから、AIが議事録のドラフトを自動作成できます。契約中に変更した場合、差額は次回のご請求に反映されます。') }}
+                    </p>
+                </div>
             </div>
 
             @php

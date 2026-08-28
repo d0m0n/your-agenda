@@ -11,9 +11,14 @@ use Tests\Concerns\CreatesTenants;
 use Tests\TestCase;
 
 /**
- * プラス限定機能を将来追加できるようにするための準備段階のテスト。
- * プラス限定機能自体はまだ存在しないため、ここではorganizations.planの
- * 管理者パネルからの切り替えと、Gate('plus')/hasPlusAccess()の判定ロジックのみを検証する。
+ * プラン(スタンダード/プラス)の切り替えと、Gate('plus')/hasPlusAccess()の
+ * 判定ロジックのテスト。組織の基本設定画面からのセルフサービス切替
+ * (BillingController::updatePlan())は、既にStripeサブスクリプションが
+ * ある組織に対してはSubscription::swap()で実際にStripe APIを呼ぶため、
+ * BillingTest.phpの方針(実際の決済経路は自動テスト対象外)と同じ理由で
+ * その分岐は自動テストしない。ここでテストするのは、Stripeへの通信が
+ * 発生しない分岐(トライアル中でまだ契約していない組織の切替、同一プランへの
+ * 変更、権限チェック)のみ。
  */
 class OrganizationPlanTest extends TestCase
 {
@@ -106,6 +111,54 @@ class OrganizationPlanTest extends TestCase
 
         $this->actingAs($general)->patch(route('admin.organizations.update-plan', $organization), ['plan' => 'plus'])->assertForbidden();
         $this->actingAs($observer)->patch(route('admin.organizations.update-plan', $organization), ['plan' => 'plus'])->assertForbidden();
+
+        $this->assertSame(OrganizationPlan::Standard, $organization->fresh()->plan);
+    }
+
+    /**
+     * トライアル中(まだStripeサブスクリプションが無い)組織は、Stripeへの
+     * 通信なしにローカルのplanだけを切り替えられる。この選択は後日
+     * checkout()を呼んだ際にorganization.plan->priceId()として使われる。
+     */
+    public function test_general_user_can_self_service_switch_plan_during_trial_without_calling_stripe(): void
+    {
+        [$organization, $general] = $this->createTenant();
+        $this->assertFalse($organization->subscribed('default'));
+
+        $this->actingAs($general)->put(route('billing.plan.update'), ['plan' => 'plus'])
+            ->assertRedirect(route('settings.edit'))
+            ->assertSessionHas('status');
+
+        $this->assertSame(OrganizationPlan::Plus, $organization->fresh()->plan);
+    }
+
+    public function test_switching_to_the_currently_selected_plan_is_a_no_op(): void
+    {
+        [$organization, $general] = $this->createTenant();
+        $organization->forceFill(['plan' => OrganizationPlan::Plus])->save();
+
+        $this->actingAs($general)->put(route('billing.plan.update'), ['plan' => 'plus'])
+            ->assertRedirect(route('settings.edit'))
+            ->assertSessionHas('status');
+
+        $this->assertSame(OrganizationPlan::Plus, $organization->fresh()->plan);
+    }
+
+    public function test_observer_cannot_self_service_switch_plan(): void
+    {
+        [$organization, , $observer] = $this->createTenant();
+
+        $this->actingAs($observer)->put(route('billing.plan.update'), ['plan' => 'plus'])->assertForbidden();
+
+        $this->assertSame(OrganizationPlan::Standard, $organization->fresh()->plan);
+    }
+
+    public function test_self_service_plan_switch_rejects_an_invalid_plan_value(): void
+    {
+        [$organization, $general] = $this->createTenant();
+
+        $this->actingAs($general)->put(route('billing.plan.update'), ['plan' => 'premium'])
+            ->assertSessionHasErrors('plan');
 
         $this->assertSame(OrganizationPlan::Standard, $organization->fresh()->plan);
     }
