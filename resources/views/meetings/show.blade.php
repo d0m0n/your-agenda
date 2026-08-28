@@ -11,6 +11,13 @@
                     {{ __('印刷') }}
                 </button>
                 @can('manage')
+                    {{-- 外部共有リンク欄はオーバーレイ(x-modal)で表示する。ヘッダーの
+                         ボタンとモーダルはDOM上別々の場所にあるが、x-confirm-delete-button
+                         と同じくwindowイベント(open-modal/close-modal)経由で
+                         橋渡しされるため、Alpineストアは不要。 --}}
+                    <button type="button" x-data x-on:click="$dispatch('open-modal', 'share-meeting-link')" class="text-leather-500 dark:text-leather-300 hover:underline">
+                        {{ __('共有') }}
+                    </button>
                     <a href="{{ route('meetings.agenda', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">
                         {{ __('次第を編集') }}
                     </a>
@@ -40,44 +47,52 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 print:max-w-none print:mx-0 print:px-0">
 
             @can('manage')
-                <div class="print-hidden mb-6 bg-paper-50 dark:bg-ink-800 border border-paper-200 dark:border-ink-700 rounded-lg p-5">
-                    <h3 class="text-sm font-semibold text-ink-800 dark:text-paper-100">{{ __('外部共有リンク') }}</h3>
-                    @if ($meeting->public_token)
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('このリンクを知っている人は誰でも、ログインなしで次第を閲覧できます(Wi-Fi情報・メモは表示されません)。') }}
-                        </p>
-                        <div x-data="{ copied: false }" class="mt-3 flex flex-wrap items-center gap-2">
-                            <input type="text" readonly value="{{ $meeting->publicUrl() }}" x-ref="publicUrlInput" onclick="this.select()"
-                                class="flex-1 min-w-0 text-sm rounded-md border-paper-200 dark:border-ink-600 dark:bg-ink-900 dark:text-paper-100" />
-                            <button type="button" @click="navigator.clipboard.writeText($refs.publicUrlInput.value); copied = true; setTimeout(() => copied = false, 2000)"
-                                class="text-sm font-medium text-leather-500 dark:text-leather-300 hover:underline">
-                                <span x-show="!copied">{{ __('コピー') }}</span>
-                                <span x-show="copied" x-cloak>{{ __('コピーしました') }}</span>
-                            </button>
-                            <form method="POST" action="{{ route('meetings.public-link.enable', $meeting) }}">
+                <x-modal name="share-meeting-link" max-width="md">
+                    <div class="print-hidden p-6">
+                        <h3 class="font-serif text-lg font-semibold text-ink-800 dark:text-paper-100">{{ __('外部共有リンク') }}</h3>
+                        @if ($meeting->public_token)
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {{ __('このリンクを知っている人は誰でも、ログインなしで次第を閲覧できます(Wi-Fi情報・メモは表示されません)。') }}
+                            </p>
+                            <div x-data="{ copied: false }" class="mt-3 flex flex-wrap items-center gap-2">
+                                <input type="text" readonly value="{{ $meeting->publicUrl() }}" x-ref="publicUrlInput" onclick="this.select()"
+                                    class="flex-1 min-w-0 text-sm rounded-md border-paper-200 dark:border-ink-600 dark:bg-ink-900 dark:text-paper-100" />
+                                <button type="button" @click="navigator.clipboard.writeText($refs.publicUrlInput.value); copied = true; setTimeout(() => copied = false, 2000)"
+                                    class="text-sm font-medium text-leather-500 dark:text-leather-300 hover:underline">
+                                    <span x-show="!copied">{{ __('コピー') }}</span>
+                                    <span x-show="copied" x-cloak>{{ __('コピーしました') }}</span>
+                                </button>
+                                <form method="POST" action="{{ route('meetings.public-link.enable', $meeting) }}">
+                                    @csrf
+                                    <button type="submit" class="text-sm font-medium text-leather-500 dark:text-leather-300 hover:underline">{{ __('再発行') }}</button>
+                                </form>
+                                <x-confirm-delete-button
+                                    id="disable-public-link"
+                                    :action="route('meetings.public-link.disable', $meeting)"
+                                    :message="__('公開リンクを無効化しますか?現在のリンクは使えなくなります。')"
+                                    :confirm-label="__('無効化する')">
+                                    {{ __('無効化') }}
+                                </x-confirm-delete-button>
+                            </div>
+                        @else
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {{ __('外部の人にも、ログイン不要で次第を共有できるリンクを発行できます。') }}
+                            </p>
+                            <form method="POST" action="{{ route('meetings.public-link.enable', $meeting) }}" class="mt-3">
                                 @csrf
-                                <button type="submit" class="text-sm font-medium text-leather-500 dark:text-leather-300 hover:underline">{{ __('再発行') }}</button>
+                                <button type="submit" class="inline-flex items-center text-sm font-medium text-leather-500 dark:text-leather-300 hover:underline">
+                                    {{ __('公開リンクを発行する') }}
+                                </button>
                             </form>
-                            <x-confirm-delete-button
-                                id="disable-public-link"
-                                :action="route('meetings.public-link.disable', $meeting)"
-                                :message="__('公開リンクを無効化しますか?現在のリンクは使えなくなります。')"
-                                :confirm-label="__('無効化する')">
-                                {{ __('無効化') }}
-                            </x-confirm-delete-button>
+                        @endif
+
+                        <div class="mt-6 flex justify-end">
+                            <x-secondary-button type="button" x-on:click="$dispatch('close')">
+                                {{ __('閉じる') }}
+                            </x-secondary-button>
                         </div>
-                    @else
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('外部の人にも、ログイン不要で次第を共有できるリンクを発行できます。') }}
-                        </p>
-                        <form method="POST" action="{{ route('meetings.public-link.enable', $meeting) }}" class="mt-3">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center text-sm font-medium text-leather-500 dark:text-leather-300 hover:underline">
-                                {{ __('公開リンクを発行する') }}
-                            </button>
-                        </form>
-                    @endif
-                </div>
+                    </div>
+                </x-modal>
             @endcan
 
             {{-- 紙の次第を1枚のシートに見立て、日時・次第・Wi-Fi/メモを
