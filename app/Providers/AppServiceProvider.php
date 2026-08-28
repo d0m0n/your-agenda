@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Anthropic\Client as AnthropicClient;
 use App\Models\Inquiry;
 use App\Models\Organization;
 use App\Models\Scopes\OrganizationScope;
@@ -22,7 +23,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // AI議事録生成機能(プラスプラン限定)で使う。config('claude.api_key')が
+        // 未設定でもここでは例外にせず、実際にメッセージを送るタイミングで
+        // Anthropic SDK側のエラーとして表面化させる。
+        $this->app->singleton(AnthropicClient::class, fn () => new AnthropicClient(
+            apiKey: config('claude.api_key'),
+        ));
     }
 
     /**

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'venue_address', 'venue_map_url', 'social_event_info', 'recommended_hotel_info',
     'wifi_ssid', 'wifi_password', 'memo', 'header_image_path',
     'invitation_pdf_body', 'invitation_email_body', 'invitation_line_body',
+    'minutes_transcript', 'minutes_body', 'minutes_generated_at',
 ])]
 class Meeting extends Model
 {
@@ -24,6 +25,7 @@ class Meeting extends Model
         return [
             'held_at' => 'datetime',
             'ends_at' => 'datetime',
+            'minutes_generated_at' => 'datetime',
         ];
     }
 

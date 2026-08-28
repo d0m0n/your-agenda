@@ -9,5 +9,5 @@ return [
 
     // 同一エラー(例外クラス+発生箇所)の通知を、この分数の間は1通に絞る
     // (同じバグが連続発生した場合に大量のメールが届くのを防ぐ)。
-    'throttle_minutes' => env('ERROR_ALERT_THROTTLE_MINUTES', 60),
+    'throttle_minutes' => (int) env('ERROR_ALERT_THROTTLE_MINUTES', 60),
 ];

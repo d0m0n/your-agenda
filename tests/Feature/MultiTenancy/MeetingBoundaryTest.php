@@ -140,6 +140,32 @@ class MeetingBoundaryTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_general_user_cannot_view_minutes_edit_page_of_another_organizations_meeting(): void
+    {
+        [, $userA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        $meetingB = Meeting::factory()->for($orgB, 'organization')->create();
+
+        $this->actingAs($userA)
+            ->get(route('meetings.minutes.edit', $meetingB))
+            ->assertNotFound();
+    }
+
+    public function test_general_user_cannot_generate_minutes_for_another_organizations_meeting(): void
+    {
+        [, $userA] = $this->createTenant();
+        [$orgB] = $this->createTenant();
+
+        $meetingB = Meeting::factory()->for($orgB, 'organization')->create();
+
+        $this->actingAs($userA)
+            ->post(route('meetings.minutes.generate', $meetingB), ['transcript' => '不正な文字起こし'])
+            ->assertNotFound();
+
+        $this->assertNull($meetingB->fresh()->minutes_transcript);
+    }
+
     public function test_observer_cannot_access_meeting_management_routes(): void
     {
         [$orgA, , $observerA] = $this->createTenant();

@@ -24,5 +24,5 @@ return [
     // 再契約が無いまま組織を自動的に完全削除するまでの猶予日数。
     // organizations.access_lost_atからの経過日数で判定する
     // (ProcessOrganizationRetentionコマンド、毎日実行)。
-    'deletion_grace_period_days' => env('DELETION_GRACE_PERIOD_DAYS', 90),
+    'deletion_grace_period_days' => (int) env('DELETION_GRACE_PERIOD_DAYS', 90),
 ];

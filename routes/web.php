@@ -9,6 +9,7 @@ use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\MeetingInvitationController;
+use App\Http\Controllers\MeetingMinutesController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ObserverUserController;
 use App\Http\Controllers\OrganizationInvitationTemplateController;
@@ -173,6 +174,15 @@ Route::middleware(['auth', 'can:manage', 'subscribed'])->group(function () {
     Route::get('/observers/{observer}/edit', [ObserverUserController::class, 'edit'])->name('observers.edit');
     Route::put('/observers/{observer}', [ObserverUserController::class, 'update'])->name('observers.update');
     Route::delete('/observers/{observer}', [ObserverUserController::class, 'destroy'])->name('observers.destroy');
+});
+
+// AI議事録生成はプラスプラン限定機能。can:manage+subscribedに加えcan:plusで
+// ゲートする(Gate::define('plus')の実質最初の利用箇所)。
+Route::middleware(['auth', 'can:manage', 'can:plus', 'subscribed'])->group(function () {
+    Route::get('/meetings/{meeting}/minutes', [MeetingMinutesController::class, 'edit'])->name('meetings.minutes.edit');
+    Route::post('/meetings/{meeting}/minutes/generate', [MeetingMinutesController::class, 'generate'])->name('meetings.minutes.generate');
+    Route::put('/meetings/{meeting}/minutes', [MeetingMinutesController::class, 'update'])->name('meetings.minutes.update');
+    Route::get('/meetings/{meeting}/minutes/pdf', [MeetingMinutesController::class, 'pdf'])->name('meetings.minutes.pdf');
 });
 
 // 会議詳細(次第)はobserverも閲覧できるうえ、解約・トライアル終了後も

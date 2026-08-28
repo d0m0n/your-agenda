@@ -20,6 +20,11 @@
                     <a href="{{ route('meetings.export', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">
                         {{ __('ダウンロード') }}
                     </a>
+                    @can('plus')
+                        <a href="{{ route('meetings.minutes.edit', $meeting) }}" class="text-leather-500 dark:text-leather-300 hover:underline">
+                            {{ __('議事録を作成') }}
+                        </a>
+                    @endcan
                 @endcan
             </div>
         </div>

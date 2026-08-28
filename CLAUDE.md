@@ -522,7 +522,8 @@
 ## プラン(スタンダード/プラス)
 - 現行の月額600円プランを「スタンダード」とし、将来的にスタンダードの
   上位プランとして「プラス」を追加できるよう、機能・金額が未確定な段階で
-  仕組みだけ準備してある(実装済みのプラス限定機能はまだ無い)
+  仕組みだけ準備してある。プラス限定機能の第一号としてAI議事録生成機能
+  (下記「AI議事録生成」参照)を実装済み
 - `organizations.plan`(`App\Enums\OrganizationPlan`、standard/plus、
   デフォルトstandard)で組織ごとのプランを保持する
 - `Organization::hasPlusAccess()`がプラス機能を使えるかどうかを判定する。
@@ -541,6 +542,64 @@
   UIを追加して自己サービス化する想定(未実装)
 - 一般ユーザーの基本設定画面(お支払い管理カード)、管理者パネルの組織詳細
   画面それぞれで現在のプランを表示する
+
+## AI議事録生成(プラスプラン限定)
+- 会議の文字起こしテキストを貼り付けると、次第(agenda_items)の構成・
+  議案ファイル(sites)・資料(materials)の内容とあわせてAnthropicのClaude API
+  (モデル: `claude-haiku-4-5`。`config('claude.model')`、`.env`の
+  `CLAUDE_MODEL`で変更可能。コード変更不要)に渡し、議事録ドラフトを生成する
+  (`meetings.minutes.*`ルート、`can:manage`+`can:plus`+`subscribed`で
+  ガード。`Gate::define('plus', ...)`の実質最初の利用箇所)
+- `composer require anthropic-ai/sdk`(公式PHP SDK)を使用。
+  `Anthropic\Client`は`AppServiceProvider::register()`でsingleton登録
+  (`config('claude.api_key')`、`.env`の`ANTHROPIC_API_KEY`)
+- **同期実行**: 本番(さくらのレンタルサーバー)にはキューワーカーが常駐
+  していないため、Claude API呼び出しは1つのHTTPリクエスト内で同期的に
+  完結させる設計。`MeetingMinutesController::generate()`で
+  `set_time_limit()`を設定しているが、これは**PHP自体の実行時間上限のみ**
+  を変更するものでApache側のタイムアウト(root権限が無く確認・変更不可)
+  には効果が無い。添付資料が多い会議で生成に60〜90秒以上かかると
+  Apacheがコネクションを切る可能性があるため、**本番で実際に大きめの
+  入力を投げてタイムアウトしないことを確認すること**。厳しい場合は
+  `config('claude.max_attachment_bytes')`/`max_attachments`を絞って対応する
+  (キュー化はしない、`TrialEndingSoonMail`が同期送信なのと同じ方針)
+- `App\Services\MeetingMinutesContextBuilder`が次第構造+添付内容を
+  Claude用コンテンツブロックへ組み立てる。対応形式はPDF・画像
+  (jpg/jpeg/png/gif/webp)・Zip議案内のgian.htm(プレーンHTMLとして
+  `strip_tags()`後にテキストブロック化。`<meta charset>`からShift_JIS等を
+  判定してUTF-8へ変換)・txt/csv資料のみ。`MeetingArchiveExportService`
+  (次第の一括ダウンロード)はmaterialをeager loadしておらず資料が漏れる
+  欠陥があるが、ここでは同じ欠陥を再現しないよう両方読み込む。
+  docx/xlsx/pptx等は変換用ライブラリを導入しない方針(root権限が無い)の
+  ため自動読み込み対象外とし、`skipped`配列に理由付きで記録して画面上に
+  表示する(黙って無視しない)。`config('claude.max_attachment_bytes')`/
+  `max_attachments`を超えた添付も同様にskipped扱いにする
+- `App\Services\ClaudeMinutesGenerator`がAPI呼び出しとエラーハンドリングを
+  担当。Anthropic SDKの例外(`NotFoundException`→`RateLimitException`→
+  `APIStatusException`→`APIConnectionException`の順に具体的な例外から
+  キャッチ)を日本語の案内文に変換して`App\Exceptions\
+  MinutesGenerationException`としてrethrowする。テストでモックしやすい
+  よう`final`にしていない
+- `meetings.minutes_transcript`(貼り付けた文字起こし、生成失敗時も
+  消えないよう保存)・`minutes_body`(生成・手動編集後の本文、
+  `invitation_pdf_body`等と同じ方針)・`minutes_generated_at`をmeetings
+  テーブルに保持。PDF出力は新規ライブラリを使わず、既存の
+  `.print-sheet`/`window.print()`方式を踏襲(`meetings/minutes-pdf.blade.php`)
+- 文字起こし・議案ファイル・資料の内容が第三者(Anthropic, PBC)に
+  送信されるため、プライバシーポリシー(`resources/views/legal/
+  privacy.blade.php`)の業務委託先リストに追記済み
+- テストは実際のClaude APIを呼ばず、`ClaudeMinutesGenerator`を
+  `$this->mock(...)`でモックする方針(`BillingTest.php`が実Stripe APIを
+  呼ぶ経路を自動テスト対象外にしているのと同じ考え方)。実API疎通・
+  本番での同期実行タイムアウト確認は手動で行う
+- 実際のAPIキー・サンプルデータでの動作確認済み。`claude-haiku-4-5`のままで
+  実用に足る精度の議事録が生成できることを確認したため、Sonnet等への
+  変更は不要と判断(モデルは`config('claude.model')`経由で`.env`の
+  `CLAUDE_MODEL`から切り替え可能、コード変更不要)。生成結果がMarkdown
+  記法(#見出し・**太字**等)で返ってくる問題が実際に発生したため、
+  システムプロンプトに「Markdownを使わずプレーンテキストで出力する
+  (見出しは【】、箇条書きは・)」という指示を追加済み
+  (`ClaudeMinutesGenerator::SYSTEM_PROMPT`)
 
 ## 契約・課金
 - 1組織 = 1契約。月額600円(税込)、Stripe + Laravel Cashierで実装済み
