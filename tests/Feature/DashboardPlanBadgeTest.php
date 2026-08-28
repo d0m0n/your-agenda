@@ -24,7 +24,7 @@ class DashboardPlanBadgeTest extends TestCase
 
         $this->actingAs($general)->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('スタンダード')
+            ->assertSee('スタンダードプラン')
             ->assertSee('href="'.route('settings.edit').'"', false);
     }
 
@@ -35,7 +35,7 @@ class DashboardPlanBadgeTest extends TestCase
 
         $this->actingAs($general)->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('プラス')
+            ->assertSee('プラスプラン')
             ->assertSee('bg-leather-500', false);
     }
 
@@ -50,7 +50,7 @@ class DashboardPlanBadgeTest extends TestCase
 
         $this->actingAs($observer)->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('スタンダード')
+            ->assertSee('スタンダードプラン')
             ->assertDontSee('href="'.route('settings.edit').'"', false);
     }
 }

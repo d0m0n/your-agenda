@@ -12,10 +12,10 @@
     <a href="{{ route('settings.edit') }}"
         class="inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-medium shrink-0 {{ $planBadgeClass }}"
         title="{{ __('現在のプラン(基本設定で変更できます)') }}">
-        {{ $organization->plan->label() }}
+        {{ $organization->plan->label() }}{{ __('プラン') }}
     </a>
 @else
     <span class="inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-medium shrink-0 {{ $planBadgeClass }}">
-        {{ $organization->plan->label() }}
+        {{ $organization->plan->label() }}{{ __('プラン') }}
     </span>
 @endif
